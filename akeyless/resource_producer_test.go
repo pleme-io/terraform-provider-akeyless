@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	akeyless_api "github.com/akeylesslabs/akeyless-go"
+	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
 )
 
 const (
