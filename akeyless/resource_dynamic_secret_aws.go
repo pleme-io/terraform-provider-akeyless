@@ -203,6 +203,11 @@ func resourceDynamicSecretAws() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"use_gw_cloud_identity": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Use the GW's Cloud IAM",
+			},
 		},
 	}
 }

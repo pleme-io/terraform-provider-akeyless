@@ -31,12 +31,6 @@ func resourceGatewayUpdateLogForwardingStdout() *schema.Resource {
 				Description: "Enable Log Forwarding [true/false]",
 				Default:     "true",
 			},
-			"json": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Set output format to JSON",
-				Default:     false,
-			},
 			"output_format": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -67,10 +61,6 @@ func resourceGatewayUpdateLogForwardingStdoutRead(d *schema.ResourceData, m inte
 		}
 	}
 	if rOut.JsonOutput != nil {
-		err = d.Set("json", *rOut.JsonOutput)
-		if err != nil {
-			return err
-		}
 		err := d.Set("output_format", common.ExtractLogForwardingFormat(*rOut.JsonOutput))
 		if err != nil {
 			return err
@@ -94,7 +84,6 @@ func resourceGatewayUpdateLogForwardingStdoutUpdate(d *schema.ResourceData, m in
 	var apiErr akeyless_api.GenericOpenAPIError
 	ctx := context.Background()
 	enable := d.Get("enable").(string)
-	json := d.Get("json").(bool)
 	outputFormat := d.Get("output_format").(string)
 	pullInterval := d.Get("pull_interval").(string)
 
@@ -102,7 +91,6 @@ func resourceGatewayUpdateLogForwardingStdoutUpdate(d *schema.ResourceData, m in
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.Enable, enable)
-	common.GetAkeylessPtr(&body.Json, json)
 	common.GetAkeylessPtr(&body.OutputFormat, outputFormat)
 	common.GetAkeylessPtr(&body.PullInterval, pullInterval)
 
@@ -141,10 +129,6 @@ func resourceGatewayUpdateLogForwardingStdoutImport(d *schema.ResourceData, m in
 		}
 	}
 	if rOut.JsonOutput != nil {
-		err = d.Set("json", *rOut.JsonOutput)
-		if err != nil {
-			return nil, err
-		}
 		err := d.Set("output_format", common.ExtractLogForwardingFormat(*rOut.JsonOutput))
 		if err != nil {
 			return nil, err

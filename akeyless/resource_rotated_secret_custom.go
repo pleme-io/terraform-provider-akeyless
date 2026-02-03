@@ -97,6 +97,11 @@ func resourceRotatedSecretCustom() *schema.Resource {
 				Description: "Additional custom fields to associate with the item",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -436,6 +441,7 @@ func resourceRotatedSecretCustomUpdate(d *schema.ResourceData, m interface{}) er
 	deleteProtection := d.Get("delete_protection").(string)
 	enablePasswordPolicy := d.Get("enable_password_policy").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 	maxVersions := d.Get("max_versions").(string)
 	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
 	rotationEventInList := d.Get("rotation_event_in").([]interface{})
@@ -490,6 +496,7 @@ func resourceRotatedSecretCustomUpdate(d *schema.ResourceData, m interface{}) er
 		}
 		body.ItemCustomFields = &customFieldsMap
 	}
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
 	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)

@@ -88,6 +88,11 @@ func resourceK8sTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -256,6 +261,7 @@ func resourceK8sTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	key := d.Get("key").(string)
 	maxVersions := d.Get("max_versions").(string)
 	description := d.Get("description").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.TargetUpdateK8s{
 		Name:  name,
@@ -271,6 +277,7 @@ func resourceK8sTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.K8sClientKey, k8sClientKey)
 	common.GetAkeylessPtr(&body.K8sClusterName, k8sClusterName)
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 	if d.HasChange("use_gw_service_account") {
 		body.UseGwServiceAccount = &useGwServiceAccount
 	}

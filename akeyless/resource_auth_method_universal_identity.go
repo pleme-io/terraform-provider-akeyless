@@ -37,10 +37,27 @@ func resourceAuthMethodUniversalIdentity() *schema.Resource {
 				Description: "Access expiration date in Unix timestamp (select 0 for access without expiry date)",
 				Default:     0,
 			},
+			"allowed_client_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"bound_ips": {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "A CIDR whitelist with the IPs that the access is restricted to",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Auth Method description",
+			},
+			"expiration_event_in": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "How many days before the expiration of the auth method would you like to be notified",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"force_sub_claims": {
@@ -48,11 +65,23 @@ func resourceAuthMethodUniversalIdentity() *schema.Resource {
 				Optional:    true,
 				Description: "enforce role-association must include sub claims",
 			},
+			"gw_bound_ips": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "A CIDR whitelist with the GW IPs that the access is restricted to",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"jwt_ttl": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Creds expiration time in minutes",
 				Default:     0,
+			},
+			"product_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"deny_rotate": {
 				Type:        schema.TypeBool,
@@ -100,10 +129,19 @@ func resourceAuthMethodUniversalIdentityCreate(d *schema.ResourceData, m interfa
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	accessExpires := d.Get("access_expires").(int)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
 	boundIpsSet := d.Get("bound_ips").(*schema.Set)
 	boundIps := common.ExpandStringList(boundIpsSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
 	forceSubClaims := d.Get("force_sub_claims").(bool)
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
 	jwtTtl := d.Get("jwt_ttl").(int)
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
 	denyRotate := d.Get("deny_rotate").(bool)
 	denyInheritance := d.Get("deny_inheritance").(bool)
 	ttl := d.Get("ttl").(int)
@@ -116,9 +154,14 @@ func resourceAuthMethodUniversalIdentityCreate(d *schema.ResourceData, m interfa
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.AccessExpires, accessExpires)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
 	common.GetAkeylessPtr(&body.BoundIps, boundIps)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
 	common.GetAkeylessPtr(&body.ForceSubClaims, forceSubClaims)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
 	common.GetAkeylessPtr(&body.JwtTtl, jwtTtl)
+	common.GetAkeylessPtr(&body.ProductType, productType)
 	common.GetAkeylessPtr(&body.DenyRotate, denyRotate)
 	common.GetAkeylessPtr(&body.DenyInheritance, denyInheritance)
 	common.GetAkeylessPtr(&body.Ttl, ttl)
@@ -183,6 +226,12 @@ func resourceAuthMethodUniversalIdentityRead(d *schema.ResourceData, m interface
 			return err
 		}
 	}
+	if rOut.AccessInfo.AllowedClientType != nil {
+		err = d.Set("allowed_client_type", rOut.AccessInfo.AllowedClientType)
+		if err != nil {
+			return err
+		}
+	}
 	if rOut.AccessInfo.ForceSubClaims != nil {
 		err = d.Set("force_sub_claims", *rOut.AccessInfo.ForceSubClaims)
 		if err != nil {
@@ -192,6 +241,20 @@ func resourceAuthMethodUniversalIdentityRead(d *schema.ResourceData, m interface
 
 	if rOut.AccessInfo.CidrWhitelist != nil && *rOut.AccessInfo.CidrWhitelist != "" {
 		err = d.Set("bound_ips", strings.Split(*rOut.AccessInfo.CidrWhitelist, ","))
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.GwCidrWhitelist != nil && *rOut.AccessInfo.GwCidrWhitelist != "" {
+		err = d.Set("gw_bound_ips", strings.Split(*rOut.AccessInfo.GwCidrWhitelist, ","))
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.ProductTypes != nil {
+		err = d.Set("product_type", rOut.AccessInfo.ProductTypes)
 		if err != nil {
 			return err
 		}
@@ -244,6 +307,20 @@ func resourceAuthMethodUniversalIdentityRead(d *schema.ResourceData, m interface
 		}
 	}
 
+	if rOut.AuthMethodDescription != nil {
+		err = d.Set("description", *rOut.AuthMethodDescription)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ExpirationEventIn != nil {
+		err = d.Set("expiration_event_in", rOut.ExpirationEventIn)
+		if err != nil {
+			return err
+		}
+	}
+
 	d.SetId(path)
 
 	return nil
@@ -258,10 +335,19 @@ func resourceAuthMethodUniversalIdentityUpdate(d *schema.ResourceData, m interfa
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	accessExpires := d.Get("access_expires").(int)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
 	boundIpsSet := d.Get("bound_ips").(*schema.Set)
 	boundIps := common.ExpandStringList(boundIpsSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
 	forceSubClaims := d.Get("force_sub_claims").(bool)
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
 	jwtTtl := d.Get("jwt_ttl").(int)
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
 	denyRotate := d.Get("deny_rotate").(bool)
 	denyInheritance := d.Get("deny_inheritance").(bool)
 	ttl := d.Get("ttl").(int)
@@ -274,9 +360,14 @@ func resourceAuthMethodUniversalIdentityUpdate(d *schema.ResourceData, m interfa
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.AccessExpires, accessExpires)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
 	common.GetAkeylessPtr(&body.BoundIps, boundIps)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
 	common.GetAkeylessPtr(&body.ForceSubClaims, forceSubClaims)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
 	common.GetAkeylessPtr(&body.JwtTtl, jwtTtl)
+	common.GetAkeylessPtr(&body.ProductType, productType)
 	common.GetAkeylessPtr(&body.DenyRotate, denyRotate)
 	common.GetAkeylessPtr(&body.DenyInheritance, denyInheritance)
 	common.GetAkeylessPtr(&body.Ttl, ttl)

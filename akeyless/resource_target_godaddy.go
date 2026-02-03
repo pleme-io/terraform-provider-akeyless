@@ -72,6 +72,11 @@ func resourceGodaddyTarget() *schema.Resource {
 				Description: "Timeout waiting for certificate validation in Duration format (1h - 1 Hour, 20m - 20 Minutes, 33m3s - 33 Minutes and 3 Seconds), maximum 1h",
 				Default:     "5m",
 			},
+			"validation_email": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Email address for certificate validation",
+			},
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -223,6 +228,12 @@ func resourceGodaddyTargetRead(d *schema.ResourceData, m interface{}) error {
 				timeout := *targetDetails.GodaddyTargetDetails.Timeout
 				duration := common.ConvertNanoSecondsIntoDurationString(timeout)
 				err := d.Set("timeout", duration)
+				if err != nil {
+					return err
+				}
+			}
+			if targetDetails.GodaddyTargetDetails.ValidationEmail != nil {
+				err := d.Set("validation_email", *targetDetails.GodaddyTargetDetails.ValidationEmail)
 				if err != nil {
 					return err
 				}

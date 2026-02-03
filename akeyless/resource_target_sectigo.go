@@ -69,6 +69,11 @@ func resourceSectigoTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.",
 			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -237,6 +242,7 @@ func resourceSectigoTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	username := d.Get("username").(string)
 	description := d.Get("description").(string)
 	key := d.Get("key").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 	maxVersions := d.Get("max_versions").(string)
 	timeout := d.Get("timeout").(string)
 
@@ -252,6 +258,7 @@ func resourceSectigoTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 	common.GetAkeylessPtr(&body.Timeout, timeout)
 

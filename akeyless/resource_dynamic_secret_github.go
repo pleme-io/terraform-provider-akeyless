@@ -98,6 +98,12 @@ func resourceDynamicSecretGithub() *schema.Resource {
 				Description: "Token TTL",
 				Default:     "60m",
 			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -126,6 +132,7 @@ func resourceDynamicSecretGithubCreate(d *schema.ResourceData, m interface{}) er
 	tokenRepositoriesSet := d.Get("token_repositories").(*schema.Set)
 	tokenRepositories := common.ExpandStringList(tokenRepositoriesSet.List())
 	tokenTtl := d.Get("token_ttl").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.DynamicSecretCreateGithub{
 		Name:  name,
@@ -144,6 +151,13 @@ func resourceDynamicSecretGithubCreate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.TokenPermissions, tokenPermissions)
 	common.GetAkeylessPtr(&body.TokenRepositories, tokenRepositories)
 	common.GetAkeylessPtr(&body.TokenTtl, tokenTtl)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
 
 	_, _, err := client.DynamicSecretCreateGithub(ctx).Body(body).Execute()
 	if err != nil {
@@ -283,6 +297,21 @@ func resourceDynamicSecretGithubRead(d *schema.ResourceData, m interface{}) erro
 		}
 	}
 
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	d.SetId(path)
 
 	return nil
@@ -312,6 +341,7 @@ func resourceDynamicSecretGithubUpdate(d *schema.ResourceData, m interface{}) er
 	tokenRepositoriesSet := d.Get("token_repositories").(*schema.Set)
 	tokenRepositories := common.ExpandStringList(tokenRepositoriesSet.List())
 	tokenTtl := d.Get("token_ttl").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.DynamicSecretUpdateGithub{
 		Name:  name,
@@ -330,6 +360,13 @@ func resourceDynamicSecretGithubUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.TokenPermissions, tokenPermissions)
 	common.GetAkeylessPtr(&body.TokenRepositories, tokenRepositories)
 	common.GetAkeylessPtr(&body.TokenTtl, tokenTtl)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
 
 	_, _, err := client.DynamicSecretUpdateGithub(ctx).Body(body).Execute()
 	if err != nil {

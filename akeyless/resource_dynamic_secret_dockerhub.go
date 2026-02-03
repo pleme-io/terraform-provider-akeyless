@@ -1,0 +1,326 @@
+package akeyless
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
+
+	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
+	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func resourceDynamicSecretDockerhub() *schema.Resource {
+	return &schema.Resource{
+		Description: "Dockerhub dynamic secret resource",
+		Create:      resourceDynamicSecretDockerhubCreate,
+		Read:        resourceDynamicSecretDockerhubRead,
+		Update:      resourceDynamicSecretDockerhubUpdate,
+		Delete:      resourceDynamicSecretDockerhubDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceDynamicSecretDockerhubImport,
+		},
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Dynamic secret name",
+				ForceNew:    true,
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Add tags attached to this object",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"dockerhub_username": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Dockerhub username",
+			},
+			"dockerhub_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Dockerhub password or access token",
+			},
+			"dockerhub_token_scopes": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Access token scopes list (comma-separated) valid options: repo:admin, repo:write, repo:read, repo:public_read",
+			},
+			"target_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Target name",
+			},
+			"user_ttl": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "User TTL",
+				Default:     "60m",
+			},
+			"producer_encryption_key_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Dynamic producer encryption key",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+		},
+	}
+}
+
+func resourceDynamicSecretDockerhubCreate(d *schema.ResourceData, m interface{}) error {
+	provider := m.(*providerMeta)
+	client := *provider.client
+	token := *provider.token
+
+	var apiErr akeyless_api.GenericOpenAPIError
+	ctx := context.Background()
+	name := d.Get("name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	tagsSet := d.Get("tags").(*schema.Set)
+	tags := common.ExpandStringList(tagsSet.List())
+	dockerhubUsername := d.Get("dockerhub_username").(string)
+	dockerhubPassword := d.Get("dockerhub_password").(string)
+	dockerhubTokenScopes := d.Get("dockerhub_token_scopes").(string)
+	targetName := d.Get("target_name").(string)
+	userTtl := d.Get("user_ttl").(string)
+	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+
+	body := akeyless_api.DynamicSecretCreateDockerhub{
+		Name:  name,
+		Token: &token,
+	}
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Tags, tags)
+	common.GetAkeylessPtr(&body.DockerhubUsername, dockerhubUsername)
+	common.GetAkeylessPtr(&body.DockerhubPassword, dockerhubPassword)
+	common.GetAkeylessPtr(&body.DockerhubTokenScopes, dockerhubTokenScopes)
+	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.UserTtl, userTtl)
+	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
+
+	_, _, err := client.DynamicSecretCreateDockerhub(ctx).Body(body).Execute()
+	if err != nil {
+		if errors.As(err, &apiErr) {
+			return fmt.Errorf("can't create Secret: %v", string(apiErr.Body()))
+		}
+		return fmt.Errorf("can't create Secret: %v", err)
+	}
+
+	d.SetId(name)
+
+	return nil
+}
+
+func resourceDynamicSecretDockerhubRead(d *schema.ResourceData, m interface{}) error {
+	provider := m.(*providerMeta)
+	client := *provider.client
+	token := *provider.token
+
+	var apiErr akeyless_api.GenericOpenAPIError
+	ctx := context.Background()
+
+	path := d.Id()
+
+	body := akeyless_api.DynamicSecretGet{
+		Name:  path,
+		Token: &token,
+	}
+
+	rOut, res, err := client.DynamicSecretGet(ctx).Body(body).Execute()
+	if err != nil {
+		if errors.As(err, &apiErr) {
+			if res.StatusCode == http.StatusNotFound {
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("can't value: %v", string(apiErr.Body()))
+		}
+		return fmt.Errorf("can't get value: %v", err)
+	}
+
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Tags != nil {
+		err = d.Set("tags", rOut.Tags)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.UserName != nil {
+		err = d.Set("dockerhub_username", *rOut.UserName)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.UserPassword != nil {
+		err = d.Set("dockerhub_password", *rOut.UserPassword)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Scopes != nil {
+		err = d.Set("dockerhub_token_scopes", strings.Join(rOut.Scopes, ","))
+		if err != nil {
+			return err
+		}
+	}
+	// Note: dockerhub_username and dockerhub_token_scopes are not returned by the API in SDK v5
+	// These fields can be set during create/update but cannot be read back
+
+	if rOut.ItemTargetsAssoc != nil {
+		targetName := common.GetTargetName(rOut.ItemTargetsAssoc)
+		err = d.Set("target_name", targetName)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.UserTtl != nil {
+		err = d.Set("user_ttl", *rOut.UserTtl)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.DynamicSecretKey != nil {
+		err = d.Set("producer_encryption_key_name", *rOut.DynamicSecretKey)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	d.SetId(path)
+
+	return nil
+}
+
+func resourceDynamicSecretDockerhubUpdate(d *schema.ResourceData, m interface{}) error {
+	provider := m.(*providerMeta)
+	client := *provider.client
+	token := *provider.token
+
+	var apiErr akeyless_api.GenericOpenAPIError
+	ctx := context.Background()
+	name := d.Get("name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	tagsSet := d.Get("tags").(*schema.Set)
+	tags := common.ExpandStringList(tagsSet.List())
+	dockerhubUsername := d.Get("dockerhub_username").(string)
+	dockerhubPassword := d.Get("dockerhub_password").(string)
+	dockerhubTokenScopes := d.Get("dockerhub_token_scopes").(string)
+	targetName := d.Get("target_name").(string)
+	userTtl := d.Get("user_ttl").(string)
+	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+
+	body := akeyless_api.DynamicSecretUpdateDockerhub{
+		Name:  name,
+		Token: &token,
+	}
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Tags, tags)
+	common.GetAkeylessPtr(&body.DockerhubUsername, dockerhubUsername)
+	common.GetAkeylessPtr(&body.DockerhubPassword, dockerhubPassword)
+	common.GetAkeylessPtr(&body.DockerhubTokenScopes, dockerhubTokenScopes)
+	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.UserTtl, userTtl)
+	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
+
+	_, _, err := client.DynamicSecretUpdateDockerhub(ctx).Body(body).Execute()
+	if err != nil {
+		if errors.As(err, &apiErr) {
+			return fmt.Errorf("can't update : %v", string(apiErr.Body()))
+		}
+		return fmt.Errorf("can't update : %v", err)
+	}
+
+	d.SetId(name)
+
+	return nil
+}
+
+func resourceDynamicSecretDockerhubDelete(d *schema.ResourceData, m interface{}) error {
+	return resourceDynamicSecretDelete(d, m)
+}
+
+func resourceDynamicSecretDockerhubImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+
+	id := d.Id()
+
+	err := resourceDynamicSecretDockerhubRead(d, m)
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.Set("name", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}

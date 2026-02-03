@@ -54,6 +54,11 @@ func resourceOpenAITarget() *schema.Resource {
 				Optional:    true,
 				Description: "Organization ID",
 			},
+			"project_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Project ID",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -165,6 +170,12 @@ func resourceOpenAITargetRead(d *schema.ResourceData, m interface{}) error {
 		}
 		if rOut.Value.OpenaiTargetDetails.OrganizationId != nil {
 			err = d.Set("organization_id", *rOut.Value.OpenaiTargetDetails.OrganizationId)
+			if err != nil {
+				return err
+			}
+		}
+		if rOut.Value.OpenaiTargetDetails.ProjectId != nil {
+			err = d.Set("project_id", *rOut.Value.OpenaiTargetDetails.ProjectId)
 			if err != nil {
 				return err
 			}

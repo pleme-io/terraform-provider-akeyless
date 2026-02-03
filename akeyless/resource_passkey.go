@@ -33,15 +33,43 @@ func resourcePasskey() *schema.Resource {
 				Required:    true,
 				Description: "Passkey type; options: [EC256, EC384, EC512]",
 			},
+			"accessibility": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "For personal password manager",
+				Default:     "regular",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"origin_url": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Originating websites for this passkey",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"protection_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of a key that used to encrypt the passkey (if empty, the account default protectionKey key will be used)",
+			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Add tags attached to this object",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"username": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "For Password Management use",
 			},
 		},
 	}
@@ -56,16 +84,40 @@ func resourcePasskeyCreate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	alg := d.Get("alg").(string)
+	accessibility := d.Get("accessibility").(string)
+	deleteProtection := d.Get("delete_protection").(string)
 	description := d.Get("description").(string)
 	protectionKeyName := d.Get("protection_key_name").(string)
+	username := d.Get("username").(string)
 
 	body := akeyless_api.CreatePasskey{
 		Name:  name,
 		Alg:   alg,
 		Token: &token,
 	}
+	common.GetAkeylessPtr(&body.Accessibility, accessibility)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.ProtectionKeyName, protectionKeyName)
+	common.GetAkeylessPtr(&body.Username, username)
+
+	if v, ok := d.GetOk("origin_url"); ok {
+		originUrlList := v.([]interface{})
+		originUrl := make([]string, len(originUrlList))
+		for i, item := range originUrlList {
+			originUrl[i] = item.(string)
+		}
+		body.OriginUrl = originUrl
+	}
+
+	if v, ok := d.GetOk("tags"); ok {
+		tagsSet := v.(*schema.Set).List()
+		tags := make([]string, len(tagsSet))
+		for i, item := range tagsSet {
+			tags[i] = item.(string)
+		}
+		body.Tags = tags
+	}
 
 	_, _, err := client.CreatePasskey(ctx).Body(body).Execute()
 	if err != nil {
@@ -122,6 +174,32 @@ func resourcePasskeyRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ClassicKeyDetails != nil && rOut.ItemGeneralInfo.ClassicKeyDetails.KeyType != nil {
 		err = d.Set("alg", *rOut.ItemGeneralInfo.ClassicKeyDetails.KeyType)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemAccessibility != nil {
+		accessibility := "regular"
+		if *rOut.ItemAccessibility == 1 {
+			accessibility = "personal"
+		}
+		err = d.Set("accessibility", accessibility)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		deleteProtection := "false"
+		if *rOut.DeleteProtection {
+			deleteProtection = "true"
+		}
+		err = d.Set("delete_protection", deleteProtection)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemTags != nil {
+		err = d.Set("tags", rOut.ItemTags)
 		if err != nil {
 			return err
 		}

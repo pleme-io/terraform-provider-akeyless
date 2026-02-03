@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
@@ -29,15 +30,32 @@ func resourceOidcApp() *schema.Resource {
 				Description: "OIDC App name",
 				ForceNew:    true,
 			},
+			"accessibility": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "For personal password manager",
+				Default:     "regular",
+			},
 			"audience": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Audience claim to be used as part of the authentication flow. In case set, it must match the one configured on the Identity Provider's Application",
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"key": {
 				Type:        schema.TypeString,
@@ -71,6 +89,12 @@ func resourceOidcApp() *schema.Resource {
 				Description: "A list of OIDC scopes",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "List of tags attached to this object",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -83,8 +107,11 @@ func resourceOidcAppCreate(d *schema.ResourceData, m interface{}) error {
 	var apiErr akeyless_api.GenericOpenAPIError
 	ctx := context.Background()
 	name := d.Get("name").(string)
+	accessibility := d.Get("accessibility").(string)
 	audience := d.Get("audience").(string)
+	deleteProtection := d.Get("delete_protection").(string)
 	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	key := d.Get("key").(string)
 	metadata := d.Get("metadata").(string)
 	permissionAssignment := d.Get("permission_assignment").(string)
@@ -93,19 +120,33 @@ func resourceOidcAppCreate(d *schema.ResourceData, m interface{}) error {
 	redirectUris := common.ExpandStringList(redirectUrisSet.List())
 	scopesSet := d.Get("scopes").(*schema.Set)
 	scopes := common.ExpandStringList(scopesSet.List())
+	tagsSet := d.Get("tags").(*schema.Set)
+	tags := common.ExpandStringList(tagsSet.List())
 
 	body := akeyless_api.CreateOidcApp{
 		Name:  name,
 		Token: &token,
 	}
+	common.GetAkeylessPtr(&body.Accessibility, accessibility)
 	common.GetAkeylessPtr(&body.Audience, audience)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Metadata, metadata)
 	common.GetAkeylessPtr(&body.PermissionAssignment, permissionAssignment)
 	common.GetAkeylessPtr(&body.Public, public)
 	common.GetAkeylessPtr(&body.RedirectUris, redirectUris)
 	common.GetAkeylessPtr(&body.Scopes, scopes)
+	if len(tags) > 0 {
+		body.Tags = tags
+	}
 
 	_, _, err := client.CreateOidcApp(ctx).Body(body).Execute()
 	if err != nil {
@@ -148,14 +189,28 @@ func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("can't get value: %v", err)
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.DisplayMetadata != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.DisplayMetadata)
-		if err != nil {
-			return err
+	if rOut.ItemGeneralInfo != nil {
+		if rOut.ItemGeneralInfo.DisplayMetadata != nil {
+			err = d.Set("description", *rOut.ItemGeneralInfo.DisplayMetadata)
+			if err != nil {
+				return err
+			}
+		}
+		if rOut.ItemGeneralInfo.ItemTags != nil && len(*rOut.ItemGeneralInfo.ItemTags) > 0 {
+			err = d.Set("tags", *rOut.ItemGeneralInfo.ItemTags)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if rOut.ProtectionKeyName != nil {
 		err = d.Set("key", *rOut.ProtectionKeyName)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
 		if err != nil {
 			return err
 		}

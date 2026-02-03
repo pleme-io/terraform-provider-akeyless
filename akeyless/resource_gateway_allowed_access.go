@@ -61,6 +61,54 @@ func resourceGatewayAllowedAccess() *schema.Resource {
 				Optional:    true,
 				Description: "Treat sub claims as case-insensitive",
 			},
+			"access_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Access type",
+			},
+			"cluster_id": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "Cluster ID",
+			},
+			"created_at": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Creation timestamp",
+			},
+			"editable": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether the allowed access is editable",
+			},
+			"error": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Error message if any",
+			},
+			"id_int": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "Internal ID",
+			},
+			"is_valid": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether the allowed access is valid",
+			},
+			"updated_at": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Last update timestamp",
+			},
 		},
 	}
 }
@@ -174,6 +222,54 @@ func resourceGatewayAllowedAccessRead(d *schema.ResourceData, m interface{}) err
 	}
 	if rOut.SubClaimsCaseInsensitive != nil {
 		err = d.Set("sub_claims_case_insensitive", *rOut.SubClaimsCaseInsensitive)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.AccessType != nil {
+		err = d.Set("access_type", *rOut.AccessType)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ClusterId != nil {
+		err = d.Set("cluster_id", int(*rOut.ClusterId))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.CreatedAt != nil {
+		err = d.Set("created_at", rOut.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Editable != nil {
+		err = d.Set("editable", *rOut.Editable)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Error != nil {
+		err = d.Set("error", *rOut.Error)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Id != nil {
+		err = d.Set("id_int", int(*rOut.Id))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.IsValid != nil {
+		err = d.Set("is_valid", *rOut.IsValid)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.UpdatedAt != nil {
+		err = d.Set("updated_at", rOut.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"))
 		if err != nil {
 			return err
 		}

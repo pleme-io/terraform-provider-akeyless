@@ -55,6 +55,11 @@ func resourceRotatedSecretSync() *schema.Resource {
 				Optional:    true,
 				Description: "Delete the secret from remote secret manager (for association create/update)",
 			},
+			"delete_from_usc": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Delete the secret from the remote target USC as well",
+			},
 		},
 	}
 }
@@ -153,11 +158,14 @@ func resourceRotatedSecretSyncDelete(d *schema.ResourceData, m any) error {
 		return err
 	}
 
+	deleteFromUsc := d.Get("delete_from_usc").(bool)
+
 	deleteItem := akeyless_api.RotatedSecretDeleteSync{
 		Token:   &token,
 		Name:    rsName,
 		UscName: uscName,
 	}
+	common.GetAkeylessPtr(&deleteItem.DeleteFromUsc, deleteFromUsc)
 
 	_, _, err = client.RotatedSecretDeleteSync(ctx).Body(deleteItem).Execute()
 	if err != nil {

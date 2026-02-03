@@ -54,11 +54,6 @@ func resourceGatewayUpdateLogForwardingDatadog() *schema.Resource {
 				Sensitive:   true,
 				Description: "Datadog api key",
 			},
-			"json": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Set output format to JSON",
-			},
 			"log_source": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -156,7 +151,6 @@ func resourceGatewayUpdateLogForwardingDatadogUpdate(d *schema.ResourceData, m i
 	pullInterval := d.Get("pull_interval").(string)
 	host := d.Get("host").(string)
 	apiKey := d.Get("api_key").(string)
-	json := d.Get("json").(bool)
 	logSource := d.Get("log_source").(string)
 	logTags := d.Get("log_tags").(string)
 	logService := d.Get("log_service").(string)
@@ -169,7 +163,6 @@ func resourceGatewayUpdateLogForwardingDatadogUpdate(d *schema.ResourceData, m i
 	common.GetAkeylessPtr(&body.PullInterval, pullInterval)
 	common.GetAkeylessPtr(&body.Host, host)
 	common.GetAkeylessPtr(&body.ApiKey, apiKey)
-	common.GetAkeylessPtr(&body.Json, json)
 	common.GetAkeylessPtr(&body.LogSource, logSource)
 	common.GetAkeylessPtr(&body.LogTags, logTags)
 	common.GetAkeylessPtr(&body.LogService, logService)

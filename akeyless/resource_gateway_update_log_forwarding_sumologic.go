@@ -61,12 +61,6 @@ func resourceGatewayUpdateLogForwardingSumologic() *schema.Resource {
 				Description: "Sumologic host",
 				Default:     "use-existing",
 			},
-			"json": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Set output format to JSON",
-				Default:     false,
-			},
 		},
 	}
 }
@@ -135,7 +129,6 @@ func resourceGatewayUpdateLogForwardingSumologicUpdate(d *schema.ResourceData, m
 	endpoint := d.Get("endpoint").(string)
 	sumologicTags := d.Get("sumologic_tags").(string)
 	host := d.Get("host").(string)
-	json := d.Get("json").(bool)
 
 	body := akeyless_api.GatewayUpdateLogForwardingSumologic{
 		Token: &token,
@@ -146,7 +139,6 @@ func resourceGatewayUpdateLogForwardingSumologicUpdate(d *schema.ResourceData, m
 	common.GetAkeylessPtr(&body.Endpoint, endpoint)
 	common.GetAkeylessPtr(&body.SumologicTags, sumologicTags)
 	common.GetAkeylessPtr(&body.Host, host)
-	common.GetAkeylessPtr(&body.Json, json)
 
 	_, _, err := client.GatewayUpdateLogForwardingSumologic(ctx).Body(body).Execute()
 	if err != nil {

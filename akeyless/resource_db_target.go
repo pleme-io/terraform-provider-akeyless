@@ -191,6 +191,11 @@ func resourceDbTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
 		},
 	}
 }
@@ -235,6 +240,7 @@ func resourceDbTargetCreate(d *schema.ResourceData, m interface{}) error {
 	parentTargetName := d.Get("parent_target_name").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateDB{
 		Name:           name,
@@ -272,6 +278,7 @@ func resourceDbTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ParentTargetName, parentTargetName)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateDB(ctx).Body(body).Execute()
 	if err != nil {
@@ -563,6 +570,7 @@ func resourceDbTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	parentTargetName := d.Get("parent_target_name").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetUpdateDB{
 		Name:           name,
@@ -600,6 +608,7 @@ func resourceDbTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ParentTargetName, parentTargetName)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetUpdateDB(ctx).Body(body).Execute()
 	if err != nil {

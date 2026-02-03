@@ -176,6 +176,18 @@ func resourceRotatedSecretLdap() *schema.Resource {
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
 			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"target": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "A list of linked targets to be associated, Relevant only for Secure Remote Access for ssh cert issuer, ldap rotated secret and ldap dynamic secret, To specify multiple targets use argument multiple times",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -216,6 +228,8 @@ func resourceRotatedSecretLdapCreate(d *schema.ResourceData, m interface{}) erro
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	target := d.Get("target").([]interface{})
 
 	body := akeyless_api.RotatedSecretCreateLdap{
 		Name:        name,
@@ -248,6 +262,14 @@ func resourceRotatedSecretLdapCreate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, customFieldsMap)
+	}
+	common.GetAkeylessPtr(&body.Target, common.ExpandStringList(target))
 
 	_, _, err := client.RotatedSecretCreateLdap(ctx).Body(body).Execute()
 	if err != nil {
@@ -452,6 +474,8 @@ func resourceRotatedSecretLdapUpdate(d *schema.ResourceData, m interface{}) erro
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	target := d.Get("target").([]interface{})
 
 	body := akeyless_api.RotatedSecretUpdateLdap{
 		Name:    name,
@@ -492,6 +516,14 @@ func resourceRotatedSecretLdapUpdate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, customFieldsMap)
+	}
+	common.GetAkeylessPtr(&body.Target, common.ExpandStringList(target))
 
 	_, _, err = client.RotatedSecretUpdateLdap(ctx).Body(body).Execute()
 	if err != nil {

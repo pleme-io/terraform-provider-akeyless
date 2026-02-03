@@ -43,11 +43,6 @@ func resourceGatewayUpdateLogForwardingSyslog() *schema.Resource {
 				Description: "Pull interval in seconds",
 				Default:     "10",
 			},
-			"json": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Set output format to JSON",
-			},
 			"network": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -167,7 +162,6 @@ func resourceGatewayUpdateLogForwardingSyslogUpdate(d *schema.ResourceData, m in
 	enable := d.Get("enable").(string)
 	outputFormat := d.Get("output_format").(string)
 	pullInterval := d.Get("pull_interval").(string)
-	json := d.Get("json").(bool)
 	network := d.Get("network").(string)
 	host := d.Get("host").(string)
 	targetTag := d.Get("target_tag").(string)
@@ -181,7 +175,6 @@ func resourceGatewayUpdateLogForwardingSyslogUpdate(d *schema.ResourceData, m in
 	common.GetAkeylessPtr(&body.Enable, enable)
 	common.GetAkeylessPtr(&body.OutputFormat, outputFormat)
 	common.GetAkeylessPtr(&body.PullInterval, pullInterval)
-	common.GetAkeylessPtr(&body.Json, json)
 	common.GetAkeylessPtr(&body.Network, network)
 	common.GetAkeylessPtr(&body.Host, host)
 	common.GetAkeylessPtr(&body.TargetTag, targetTag)

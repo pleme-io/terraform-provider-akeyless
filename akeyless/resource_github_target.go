@@ -63,6 +63,11 @@ func resourceGithubTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Set the maximum number of versions, limited by the account settings defaults",
 			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -185,6 +190,7 @@ func resourceGithubTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	description := d.Get("description").(string)
 	key := d.Get("key").(string)
 	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.TargetUpdateGithub{
 		Name:  name,
@@ -197,6 +203,7 @@ func resourceGithubTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, _, err := client.TargetUpdateGithub(ctx).Body(body).Execute()
 	if err != nil {

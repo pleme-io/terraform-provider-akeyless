@@ -35,6 +35,11 @@ func resourceSSHCertIssuer() *schema.Resource {
 				Required:    true,
 				Description: "A key to sign the certificate with",
 			},
+			"provider_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Provider type",
+			},
 			"allowed_users": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -165,6 +170,7 @@ func resourceSSHCertIssuerCreate(d *schema.ResourceData, m interface{}) error {
 	signerKeyName := d.Get("signer_key_name").(string)
 	allowedUsers := d.Get("allowed_users").(string)
 	ttl := d.Get("ttl").(int)
+	providerType := d.Get("provider_type").(string)
 	principals := d.Get("principals").(string)
 	extensions := d.Get("extensions").(map[string]interface{})
 	description := d.Get("description").(string)
@@ -196,6 +202,7 @@ func resourceSSHCertIssuerCreate(d *schema.ResourceData, m interface{}) error {
 		Ttl:           int64(ttl),
 		Token:         &token,
 	}
+	common.GetAkeylessPtr(&body.ProviderType, providerType)
 	common.GetAkeylessPtr(&body.Principals, principals)
 	common.GetAkeylessPtr(&body.Extensions, extensions)
 	common.GetAkeylessPtr(&body.ExternalUsername, "false")
@@ -330,6 +337,7 @@ func resourceSSHCertIssuerUpdate(d *schema.ResourceData, m interface{}) error {
 	signerKeyName := d.Get("signer_key_name").(string)
 	allowedUsers := d.Get("allowed_users").(string)
 	ttl := d.Get("ttl").(int)
+	providerType := d.Get("provider_type").(string)
 	principals := d.Get("principals").(string)
 	extensions := d.Get("extensions").(map[string]interface{})
 	description := d.Get("description").(string)
@@ -360,6 +368,7 @@ func resourceSSHCertIssuerUpdate(d *schema.ResourceData, m interface{}) error {
 		Ttl:           int64(ttl),
 		Token:         &token,
 	}
+	common.GetAkeylessPtr(&body.ProviderType, providerType)
 	add, remove, err := common.GetTagsForUpdate(d, name, token, tagsList, client)
 	if err == nil {
 		if len(add) > 0 {
