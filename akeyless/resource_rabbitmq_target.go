@@ -66,11 +66,6 @@ func resourceRabbitmqTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
 			},
-			"new_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "New target name",
-			},
 		},
 	}
 }
@@ -193,7 +188,6 @@ func resourceRabbitmqTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	description := d.Get("description").(string)
 	maxVersions := d.Get("max_versions").(string)
 	keepPrevVersion := d.Get("keep_prev_version").(string)
-	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.TargetUpdateRabbitMq{
 		Name:  name,
@@ -206,7 +200,6 @@ func resourceRabbitmqTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
-	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.TargetUpdateRabbitMq(ctx).Body(body).Execute()
 	if err != nil {

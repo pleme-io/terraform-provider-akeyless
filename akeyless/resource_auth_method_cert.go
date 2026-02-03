@@ -153,11 +153,6 @@ func resourceAuthMethodCert() *schema.Resource {
 				Description: "How many days before the expiration of the auth method would you like to be notified",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			"new_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Auth Method new name",
-			},
 			"access_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -497,7 +492,6 @@ func resourceAuthMethodCertUpdate(d *schema.ResourceData, m interface{}) error {
 	productType := common.ExpandStringList(productTypeSet.List())
 	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
 	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
-	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.AuthMethodUpdateCert{
 		Name:             name,
@@ -524,7 +518,6 @@ func resourceAuthMethodCertUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.AllowedCors, allowedCors)
 	common.GetAkeylessPtr(&body.ProductType, productType)
 	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
-	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.AuthMethodUpdateCert(ctx).Body(body).Execute()
 	if err != nil {

@@ -109,11 +109,6 @@ func resourceEventForwarderEmail() *schema.Resource {
 				Optional:    true,
 				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
 			},
-			"new_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "New EventForwarder name",
-			},
 		},
 	}
 }
@@ -278,7 +273,6 @@ func resourceEventForwarderEmailUpdate(d *schema.ResourceData, m interface{}) er
 	description := d.Get("description").(string)
 	enable := d.Get("enable").(string)
 	keepPrevVersion := d.Get("keep_prev_version").(string)
-	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.EventForwarderUpdateEmail{
 		Name:  name,
@@ -296,7 +290,6 @@ func resourceEventForwarderEmailUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Enable, enable)
 	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
-	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, resp, err := client.EventForwarderUpdateEmail(ctx).Body(body).Execute()
 	if err != nil {

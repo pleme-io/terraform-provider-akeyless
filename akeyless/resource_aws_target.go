@@ -84,11 +84,6 @@ func resourceAwsTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
 			},
-			"new_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "New target name",
-			},
 		},
 	}
 }
@@ -244,7 +239,6 @@ func resourceAwsTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	maxVersions := d.Get("max_versions").(string)
 	roleArn := d.Get("role_arn").(string)
 	keepPrevVersion := d.Get("keep_prev_version").(string)
-	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.TargetUpdateAws{
 		Name:  name,
@@ -261,7 +255,6 @@ func resourceAwsTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 	common.GetAkeylessPtr(&body.RoleArn, roleArn)
 	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
-	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.TargetUpdateAws(ctx).Body(body).Execute()
 	if err != nil {
