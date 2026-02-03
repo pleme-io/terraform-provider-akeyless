@@ -129,7 +129,7 @@ func resourceRole() *schema.Resource {
 			"audit_access": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Allow this role to view audit logs. Currently only 'none', 'own' and 'all' values are supported, allowing associated auth methods to view audit logs produced by the same auth methods.",
+				Description: "Allow this role to view audit logs. Currently only 'none', 'own', 'scoped' and 'all' values are supported, allowing associated auth methods to view audit logs produced by the same auth methods.",
 			},
 			"analytics_access": {
 				Type:        schema.TypeString,
@@ -139,12 +139,12 @@ func resourceRole() *schema.Resource {
 			"gw_analytics_access": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Allow this role to view gw analytics. Currently only 'none', 'own' and 'all' values are supported, allowing associated auth methods to view reports produced by the same auth methods.",
+				Description: "Allow this role to view gw analytics. Currently only 'none', 'scoped', 'all' values are supported, allowing associated auth methods to view reports produced by the same auth methods.",
 			},
 			"sra_reports_access": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Allow this role to view SRA Clusters. Currently only 'none', 'own' and 'all' values are supported.",
+				Description: "Allow this role to view SRA Clusters. Currently only 'none', 'scoped', 'all' values are supported.",
 			},
 			"usage_reports_access": {
 				Type:        schema.TypeString,
@@ -154,7 +154,7 @@ func resourceRole() *schema.Resource {
 			"event_center_access": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Allow this role to view Event Center. Currently only 'none', 'own' and 'all' values are supported.",
+				Description: "Allow this role to view Event Center. Currently only 'none', 'scoped' and 'all' values are supported.",
 			},
 			"event_forwarders_access": {
 				Type:        schema.TypeString,

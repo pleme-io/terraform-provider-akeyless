@@ -87,6 +87,11 @@ func resourceUscSecret() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the remote key that used to encrypt the secret value (if empty, the default key will be used)",
 			},
+			"force_delete": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Force delete objects that are soft deleted by default (relevant only for Azure target)",
+			},
 			"secret_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -285,11 +290,14 @@ func resourceUscSecretDelete(d *schema.ResourceData, m any) error {
 		return err
 	}
 
+	forceDelete := d.Get("force_delete").(bool)
+
 	deleteItem := akeyless_api.UscDelete{
 		Token:    &token,
 		UscName:  uscName,
 		SecretId: secretId,
 	}
+	common.GetAkeylessPtr(&deleteItem.ForceDelete, forceDelete)
 
 	ctx := context.Background()
 	_, _, err = client.UscDelete(ctx).Body(deleteItem).Execute()

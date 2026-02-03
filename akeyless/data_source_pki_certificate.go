@@ -55,7 +55,7 @@ func dataSourceGetPKICertificate() *schema.Resource {
 			"extended_key_usage": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: " A comma-separated list of extended key usage requests which will be used for certificate issuance. Supported values: 'clientauth', 'serverauth'.",
+				Description: "A comma-separated list of extended key usage requests which will be used for certificate issuance. Supported values: 'clientauth', 'serverauth', 'codesigning'.",
 			},
 			"data": {
 				Type:        schema.TypeString,
