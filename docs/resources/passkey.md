@@ -22,8 +22,13 @@ Passkey resource
 
 ### Optional
 
+- `accessibility` (String) For personal password manager
+- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `description` (String) Description of the object
+- `origin_url` (List of String) Originating websites for this passkey
 - `protection_key_name` (String) The name of a key that used to encrypt the passkey (if empty, the account default protectionKey key will be used)
+- `tags` (Set of String) Add tags attached to this object
+- `username` (String) For Password Management use
 
 ### Read-Only
 

@@ -20,7 +20,6 @@ Log Forwarding config for sumologic
 - `enable` (String) Enable Log Forwarding [true/false]
 - `endpoint` (String, Sensitive) Sumologic endpoint URL
 - `host` (String) Sumologic host
-- `json` (Boolean) Set output format to JSON
 - `output_format` (String) Logs format [text/json]
 - `pull_interval` (String) Pull interval in seconds
 - `sumologic_tags` (String) A comma-separated list of Sumologic tags

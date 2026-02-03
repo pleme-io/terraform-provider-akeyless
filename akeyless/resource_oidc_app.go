@@ -196,11 +196,11 @@ func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
 				return err
 			}
 		}
-		if rOut.ItemGeneralInfo.ItemTags != nil && len(*rOut.ItemGeneralInfo.ItemTags) > 0 {
-			err = d.Set("tags", *rOut.ItemGeneralInfo.ItemTags)
-			if err != nil {
-				return err
-			}
+	}
+	if rOut.ItemTags != nil {
+		err = d.Set("tags", rOut.ItemTags)
+		if err != nil {
+			return err
 		}
 	}
 	if rOut.ProtectionKeyName != nil {

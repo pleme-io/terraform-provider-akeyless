@@ -21,7 +21,6 @@ Log Forwarding config for syslog
 - `enable_tls` (Boolean) Enable tls relevant only for network type TCP
 - `formatter` (String) Syslog formatter [text/cef]
 - `host` (String) Syslog host
-- `json` (Boolean) Set output format to JSON
 - `network` (String) Syslog network [tcp/udp]
 - `output_format` (String) Logs format [text/json]
 - `pull_interval` (String) Pull interval in seconds

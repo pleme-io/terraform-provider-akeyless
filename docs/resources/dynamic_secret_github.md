@@ -29,6 +29,7 @@ Github dynamic secret resource
 - `installation_id` (Number) Github application installation id
 - `installation_organization` (String) Instead of installation id, set a GitHub organization name
 - `installation_repository` (String) Instead of installation id, set a GitHub repository '<owner>/<repo-name>'
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `tags` (Set of String) Add tags attached to this object
 - `target_name` (String) Name of existing target to use in dynamic secret creation
 - `token_permissions` (Set of String) Tokens' allowed permissions. By default use installation allowed permissions. Input format: key=value pairs or JSON strings, e.g - -p contents=read -p issues=write or -p '{content:read}'

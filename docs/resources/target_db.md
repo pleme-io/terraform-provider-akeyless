@@ -34,6 +34,7 @@ DB Target resource
 - `description` (String) Description of the object
 - `host` (String) Database host
 - `key` (String) Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used
+- `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults
 - `mongodb_atlas` (Boolean) Flag, set database type to mongodb and the flag to true to create Mongo Atlas target
 - `mongodb_atlas_api_private_key` (String) MongoDB Atlas private key
 - `mongodb_atlas_api_public_key` (String) MongoDB Atlas public key

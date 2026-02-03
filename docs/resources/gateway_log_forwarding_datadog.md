@@ -20,7 +20,6 @@ Log Forwarding config for datadog
 - `api_key` (String, Sensitive) Datadog api key
 - `enable` (String) Enable Log Forwarding [true/false]
 - `host` (String) Datadog host
-- `json` (Boolean) Set output format to JSON
 - `log_service` (String) Datadog log service
 - `log_source` (String) Datadog log source
 - `log_tags` (String) A comma-separated list of Datadog log tags formatted as key:value strings

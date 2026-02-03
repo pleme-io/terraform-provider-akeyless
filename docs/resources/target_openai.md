@@ -33,5 +33,6 @@ OpenAI Target resource
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `project_id` (String) Project ID
 
 

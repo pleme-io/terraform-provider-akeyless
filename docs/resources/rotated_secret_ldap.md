@@ -28,6 +28,7 @@ Ldap rotated secret resource
 - `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `description` (String) Description of the object
 - `host_provider` (String) Host provider type [explicit/target], Default Host provider is explicit, Relevant only for Secure Remote Access of ssh cert issuer, ldap rotated secret and ldap dynamic secret
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `key` (String) The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)
 - `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults
 - `password_length` (String) The length of the password to be generated
@@ -46,6 +47,7 @@ Ldap rotated secret resource
 - `secure_access_web_browsing` (Boolean) Secure browser via Akeyless's Secure Remote Access (SRA)
 - `secure_access_web_proxy` (Boolean) Web-Proxy via Akeyless's Secure Remote Access (SRA)
 - `tags` (Set of String) List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2
+- `target` (List of String) A list of linked targets to be associated, Relevant only for Secure Remote Access for ssh cert issuer, ldap rotated secret and ldap dynamic secret, To specify multiple targets use argument multiple times
 - `user_attribute` (String) LDAP User Attribute
 - `user_dn` (String) Base DN to Perform User Search
 

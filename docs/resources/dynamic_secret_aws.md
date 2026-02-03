@@ -58,5 +58,6 @@ AWS dynamic secret resource
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `use_gw_cloud_identity` (Boolean) Use the GW's Cloud IAM
 
 

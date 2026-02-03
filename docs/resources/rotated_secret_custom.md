@@ -29,6 +29,7 @@ Custom rotated secret resource
 - `description` (String) Description of the object
 - `enable_password_policy` (String) Enable password policy
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item
+- `keep_prev_version` (String) Whether to keep previous version [true/false]. If not set, use default according to account settings
 - `key` (String) The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)
 - `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults
 - `password_length` (String) The length of the password to be generated

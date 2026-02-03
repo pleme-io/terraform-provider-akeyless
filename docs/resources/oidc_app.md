@@ -21,14 +21,18 @@ OIDC App resource
 
 ### Optional
 
+- `accessibility` (String) For personal password manager
 - `audience` (String) Audience claim to be used as part of the authentication flow. In case set, it must match the one configured on the Identity Provider's Application
+- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `description` (String) Description of the object
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `key` (String) The name of a key that used to encrypt the OIDC application (if empty, the account default protectionKey key will be used)
 - `metadata` (String) Deprecated - use description
 - `permission_assignment` (String) A json string defining the access permission assignment for this app
 - `public` (Boolean) Set to true if the app is public (cannot keep secrets)
 - `redirect_uris` (Set of String) A list of allowed redirect uris
 - `scopes` (Set of String) A list of OIDC scopes
+- `tags` (Set of String) List of tags attached to this object
 
 ### Read-Only
 

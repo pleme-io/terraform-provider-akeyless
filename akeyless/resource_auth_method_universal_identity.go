@@ -307,15 +307,15 @@ func resourceAuthMethodUniversalIdentityRead(d *schema.ResourceData, m interface
 		}
 	}
 
-	if rOut.AuthMethodDescription != nil {
-		err = d.Set("description", *rOut.AuthMethodDescription)
+	if rOut.Description != nil {
+		err = d.Set("description", *rOut.Description)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rOut.ExpirationEventIn != nil {
-		err = d.Set("expiration_event_in", rOut.ExpirationEventIn)
+	if rOut.ExpirationEvents != nil {
+		err := d.Set("expiration_event_in", common.ReadAuthExpirationEventInParam(rOut.ExpirationEvents))
 		if err != nil {
 			return err
 		}

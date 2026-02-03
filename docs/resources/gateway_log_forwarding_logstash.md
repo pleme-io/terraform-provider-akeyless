@@ -20,7 +20,6 @@ Log Forwarding config for logstash
 - `dns` (String) Logstash dns
 - `enable` (String) Enable Log Forwarding [true/false]
 - `enable_tls` (Boolean) Enable tls
-- `json` (Boolean) Set output format to JSON
 - `output_format` (String) Logs format [text/json]
 - `protocol` (String) Logstash protocol [tcp/udp]
 - `pull_interval` (String) Pull interval in seconds

@@ -20,7 +20,6 @@ Log Forwarding config for google-chronicle
 - `customer_id` (String) Google chronicle customer id
 - `enable` (String) Enable Log Forwarding [true/false]
 - `gcp_key` (String, Sensitive) Base64-encoded service account private key text
-- `json` (Boolean) Set output format to JSON
 - `log_type` (String) Google chronicle log type
 - `output_format` (String) Logs format [text/json]
 - `pull_interval` (String) Pull interval in seconds

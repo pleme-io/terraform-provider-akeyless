@@ -31,6 +31,7 @@ SSH Cert Issuer  resource
 - `host_provider` (String) Host provider type [explicit/target], Default Host provider is explicit, Relevant only for Secure Remote Access of ssh cert issuer, ldap rotated secret and ldap dynamic secret
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `principals` (String) Signed certificates with principal, e.g example_role1,example_role2
+- `provider_type` (String) Provider type
 - `secure_access_api` (String) Secure Access SSH control API endpoint. E.g. https://my.sra-server:9900
 - `secure_access_bastion_api` (String) Bastion's SSH control API endpoint. E.g. https://my.bastion:9900
 - `secure_access_bastion_ssh` (String) Bastion's SSH server. E.g. my.bastion:22

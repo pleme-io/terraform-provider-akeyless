@@ -83,6 +83,11 @@ func resourceGatewayMigrationServerInventory() *schema.Resource {
 				Optional:    true,
 				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
+			"id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Migration ID",
+			},
 		},
 	}
 }
@@ -111,10 +116,10 @@ func resourceGatewayMigrationServerInventoryCreate(d *schema.ResourceData, m int
 	body.Token = &token
 	common.GetAkeylessPtr(&body.SiAutoRotate, siAutoRotate)
 	if siRotationHour != 0 {
-		body.SiRotationHour = common.PtrInt32(int32(siRotationHour))
+		body.SiRotationHour = akeyless_api.PtrInt32(int32(siRotationHour))
 	}
 	if siRotationInterval != 0 {
-		body.SiRotationInterval = common.PtrInt32(int32(siRotationInterval))
+		body.SiRotationInterval = akeyless_api.PtrInt32(int32(siRotationInterval))
 	}
 	common.GetAkeylessPtr(&body.SiSraEnableRdp, siSraEnableRdp)
 	common.GetAkeylessPtr(&body.SiUserGroups, siUserGroups)
@@ -149,7 +154,7 @@ func resourceGatewayMigrationServerInventoryRead(d *schema.ResourceData, m inter
 		Token: &token,
 	}
 
-	_, res, err := client.GatewayGetMigration(ctx).Body(body).Execute()
+	rOut, res, err := client.GatewayGetMigration(ctx).Body(body).Execute()
 	if err != nil {
 		if errors.As(err, &apiErr) {
 			if res.StatusCode == http.StatusNotFound {
@@ -160,6 +165,22 @@ func resourceGatewayMigrationServerInventoryRead(d *schema.ResourceData, m inter
 			return fmt.Errorf("can't value: %v", string(apiErr.Body()))
 		}
 		return fmt.Errorf("can't get value: %v", err)
+	}
+
+	if rOut.Body != nil {
+		if rOut.Body.ServerInventoryMigrations != nil && len(rOut.Body.ServerInventoryMigrations) > 0 {
+			for _, migration := range rOut.Body.ServerInventoryMigrations {
+				if migration.General != nil && *migration.General.Name == path {
+					id := migration.General.Id
+					if id != nil {
+						err = d.Set("id", *id)
+						if err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
 	}
 
 	d.SetId(path)
@@ -192,15 +213,25 @@ func resourceGatewayMigrationServerInventoryUpdate(d *schema.ResourceData, m int
 	body.Name = &name
 	common.GetAkeylessPtr(&body.SiAutoRotate, siAutoRotate)
 	if siRotationHour != 0 {
-		body.SiRotationHour = common.PtrInt32(int32(siRotationHour))
+		body.SiRotationHour = akeyless_api.PtrInt32(int32(siRotationHour))
 	}
 	if siRotationInterval != 0 {
-		body.SiRotationInterval = common.PtrInt32(int32(siRotationInterval))
+		body.SiRotationInterval = akeyless_api.PtrInt32(int32(siRotationInterval))
 	}
 	common.GetAkeylessPtr(&body.SiSraEnableRdp, siSraEnableRdp)
 	common.GetAkeylessPtr(&body.SiUserGroups, siUserGroups)
 	common.GetAkeylessPtr(&body.SiUsersIgnore, siUsersIgnore)
 	common.GetAkeylessPtr(&body.ProtectionKey, protectionKey)
+
+	id := d.Get("id").(string)
+	if id == "" {
+		err := resourceGatewayMigrationServerInventoryRead(d, m)
+		if err != nil {
+			return err
+		}
+	}
+	id = d.Get("id").(string)
+	body.Id = &id
 
 	_, _, err := client.GatewayUpdateMigration(ctx).Body(*body).Execute()
 	if err != nil {
@@ -218,11 +249,18 @@ func resourceGatewayMigrationServerInventoryDelete(d *schema.ResourceData, m int
 	client := *provider.client
 	token := *provider.token
 
-	name := d.Get("name").(string)
+	id := d.Get("id").(string)
+	if id == "" {
+		err := resourceGatewayMigrationServerInventoryRead(d, m)
+		if err != nil {
+			return err
+		}
+	}
+	id = d.Get("id").(string)
 
 	deleteItem := akeyless_api.GatewayDeleteMigration{
 		Token: &token,
-		Id:    name,
+		Id:    id,
 	}
 
 	ctx := context.Background()
