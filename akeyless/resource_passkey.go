@@ -1,0 +1,176 @@
+package akeyless
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+
+	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
+	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func resourcePasskey() *schema.Resource {
+	return &schema.Resource{
+		Description: "Passkey resource",
+		Create:      resourcePasskeyCreate,
+		Read:        resourcePasskeyRead,
+		Update:      resourcePasskeyUpdate,
+		Delete:      resourcePasskeyDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourcePasskeyImport,
+		},
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Passkey name",
+				ForceNew:    true,
+			},
+			"alg": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Passkey type; options: [EC256, EC384, EC512]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"protection_key_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of a key that used to encrypt the passkey (if empty, the account default protectionKey key will be used)",
+			},
+		},
+	}
+}
+
+func resourcePasskeyCreate(d *schema.ResourceData, m interface{}) error {
+	provider := m.(*providerMeta)
+	client := *provider.client
+	token := *provider.token
+
+	var apiErr akeyless_api.GenericOpenAPIError
+	ctx := context.Background()
+	name := d.Get("name").(string)
+	alg := d.Get("alg").(string)
+	description := d.Get("description").(string)
+	protectionKeyName := d.Get("protection_key_name").(string)
+
+	body := akeyless_api.CreatePasskey{
+		Name:  name,
+		Alg:   alg,
+		Token: &token,
+	}
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ProtectionKeyName, protectionKeyName)
+
+	_, _, err := client.CreatePasskey(ctx).Body(body).Execute()
+	if err != nil {
+		if errors.As(err, &apiErr) {
+			return fmt.Errorf("can't create Passkey: %v", string(apiErr.Body()))
+		}
+		return fmt.Errorf("can't create Passkey: %v", err)
+	}
+
+	d.SetId(name)
+
+	return nil
+}
+
+func resourcePasskeyRead(d *schema.ResourceData, m interface{}) error {
+	provider := m.(*providerMeta)
+	client := *provider.client
+	token := *provider.token
+
+	var apiErr akeyless_api.GenericOpenAPIError
+	ctx := context.Background()
+
+	path := d.Id()
+
+	body := akeyless_api.DescribeItem{
+		Name:  path,
+		Token: &token,
+	}
+
+	rOut, res, err := client.DescribeItem(ctx).Body(body).Execute()
+	if err != nil {
+		if errors.As(err, &apiErr) {
+			if res.StatusCode == http.StatusNotFound {
+				// The resource was deleted outside of the current Terraform workspace, so invalidate this resource
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("can't value: %v", string(apiErr.Body()))
+		}
+		return fmt.Errorf("can't get value: %v", err)
+	}
+
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.DisplayMetadata != nil {
+		err = d.Set("description", *rOut.ItemGeneralInfo.DisplayMetadata)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ProtectionKeyName != nil {
+		err = d.Set("protection_key_name", *rOut.ProtectionKeyName)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ClassicKeyDetails != nil && rOut.ItemGeneralInfo.ClassicKeyDetails.KeyType != nil {
+		err = d.Set("alg", *rOut.ItemGeneralInfo.ClassicKeyDetails.KeyType)
+		if err != nil {
+			return err
+		}
+	}
+
+	d.SetId(path)
+
+	return nil
+}
+
+func resourcePasskeyUpdate(d *schema.ResourceData, m interface{}) error {
+	// Passkeys cannot be updated, only recreated
+	return resourcePasskeyRead(d, m)
+}
+
+func resourcePasskeyDelete(d *schema.ResourceData, m interface{}) error {
+	provider := m.(*providerMeta)
+	client := *provider.client
+	token := *provider.token
+
+	path := d.Id()
+
+	deleteItem := akeyless_api.DeleteItem{
+		Token: &token,
+		Name:  path,
+	}
+
+	ctx := context.Background()
+	_, _, err := client.DeleteItem(ctx).Body(deleteItem).Execute()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func resourcePasskeyImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+
+	id := d.Id()
+
+	err := resourcePasskeyRead(d, m)
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.Set("name", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}

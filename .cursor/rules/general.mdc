@@ -28,3 +28,5 @@ and the correct field names:
 - **Huawei-related commands** - Ignore all commands related to Huawei
 - **ESM terminology** - ESM was renamed to USC; use USC in all implementations
 - **CreateSecret operation** - This operation is handled in the static secret resource
+
+Never use the term "Producer" - always use "Dynamic Secret" instead
