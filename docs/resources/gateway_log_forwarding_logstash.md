@@ -25,7 +25,6 @@ Log Forwarding config for logstash
 - `protocol` (String) Logstash protocol [tcp/udp]
 - `pull_interval` (String) Pull interval in seconds
 - `tls_certificate` (String, Sensitive) Logstash tls certificate (PEM format) in a Base64 format
-- `uid_token` (String) The universal identity token, Required only for universal_identity authentication
 
 ### Read-Only
 

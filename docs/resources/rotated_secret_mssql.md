@@ -38,7 +38,6 @@ Mssql rotated secret resource
 - `rotation_event_in` (List of String) How many days before the rotation of the item would you like to be notified
 - `rotation_hour` (Number) The Hour of the rotation in UTC
 - `rotation_interval` (String) The number of days to wait between every automatic rotation (1-365),custom rotator interval will be set in minutes
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) The DB name (relevant only for DB Dynamic-Secret)
 - `secure_access_db_schema` (String) The DB schema

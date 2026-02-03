@@ -139,12 +139,6 @@ func resourceProducerAws() *schema.Resource {
 				Optional:    true,
 				Description: "Secure browser via Akeyless Web Access Bastion",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
-			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Required:    false,
@@ -258,7 +252,6 @@ func resourceProducerAwsCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
 	awsExternalId := d.Get("aws_external_id").(string)
@@ -294,7 +287,6 @@ func resourceProducerAwsCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, int64(adminRotationIntervalDays))
 	common.GetAkeylessPtr(&body.AwsExternalId, awsExternalId)
@@ -528,7 +520,6 @@ func resourceProducerAwsUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
 	awsExternalId := d.Get("aws_external_id").(string)
@@ -564,7 +555,6 @@ func resourceProducerAwsUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, int64(adminRotationIntervalDays))
 	common.GetAkeylessPtr(&body.AwsExternalId, awsExternalId)

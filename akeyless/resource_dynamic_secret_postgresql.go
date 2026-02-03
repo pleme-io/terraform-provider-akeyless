@@ -110,11 +110,6 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 				Optional:    true,
 				Description: "Enable/Disable secure remote access, [true/false]",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
-			},
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -192,7 +187,6 @@ func resourceDynamicSecretPostgresqlCreate(d *schema.ResourceData, m interface{}
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -222,7 +216,6 @@ func resourceDynamicSecretPostgresqlCreate(d *schema.ResourceData, m interface{}
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
@@ -435,7 +428,6 @@ func resourceDynamicSecretPostgresqlUpdate(d *schema.ResourceData, m interface{}
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -465,7 +457,6 @@ func resourceDynamicSecretPostgresqlUpdate(d *schema.ResourceData, m interface{}
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)

@@ -28,7 +28,6 @@ Artifactory Target resource
 - `keep_prev_version` (String) Whether to keep previous version [true/false]. If not set, use default according to account settings
 - `key` (String) The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)
 - `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults
-- `new_name` (String) New target name
 
 ### Read-Only
 

@@ -151,12 +151,6 @@ func resourceProducerMssql() *schema.Resource {
 				Optional:    true,
 				Description: "Enable/Disable secure remote access, [true/false]",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
-			},
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Required:    false,
@@ -214,7 +208,6 @@ func resourceProducerMssqlCreate(d *schema.ResourceData, m interface{}) error {
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
@@ -249,7 +242,6 @@ func resourceProducerMssqlCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	if secureAccessDelay > 0 {
 		delay := int64(secureAccessDelay)
@@ -401,7 +393,6 @@ func resourceProducerMssqlUpdate(d *schema.ResourceData, m interface{}) error {
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
@@ -436,7 +427,6 @@ func resourceProducerMssqlUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	if secureAccessDelay > 0 {
 		delay := int64(secureAccessDelay)

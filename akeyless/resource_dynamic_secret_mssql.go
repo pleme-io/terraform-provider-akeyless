@@ -126,11 +126,6 @@ func resourceDynamicSecretMssql() *schema.Resource {
 				Optional:    true,
 				Description: "Enable/Disable secure remote access, [true/false]",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -199,7 +194,6 @@ func resourceDynamicSecretMssqlCreate(d *schema.ResourceData, m interface{}) err
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
@@ -231,7 +225,6 @@ func resourceDynamicSecretMssqlCreate(d *schema.ResourceData, m interface{}) err
 	}
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
@@ -424,7 +417,6 @@ func resourceDynamicSecretMssqlUpdate(d *schema.ResourceData, m interface{}) err
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
@@ -456,7 +448,6 @@ func resourceDynamicSecretMssqlUpdate(d *schema.ResourceData, m interface{}) err
 	}
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)

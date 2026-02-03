@@ -169,12 +169,6 @@ func resourceProducerRdp() *schema.Resource {
 				Description: "Allow providing external user for a domain users",
 				Default:     "false",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Deprecated. use secure-access-certificate-issuer",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -236,7 +230,6 @@ func resourceProducerRdpCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessRdGatewayServer := d.Get("secure_access_rd_gateway_server").(string)
@@ -277,7 +270,6 @@ func resourceProducerRdpCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	if secureAccessDelay != 0 {
 		body.SecureAccessDelay = &[]int64{int64(secureAccessDelay)}[0]
@@ -425,7 +417,6 @@ func resourceProducerRdpUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessRdGatewayServer := d.Get("secure_access_rd_gateway_server").(string)
@@ -466,7 +457,6 @@ func resourceProducerRdpUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	if secureAccessDelay != 0 {
 		body.SecureAccessDelay = &[]int64{int64(secureAccessDelay)}[0]

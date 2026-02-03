@@ -35,7 +35,6 @@ Oracle DB producer resource
 - `oracle_username` (String) Oracle user
 - `password_length` (String) The length of the password to be generated
 - `producer_encryption_key_name` (String) Encrypt producer with following key
-- `secure_access_bastion_issuer` (String) Deprecated. use secure-access-certificate-issuer
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_enable` (String) Enable/Disable secure remote access [true/false]
 - `secure_access_host` (Set of String) Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)

@@ -36,7 +36,6 @@ RDP dynamic secret resource
 - `rdp_host_port` (String) RDP Host port
 - `rdp_user_groups` (String) RDP UserGroup name(s). Multiple values should be separated by comma
 - `secure_access_allow_external_user` (Boolean) Allow providing external user for a domain users
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure-access-certificate-issuer)
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]

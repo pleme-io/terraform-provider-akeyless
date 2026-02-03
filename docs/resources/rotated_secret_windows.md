@@ -40,7 +40,6 @@ Windows rotated secret resource
 - `rotation_interval` (String) The number of days to wait between every automatic rotation (1-365),custom rotator interval will be set in minutes
 - `same_password` (String) Rotate same password for each host from the Linked Target (relevant only for Linked Target)
 - `secure_access_allow_external_user` (Boolean) Allow providing external user for a domain users
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_enable` (String) Enable/Disable secure remote access [true/false]
 - `secure_access_host` (List of String) Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)

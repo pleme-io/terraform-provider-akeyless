@@ -220,11 +220,6 @@ func resourceRotatedSecret() *schema.Resource {
 				Optional:    true,
 				Description: "The AWS native cli",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -352,7 +347,6 @@ func resourceRotatedSecretCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDbName := d.Get("secure_access_db_name").(string)
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -406,7 +400,6 @@ func resourceRotatedSecretCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
@@ -650,7 +643,6 @@ func resourceRotatedSecretUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDbName := d.Get("secure_access_db_name").(string)
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -705,7 +697,6 @@ func resourceRotatedSecretUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)

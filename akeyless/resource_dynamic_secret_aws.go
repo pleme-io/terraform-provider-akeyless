@@ -187,11 +187,6 @@ func resourceDynamicSecretAws() *schema.Resource {
 				Optional:    true,
 				Description: "Secure browser via Akeyless Web Access Bastion",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
-			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -255,7 +250,6 @@ func resourceDynamicSecretAwsCreate(d *schema.ResourceData, m interface{}) error
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.DynamicSecretCreateAws{
@@ -298,7 +292,6 @@ func resourceDynamicSecretAwsCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretCreateAws(ctx).Body(body).Execute()
@@ -547,7 +540,6 @@ func resourceDynamicSecretAwsUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.DynamicSecretUpdateAws{
@@ -590,7 +582,6 @@ func resourceDynamicSecretAwsUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretUpdateAws(ctx).Body(body).Execute()

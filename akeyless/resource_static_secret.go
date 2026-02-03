@@ -152,12 +152,6 @@ func resourceStaticSecret() *schema.Resource {
 				Optional:    true,
 				Description: "Secure browser via Akeyless's Secure Remote Access (SRA)",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
-			},
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Required:    false,
@@ -236,7 +230,6 @@ func resourceStaticSecretCreate(d *schema.ResourceData, m any) error {
 	secureAccessSshCreds := d.Get("secure_access_ssh_creds").(string)
 	secureAccessUrl := d.Get("secure_access_url").(string)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessSshUser := d.Get("secure_access_ssh_user").(string)
@@ -277,7 +270,6 @@ func resourceStaticSecretCreate(d *schema.ResourceData, m any) error {
 	common.GetAkeylessPtr(&body.SecureAccessSshCreds, secureAccessSshCreds)
 	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessSshUser, secureAccessSshUser)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
@@ -524,7 +516,6 @@ func resourceStaticSecretUpdate(d *schema.ResourceData, m any) error {
 	secureAccessSshCreds := d.Get("secure_access_ssh_creds").(string)
 	secureAccessUrl := d.Get("secure_access_url").(string)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessSshUser := d.Get("secure_access_ssh_user").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]any)
@@ -557,7 +548,6 @@ func resourceStaticSecretUpdate(d *schema.ResourceData, m any) error {
 	common.GetAkeylessPtr(&bodyItem.SecureAccessSshCreds, secureAccessSshCreds)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessUrl, secureAccessUrl)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessWebBrowsing, secureAccessWebBrowsing)
-	common.GetAkeylessPtr(&bodyItem.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessSshCredsUser, secureAccessSshUser)
 	common.GetAkeylessPtr(&bodyItem.DeleteProtection, deleteProtection)

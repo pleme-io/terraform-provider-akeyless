@@ -130,11 +130,6 @@ func resourceRotatedSecretWindows() *schema.Resource {
 				Optional:    true,
 				Description: "Allow providing external user for a domain users",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -199,7 +194,6 @@ func resourceRotatedSecretWindowsCreate(d *schema.ResourceData, m interface{}) e
 	rotationEventIn := common.ExpandStringList(rotationEventInList)
 	samePassword := d.Get("same_password").(string)
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessHostList := d.Get("secure_access_host").([]interface{})
@@ -229,7 +223,6 @@ func resourceRotatedSecretWindowsCreate(d *schema.ResourceData, m interface{}) e
 	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
 	common.GetAkeylessPtr(&body.SamePassword, samePassword)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
@@ -418,7 +411,6 @@ func resourceRotatedSecretWindowsUpdate(d *schema.ResourceData, m interface{}) e
 	rotationEventIn := common.ExpandStringList(rotationEventInList)
 	samePassword := d.Get("same_password").(string)
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessHostList := d.Get("secure_access_host").([]interface{})
@@ -457,7 +449,6 @@ func resourceRotatedSecretWindowsUpdate(d *schema.ResourceData, m interface{}) e
 	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
 	common.GetAkeylessPtr(&body.SamePassword, samePassword)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)

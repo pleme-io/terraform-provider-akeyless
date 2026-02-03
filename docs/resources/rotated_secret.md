@@ -53,7 +53,6 @@ Rotated secret resource
 - `secure_access_allow_external_user` (Boolean) Allow providing external user for a domain users (relevant only for rdp)
 - `secure_access_aws_account_id` (String) The AWS account id (relevant only for aws)
 - `secure_access_aws_native_cli` (Boolean) The AWS native cli
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) The DB name (relevant only for DB Dynamic-Secret)
 - `secure_access_db_schema` (String) The db schema (relevant only for mssql or postgresql)

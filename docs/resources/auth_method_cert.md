@@ -40,7 +40,6 @@ Cert Auth Method Resource
 - `force_sub_claims` (Boolean) enforce role-association must include sub claims
 - `gw_bound_ips` (Set of String) A comma-separated CIDR block list as a trusted Gateway entity
 - `jwt_ttl` (Number) Creds expiration time in minutes
-- `new_name` (String) Auth Method new name
 - `product_type` (Set of String) Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]
 - `revoked_cert_ids` (Set of String) A list of revoked cert ids
 

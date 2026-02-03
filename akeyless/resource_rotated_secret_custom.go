@@ -118,11 +118,6 @@ func resourceRotatedSecretCustom() *schema.Resource {
 				Optional:    true,
 				Description: "Allow providing external user for a domain users",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -230,7 +225,6 @@ func resourceRotatedSecretCustomCreate(d *schema.ResourceData, m interface{}) er
 	rotationEventInList := d.Get("rotation_event_in").([]interface{})
 	rotationEventIn := common.ExpandStringList(rotationEventInList)
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessHostList := d.Get("secure_access_host").([]interface{})
@@ -275,7 +269,6 @@ func resourceRotatedSecretCustomCreate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
 	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
@@ -448,7 +441,6 @@ func resourceRotatedSecretCustomUpdate(d *schema.ResourceData, m interface{}) er
 	rotationEventInList := d.Get("rotation_event_in").([]interface{})
 	rotationEventIn := common.ExpandStringList(rotationEventInList)
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessHostList := d.Get("secure_access_host").([]interface{})
@@ -502,7 +494,6 @@ func resourceRotatedSecretCustomUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
 	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)

@@ -33,7 +33,6 @@ PostgreSQLproducer resource
 - `postgresql_username` (String) PostgreSQL user
 - `producer_encryption_key` (String) Encrypt producer with following key
 - `revocation_statement` (String) PostgreSQL Revocation statements
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) Enable Web Secure Remote Access
 - `secure_access_db_schema` (String) The db schema

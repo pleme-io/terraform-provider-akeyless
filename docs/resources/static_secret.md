@@ -60,7 +60,6 @@ resource "akeyless_static_secret" "secret" {
 ')
 - `password` (String, Sensitive) Password value (relevant only for type 'password')
 - `protection_key` (String) The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]
 - `secure_access_gateway` (String) Secure Remote Access Gateway

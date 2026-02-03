@@ -137,12 +137,6 @@ func resourceProducerOracle() *schema.Resource {
 				Optional:    true,
 				Description: "The length of the password to be generated",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Deprecated. use secure-access-certificate-issuer",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -198,7 +192,6 @@ func resourceProducerOracleCreate(d *schema.ResourceData, m interface{}) error {
 	deleteProtection := d.Get("delete_protection").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	passwordLength := d.Get("password_length").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
@@ -232,7 +225,6 @@ func resourceProducerOracleCreate(d *schema.ResourceData, m interface{}) error {
 		body.ItemCustomFields = &fields
 	}
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
@@ -425,7 +417,6 @@ func resourceProducerOracleUpdate(d *schema.ResourceData, m interface{}) error {
 	deleteProtection := d.Get("delete_protection").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	passwordLength := d.Get("password_length").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
@@ -459,7 +450,6 @@ func resourceProducerOracleUpdate(d *schema.ResourceData, m interface{}) error {
 		body.ItemCustomFields = &fields
 	}
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)

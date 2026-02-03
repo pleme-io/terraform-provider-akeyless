@@ -114,12 +114,6 @@ func resourceProducerMysql() *schema.Resource {
 				Optional:    true,
 				Description: "Enable/Disable secure remote access, [true/false]",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
-			},
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Required:    false,
@@ -167,7 +161,6 @@ func resourceProducerMysqlCreate(d *schema.ResourceData, m interface{}) error {
 	dbServerCertificates := d.Get("db_server_certificates").(string)
 	dbServerName := d.Get("db_server_name").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
@@ -189,7 +182,6 @@ func resourceProducerMysqlCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.DbServerCertificates, dbServerCertificates)
 	common.GetAkeylessPtr(&body.DbServerName, dbServerName)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
@@ -337,7 +329,6 @@ func resourceProducerMysqlUpdate(d *schema.ResourceData, m interface{}) error {
 	dbServerCertificates := d.Get("db_server_certificates").(string)
 	dbServerName := d.Get("db_server_name").(string)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
@@ -359,7 +350,6 @@ func resourceProducerMysqlUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.DbServerCertificates, dbServerCertificates)
 	common.GetAkeylessPtr(&body.DbServerName, dbServerName)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 

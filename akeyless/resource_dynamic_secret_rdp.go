@@ -151,11 +151,6 @@ func resourceDynamicSecretRdp() *schema.Resource {
 				Description: "Allow providing external user for a domain users",
 				Default:     "false",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure-access-certificate-issuer)",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -218,7 +213,6 @@ func resourceDynamicSecretRdpCreate(d *schema.ResourceData, m interface{}) error
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessRdGatewayServer := d.Get("secure_access_rd_gateway_server").(string)
@@ -250,7 +244,6 @@ func resourceDynamicSecretRdpCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDelay, int64(secureAccessDelay))
 	common.GetAkeylessPtr(&body.SecureAccessRdGatewayServer, secureAccessRdGatewayServer)
@@ -443,7 +436,6 @@ func resourceDynamicSecretRdpUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessRdGatewayServer := d.Get("secure_access_rd_gateway_server").(string)
@@ -475,7 +467,6 @@ func resourceDynamicSecretRdpUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDelay, int64(secureAccessDelay))
 	common.GetAkeylessPtr(&body.SecureAccessRdGatewayServer, secureAccessRdGatewayServer)

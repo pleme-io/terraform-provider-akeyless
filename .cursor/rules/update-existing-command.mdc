@@ -24,6 +24,8 @@ When updating an existing command (resource or data source) to support new field
     *   Map the new schema fields to the SDK struct fields.
     *   Ensure the API call includes the new parameters.
 
+ignore resorces that has DeprecationMessage
+
 ## 3. Update Documentation
 
 Documentation is auto-generated from the code comments and schema descriptions.

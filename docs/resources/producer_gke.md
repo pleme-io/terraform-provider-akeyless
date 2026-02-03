@@ -30,7 +30,6 @@ Google Kubernetes Engine (GKE) producer resource
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `producer_encryption_key_name` (String) Encrypt producer with following key
 - `secure_access_allow_port_forwading` (Boolean) Enable Port forwarding while using CLI access.
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_cluster_endpoint` (String) The K8s cluster endpoint URL
 - `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds

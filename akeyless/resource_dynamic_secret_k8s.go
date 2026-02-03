@@ -156,11 +156,6 @@ func resourceDynamicSecretK8s() *schema.Resource {
 				Optional:    true,
 				Description: "Enable Port forwarding while using CLI access.",
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -234,7 +229,6 @@ func resourceDynamicSecretK8sCreate(d *schema.ResourceData, m interface{}) error
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessDashboardUrl := d.Get("secure_access_dashboard_url").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
@@ -270,7 +264,6 @@ func resourceDynamicSecretK8sCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessDashboardUrl, secureAccessDashboardUrl)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelay)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
@@ -492,7 +485,6 @@ func resourceDynamicSecretK8sUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessDashboardUrl := d.Get("secure_access_dashboard_url").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
@@ -528,7 +520,6 @@ func resourceDynamicSecretK8sUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessDashboardUrl, secureAccessDashboardUrl)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelay)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)

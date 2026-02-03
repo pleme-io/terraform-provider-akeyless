@@ -42,7 +42,6 @@ AWS dynamic secret resource
 - `secure_access_aws_account_id` (String) The aws account id
 - `secure_access_aws_native_cli` (Boolean) The aws native cli
 - `secure_access_aws_region` (String)
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]

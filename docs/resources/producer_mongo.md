@@ -39,7 +39,6 @@ Mongo DB Producer resource
 - `mongodb_username` (String) MongoDB server username
 - `password_length` (String) The length of the password to be generated
 - `producer_encryption_key_name` (String) Encrypt producer with following key
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) Enable Web Secure Remote Access
 - `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds

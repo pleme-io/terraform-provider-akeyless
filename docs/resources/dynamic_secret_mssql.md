@@ -35,7 +35,6 @@ Microsoft SQL Server dynamic secret resource
 - `mssql_revocation_statements` (String) MSSQL Server Revocation Statements
 - `mssql_username` (String) MS SQL Server user
 - `password_length` (String) The length of the password to be generated
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) The DB Name
 - `secure_access_db_schema` (String) The db schema

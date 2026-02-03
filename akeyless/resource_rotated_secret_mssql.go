@@ -121,11 +121,6 @@ func resourceRotatedSecretMsSql() *schema.Resource {
 				Description: "How many days before the rotation of the item would you like to be notified",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			"secure_access_bastion_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)",
-			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -194,7 +189,6 @@ func resourceRotatedSecretMsSqlCreate(d *schema.ResourceData, m interface{}) err
 	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
 	rotationEventInSet := d.Get("rotation_event_in").([]interface{})
 	rotationEventIn := common.ExpandStringList(rotationEventInSet)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDbName := d.Get("secure_access_db_name").(string)
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -223,7 +217,6 @@ func resourceRotatedSecretMsSqlCreate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
 	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
@@ -395,10 +388,6 @@ func resourceRotatedSecretMsSqlRead(d *schema.ResourceData, m interface{}) error
 			}
 		}
 		if sra.BastionIssuer != nil {
-			err = d.Set("secure_access_bastion_issuer", *sra.BastionIssuer)
-			if err != nil {
-				return err
-			}
 			err = d.Set("secure_access_certificate_issuer", *sra.BastionIssuer)
 			if err != nil {
 				return err
@@ -501,7 +490,6 @@ func resourceRotatedSecretMsSqlUpdate(d *schema.ResourceData, m interface{}) err
 	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
 	rotationEventInSet := d.Get("rotation_event_in").([]interface{})
 	rotationEventIn := common.ExpandStringList(rotationEventInSet)
-	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessDbName := d.Get("secure_access_db_name").(string)
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -539,7 +527,6 @@ func resourceRotatedSecretMsSqlUpdate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
 	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
-	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)

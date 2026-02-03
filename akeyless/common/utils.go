@@ -345,13 +345,6 @@ func GetSra(d *schema.ResourceData, sra *akeyless_api.SecureRemoteAccess, itemTy
 		}
 	}
 
-	if s, ok := sra.GetBastionIssuerOk(); ok {
-		err = d.Set("secure_access_bastion_issuer", s)
-		if err != nil {
-			return err
-		}
-	}
-
 	if s, ok := sra.GetBastionApiOk(); ok {
 		err = d.Set("secure_access_bastion_api", s)
 		if err != nil {

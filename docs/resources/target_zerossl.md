@@ -31,7 +31,6 @@ ZeroSSL Target resource
 - `keep_prev_version` (String) Whether to keep previous version [true/false]. If not set, use default according to account settings
 - `key` (String) Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used
 - `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults
-- `new_name` (String) New target name
 - `timeout` (String) Timeout waiting for certificate validation
 
 ### Read-Only

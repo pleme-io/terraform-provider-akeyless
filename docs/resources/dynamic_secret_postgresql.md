@@ -34,7 +34,6 @@ PostgreSQL dynamic secret resource
 - `postgresql_port` (String) PostgreSQL port
 - `postgresql_username` (String) PostgreSQL user
 - `revocation_statements` (String) PostgreSQL Revocation Statement
-- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) The DB Name
 - `secure_access_db_schema` (String) The db schema
