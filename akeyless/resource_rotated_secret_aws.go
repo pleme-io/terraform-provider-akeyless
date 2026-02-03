@@ -375,27 +375,32 @@ func resourceRotatedSecretAwsRead(d *schema.ResourceData, m interface{}) error {
 				}
 			}
 		}
-		if rsd.RotateAfterDisconnect != nil {
-			if *rsd.RotateAfterDisconnect || d.Get("rotate_after_disconnect").(string) != "" {
-				err := d.Set("rotate_after_disconnect", strconv.FormatBool(*rsd.RotateAfterDisconnect))
+		if rsd.MaxVersions != nil {
+			err := d.Set("max_versions", strconv.Itoa(int(*rsd.MaxVersions)))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if itemOut.ItemGeneralInfo != nil && itemOut.ItemGeneralInfo.SecureRemoteAccessDetails != nil {
+		sra := itemOut.ItemGeneralInfo.SecureRemoteAccessDetails
+		if sra.RotateAfterDisconnect != nil {
+			if *sra.RotateAfterDisconnect || d.Get("rotate_after_disconnect").(string) != "" {
+				err := d.Set("rotate_after_disconnect", strconv.FormatBool(*sra.RotateAfterDisconnect))
 				if err != nil {
 					return err
 				}
 			}
 		}
 	}
+
 	if itemOut.DeleteProtection != nil {
 		if *itemOut.DeleteProtection || d.Get("delete_protection").(string) != "" {
 			err := d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
 			if err != nil {
 				return err
 			}
-		}
-	}
-	if itemOut.MaxVersions != nil {
-		err := d.Set("max_versions", strconv.Itoa(int(*itemOut.MaxVersions)))
-		if err != nil {
-			return err
 		}
 	}
 	if itemOut.ItemCustomFieldsDetails != nil {

@@ -268,14 +268,14 @@ func resourceProducerGithubRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.GithubInstallationOrganization != nil {
-		err = d.Set("installation_organization", *rOut.GithubInstallationOrganization)
+	if rOut.GithubOrganizationName != nil {
+		err = d.Set("installation_organization", *rOut.GithubOrganizationName)
 		if err != nil {
 			return err
 		}
 	}
-	if rOut.ItemTags != nil {
-		err = d.Set("tags", rOut.ItemTags)
+	if rOut.Tags != nil {
+		err = d.Set("tags", rOut.Tags)
 		if err != nil {
 			return err
 		}
@@ -286,14 +286,20 @@ func resourceProducerGithubRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.ItemCustomFields != nil {
-		err = d.Set("item_custom_fields", *rOut.ItemCustomFields)
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		err = d.Set("item_custom_fields", customFields)
 		if err != nil {
 			return err
 		}
 	}
-	if rOut.TokenTtl != nil {
-		err = d.Set("token_ttl", *rOut.TokenTtl)
+	if rOut.UserTtl != nil {
+		err = d.Set("token_ttl", *rOut.UserTtl)
 		if err != nil {
 			return err
 		}

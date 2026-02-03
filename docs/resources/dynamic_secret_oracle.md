@@ -24,7 +24,10 @@ Oracle DB dynamic secret resource
 - `custom_username_template` (String) Customize how temporary usernames are generated using go template
 - `db_server_certificates` (String) the set of root certificate authorities in base64 encoding that clients use when verifying server certificates
 - `db_server_name` (String) Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is given. It is also included in the client's handshake to support virtual hosting unless it is an IP address
+- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
+- `description` (String) Description of the object
 - `encryption_key_name` (String) Encrypt dynamic secret details with following key
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `oracle_creation_statements` (String) Oracle Creation Statements
 - `oracle_host` (String) Oracle host name
 - `oracle_password` (String) Oracle password
@@ -33,6 +36,10 @@ Oracle DB dynamic secret resource
 - `oracle_service_name` (String) Oracle service name
 - `oracle_username` (String) Oracle user
 - `password_length` (String) The length of the password to be generated
+- `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
+- `secure_access_enable` (String) Enable/Disable secure remote access [true/false]
+- `secure_access_host` (Set of String) Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)
+- `secure_access_web` (Boolean) Enable Web Secure Remote Access
 - `tags` (Set of String) List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2
 - `target_name` (String) Name of existing target to use in dynamic secret creation
 - `user_ttl` (String) User TTL

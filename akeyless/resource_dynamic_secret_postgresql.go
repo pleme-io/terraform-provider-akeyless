@@ -369,8 +369,8 @@ func resourceDynamicSecretPostgresqlRead(d *schema.ResourceData, m interface{}) 
 			return err
 		}
 	}
-	if rOut.ItemMetadata != nil {
-		err = d.Set("description", *rOut.ItemMetadata)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
@@ -378,8 +378,8 @@ func resourceDynamicSecretPostgresqlRead(d *schema.ResourceData, m interface{}) 
 	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
 		fields := make(map[string]interface{})
 		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				fields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				fields[*field.Name] = *field.Value
 			}
 		}
 		err = d.Set("item_custom_fields", fields)

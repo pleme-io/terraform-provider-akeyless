@@ -24,7 +24,10 @@ MySQL dynamic secret resource
 - `custom_username_template` (String) Customize how temporary usernames are generated using go template
 - `db_server_certificates` (String) the set of root certificate authorities in base64 encoding that clients use when verifying server certificates
 - `db_server_name` (String) Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is given. It is also included in the client's handshake to support virtual hosting unless it is an IP address
+- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
+- `description` (String) Description of the object
 - `encryption_key_name` (String) Encrypt dynamic secret details with following key
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `mysql_creation_statements` (String) MySQL Creation Statements
 - `mysql_dbname` (String) MySQL DB name
 - `mysql_host` (String) MySQL host name
@@ -34,7 +37,9 @@ MySQL dynamic secret resource
 - `mysql_username` (String) MySQL user
 - `password_length` (String) The length of the password to be generated
 - `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
+- `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) Enable Web Secure Remote Access
+- `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]
 - `secure_access_host` (Set of String) Target DB servers for connections., For multiple values repeat this flag.
 - `secure_access_web` (Boolean) Enable Web Secure Remote Access

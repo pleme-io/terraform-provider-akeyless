@@ -191,14 +191,14 @@ func resourceDynamicSecretGithubRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 	}
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
 	}
-	if rOut.ItemTags != nil {
-		err = d.Set("tags", *rOut.ItemTags)
+	if rOut.Tags != nil {
+		err = d.Set("tags", rOut.Tags)
 		if err != nil {
 			return err
 		}

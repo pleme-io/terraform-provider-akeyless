@@ -16,6 +16,15 @@ Do **not** create or update test cases for:
 For all dynamic secret resources:
 - **`ItemCustomFields`** is located in `ItemCustomFieldsDetails`, **NOT** in `ItemGeneralInfo`
 When reading dynamic secret data, ensure you retrieve custom fields from the correct response structure.
+and the correct field names:
+- Use **`field.Name`** (NOT `field.FieldName`)
+- Use **`field.Value`** (NOT `field.FieldValue`)
+
 
 ## Deprecated Fields
 **Exclude all fields marked as deprecated** in their SDK description. Do not implement, update, or maintain deprecated fields in the Terraform provider.
+ 
+## Additional Exclusions
+- **Huawei-related commands** - Ignore all commands related to Huawei
+- **ESM terminology** - ESM was renamed to USC; use USC in all implementations
+- **CreateSecret operation** - This operation is handled in the static secret resource

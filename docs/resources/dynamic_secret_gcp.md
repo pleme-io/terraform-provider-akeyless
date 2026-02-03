@@ -21,15 +21,26 @@ Google Cloud Provider (GCP) dynamic secret resource
 
 ### Optional
 
+- `access_type` (String) Access type for the GCP dynamic secret
 - `custom_username_template` (String) Customize how temporary usernames are generated using go template
 - `delete_protection` (String) Protection from accidental deletion of this item, [true/false]
+- `description` (String) Description of the object
 - `encryption_key_name` (String) Encrypt dynamic secret details with following key
+- `fixed_user_claim_keyname` (String) For externally provided users, denotes the key-name of IdP claim to extract the username from
 - `gcp_cred_type` (String) Credentials type, options are [token, key]
 - `gcp_key` (String) Base64-encoded service account private key text
 - `gcp_key_algo` (String) Service account key algorithm, e.g. KEY_ALG_RSA_1024
+- `gcp_project_id` (String) GCP Project ID override for dynamic secret operations
 - `gcp_sa_email` (String) GCP service account email
 - `gcp_token_scopes` (String) Access token scopes list, e.g. scope1,scope2
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `role_binding` (String) Role binding definitions in json format
+- `role_names` (String) Comma-separated list of GCP roles to assign to the user
+- `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds
+- `secure_access_enable` (String) Enable/Disable secure remote access [true/false]
+- `secure_access_url` (String) Destination URL to inject secrets
+- `secure_access_web_browsing` (Boolean) Secure browser via Akeyless's Secure Remote Access (SRA)
+- `secure_access_web_proxy` (Boolean) Web-Proxy via Akeyless's Secure Remote Access (SRA)
 - `service_account_type` (String) The type of the gcp dynamic secret. Options[fixed, dynamic]
 - `tags` (Set of String) List of the tags attached to this secret. To specify multiple tags use argument multiple times: --tag Tag1 --tag Tag2
 - `target_name` (String) Name of existing target to use in dynamic secret creation

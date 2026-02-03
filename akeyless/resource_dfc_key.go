@@ -297,10 +297,18 @@ func resourceDfcKeyRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.ItemCustomFieldsDetails != nil {
-		err := d.Set("item_custom_fields", *rOut.ItemCustomFieldsDetails)
-		if err != nil {
-			return err
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFieldsMap := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFieldsMap[*field.Name] = *field.Value
+			}
+		}
+		if len(customFieldsMap) > 0 {
+			err = d.Set("item_custom_fields", customFieldsMap)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if rOut.ItemGeneralInfo != nil {

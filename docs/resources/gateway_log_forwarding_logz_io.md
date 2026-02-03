@@ -18,10 +18,12 @@ Log Forwarding config for logz-io
 ### Optional
 
 - `enable` (String) Enable Log Forwarding [true/false]
+- `json` (Boolean) Set output format to JSON
 - `logz_io_token` (String, Sensitive) Logz-io token
 - `output_format` (String) Logs format [text/json]
 - `protocol` (String) Logz-io protocol [tcp/https]
 - `pull_interval` (String) Pull interval in seconds
+- `uid_token` (String) The universal identity token, Required only for universal_identity authentication
 
 ### Read-Only
 

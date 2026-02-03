@@ -22,6 +22,12 @@ DB Target resource
 
 ### Optional
 
+- `azure_client_id` (String) Client id (relevant for cloud-service-provider only)
+- `azure_client_secret` (String) Client secret (relevant for cloud-service-provider only)
+- `azure_tenant_id` (String) Tenant id (relevant for cloud-service-provider only)
+- `cloud_service_provider` (String) Cloud service provider (currently only supports Azure)
+- `cluster_mode` (Boolean) Cluster Mode
+- `connection_type` (String) Type of connection to mssql database [credentials/cloud-identity/wallet/parent-target]
 - `db_name` (String) Database name
 - `db_server_certificates` (String) Set of root certificate authorities in base64 encoding used by clients to verify server certificates
 - `db_server_name` (String) Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is provided. It is also included in the client's handshake to support virtual hosting unless it is an IP address
@@ -34,10 +40,16 @@ DB Target resource
 - `mongodb_atlas_project_id` (String) MongoDB Atlas project ID
 - `mongodb_default_auth_db` (String) MongoDB server default authentication database
 - `mongodb_uri_options` (String) MongoDB server URI options (e.g. replicaSet=mySet&authSource=authDB)
-- `oracle_service_name` (String) oracle db service name
+- `oracle_service_name` (String) Oracle db service name
+- `oracle_wallet_login_type` (String) Oracle Wallet login type (password/mtls)
+- `oracle_wallet_p12_file_data` (String) Oracle wallet p12 file data in base64
+- `oracle_wallet_sso_file_data` (String) Oracle wallet sso file data in base64
+- `parent_target_name` (String) Name of the parent target, relevant only when connection-type is parent-target
 - `port` (String) Database port
 - `pwd` (String) Database password
 - `snowflake_account` (String) Snowflake account name
+- `snowflake_api_private_key` (String) RSA Private key (base64 encoded)
+- `snowflake_api_private_key_password` (String) The Private key passphrase
 - `ssl` (Boolean) Enable/Disable SSL [true/false]
 - `ssl_certificate` (String) SSL CA certificate in base64 encoding generated from a trusted Certificate Authority (CA)
 - `user_name` (String) Database user name

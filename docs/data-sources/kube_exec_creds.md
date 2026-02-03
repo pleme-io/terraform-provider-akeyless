@@ -23,7 +23,12 @@ Get credentials for authentication with Kubernetes cluster based on a PKI Cert I
 
 - `alt_names` (String) The Subject Alternative Names to be included in the PKI certificate (in a comma-delimited list)
 - `common_name` (String) The common name to be included in the PKI certificate
+- `csr_data_base64` (String) Certificate Signing Request contents encoded in base64 to generate the certificate with
+- `extended_key_usage` (String) A comma-separated list of extended key usage requests which will be used for certificate issuance. Supported values: 'clientauth', 'serverauth', 'codesigning'
+- `extra_extensions` (String) A json string that defines the requested extra extensions for the certificate
 - `key_data_base64` (String, Sensitive) pki key file contents encoded using Base64. If this option is used, the certificate will be printed to stdout
+- `max_path_len` (Number) The maximum path length for the generated certificate. -1 means unlimited unless the signing certificate has a maximum path length set
+- `ttl` (String) Updated certificate lifetime in seconds (must be less than the Certificate Issuer default TTL)
 - `uri_sans` (String) The URI Subject Alternative Names to be included in the PKI certificate (in a comma-delimited list)
 
 ### Read-Only

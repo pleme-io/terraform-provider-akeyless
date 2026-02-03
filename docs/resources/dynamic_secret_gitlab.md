@@ -31,6 +31,7 @@ Gitlab dynamic secret resource.
 - `gitlab_url` (String) Gitlab base url
 - `group_name` (String) Gitlab group name, required for access-type=group
 - `installation_organization` (String) Gitlab project name, required for access-type=project
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `tags` (Set of String) A comma-separated list of tags attached to this secret
 - `target_name` (String) Name of an existing target
 - `ttl` (String) Access Token TTL

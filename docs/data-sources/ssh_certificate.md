@@ -30,5 +30,6 @@ Generates SSH certificate data source
 
 - `data` (String, Sensitive)
 - `id` (String) The ID of this resource.
+- `path` (String) The path of the SSH certificate
 
 

@@ -22,9 +22,11 @@ Create gateway allowed access
 
 ### Optional
 
+- `case_sensitive` (String) Treat sub claims as case-sensitive [true/false]
 - `description` (String) Allowed access description
 - `permissions` (String) Comma-seperated list of permissions for this allowed access. Available permissions: [defaults,targets,classic_keys,automatic_migration,ldap_auth,dynamic_secret,k8s_auth,log_forwarding,zero_knowledge_encryption,rotated_secret,caching,event_forwarding,admin,kmip,general]
 - `sub_claims` (Map of String) key/val of sub claims, e.g group=admins,developers
+- `sub_claims_case_insensitive` (Boolean) Treat sub claims as case-insensitive
 
 ### Read-Only
 

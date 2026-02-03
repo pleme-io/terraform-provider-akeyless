@@ -64,11 +64,20 @@ output "api_key" {
 ### Optional
 
 - `access_expires` (Number) Access expiration date in Unix timestamp (select 0 for access without expiry date)
+- `allowed_client_type` (List of String) Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]
 - `api_key` (Block List) A configuration block, described below, using API-Key Auth Method (see [below for nested schema](#nestedblock--api_key))
+- `audit_logs_claims` (List of String) Subclaims to include in audit logs, e.g "--audit-logs-claims email --audit-logs-claims username"
 - `aws_iam` (Block List) A configuration block, described below, using AWS-IAM Auth Method (see [below for nested schema](#nestedblock--aws_iam))
 - `azure_ad` (Block List) A configuration block, described below, using Azure AD Auth Method (see [below for nested schema](#nestedblock--azure_ad))
 - `bound_ips` (String) A CIDR whitelist with the IPs that the access is restricted to
+- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
+- `description` (String) Auth Method description
+- `expiration_event_in` (List of String) How many days before the expiration of the auth method would you like to be notified
+- `force_sub_claims` (Boolean) If true: enforce role-association must include sub claims
 - `gcp` (Block List) A configuration block, described below, using Auth Method API-Key (see [below for nested schema](#nestedblock--gcp))
+- `gw_bound_ips` (List of String) A CIDR whitelist with the GW IPs that the access is restricted to
+- `jwt_ttl` (Number) Jwt TTL
+- `product_type` (List of String) Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]
 - `saml` (Block List) A configuration block, described below, using SAML Auth Method (see [below for nested schema](#nestedblock--saml))
 
 ### Read-Only
@@ -97,6 +106,7 @@ Optional:
 - `bound_user_id` (Set of String) A list of full user ids that the access is restricted to
 - `bound_user_name` (Set of String) A list of full user-name that the access is restricted to
 - `sts_url` (String) STS URL (default: https://sts.amazonaws.com)
+- `unique_identifier` (String) A unique identifier (ID) value which is a "sub claim" name that contains details uniquely identifying that resource
 
 
 <a id="nestedblock--azure_ad"></a>
@@ -119,6 +129,7 @@ Optional:
 - `custom_audience` (String) The audience in the JWT
 - `custom_issuer` (String) Issuer URL
 - `jwks_uri` (String) The URL to the JSON Web Key Set (JWKS) that containing the public keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server
+- `unique_identifier` (String) A unique identifier (ID) value which is a "sub claim" name that contains details uniquely identifying that resource
 
 
 <a id="nestedblock--gcp"></a>
@@ -131,8 +142,10 @@ Required:
 Optional:
 
 - `audience` (String) The audience to verify in the JWT received by the client
+- `bound_projects` (List of String) Array of GCP project IDs. Only entities belonging to any of the provided projects can authenticate
 - `gce` (Block List) IAM GCE Auth Method (see [below for nested schema](#nestedblock--gcp--gce))
 - `iam` (Block List) IAM GCP Auth Method (see [below for nested schema](#nestedblock--gcp--iam))
+- `unique_identifier` (String) A unique identifier (ID) value which is a "sub claim" name that contains details uniquely identifying that resource
 
 <a id="nestedblock--gcp--gce"></a>
 ### Nested Schema for `gcp.gce`
@@ -162,8 +175,10 @@ Required:
 
 Optional:
 
+- `allowed_redirect_uri` (List of String) Allowed redirect URIs after the authentication
 - `idp_metadata_url` (String) IDP metadata url
 - `idp_metadata_xml_data` (String) IDP metadata xml data
+- `subclaims_delimiters` (List of String) A list of additional sub claims delimiters (relevant only for SAML, OIDC, OAuth2/JWT)
 
 ## Import
 

@@ -26,6 +26,7 @@ Github Target resource
 - `github_app_private_key` (String) Github application private key (base64 encoded key)
 - `github_base_url` (String) Github base url
 - `key` (String) Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.
+- `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults
 
 ### Read-Only
 

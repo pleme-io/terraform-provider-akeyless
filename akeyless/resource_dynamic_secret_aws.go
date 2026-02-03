@@ -445,13 +445,13 @@ func resourceDynamicSecretAwsRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", common.BoolToString(*rOut.DeleteProtection))
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
 		if err != nil {
 			return err
 		}
 	}
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
@@ -472,6 +472,21 @@ func resourceDynamicSecretAwsRead(d *schema.ResourceData, m interface{}) error {
 		err = d.Set("transitive_tag_keys", *rOut.AwsTransitiveTagKeys)
 		if err != nil {
 			return err
+		}
+	}
+
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

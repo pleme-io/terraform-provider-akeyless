@@ -280,8 +280,14 @@ func resourceDynamicSecretGitlabRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 	}
-	if rOut.ItemCustomFieldsDetails != nil && rOut.ItemCustomFieldsDetails.ItemCustomFields != nil {
-		err = d.Set("item_custom_fields", *rOut.ItemGeneralInfo.ItemCustomFields)
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		err = d.Set("item_custom_fields", customFields)
 		if err != nil {
 			return err
 		}

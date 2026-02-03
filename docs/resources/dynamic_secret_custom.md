@@ -24,8 +24,11 @@ Custom dynamic secret resource
 ### Optional
 
 - `admin_rotation_interval_days` (Number) Rotation period in days
+- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
+- `description` (String) Description of the object
 - `enable_admin_rotation` (Boolean) Enable automatic admin credentials rotation
 - `encryption_key_name` (String) Encrypt dynamic secret details with following key
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `payload` (String) Secret payload to be sent with each create/revoke webhook request
 - `rotate_sync_url` (String) URL of an endpoint that implements /sync/rotate method
 - `tags` (Set of String) List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2

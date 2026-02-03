@@ -26,6 +26,7 @@ DFC Key resource
 - `cert_data_base64` (String) PEM Certificate in a Base64 format. Used for updating RSA keys' certificates
 - `certificate_common_name` (String) Common name for the generated certificate. Relevant only for generate-self-signed-certificate.
 - `certificate_country` (String) Country name for the generated certificate. Relevant only for generate-self-signed-certificate.
+- `certificate_digest_algo` (String) Digest algorithm to be used for the certificate key signing
 - `certificate_format` (String) The format of the returned certificate [pem/der]
 - `certificate_locality` (String) Locality for the generated certificate. Relevant only for generate-self-signed-certificate.
 - `certificate_organization` (String) Organization name for the generated certificate. Relevant only for generate-self-signed-certificate.
@@ -37,6 +38,8 @@ DFC Key resource
 - `description` (String) Description of the object
 - `expiration_event_in` (Set of String) How many days before the expiration of the certificate would you like to be notified.
 - `generate_self_signed_certificate` (Boolean) Whether to generate a self signed certificate with the key. If set, certificate-ttl must be provided.
+- `hash_algorithm` (String) Specifies the hash algorithm used for the encryption key's operations, available options: [SHA256, SHA384, SHA512]
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `rotation_event_in` (Set of String) How many days before the rotation of the item would you like to be notified.
 - `rotation_interval` (String) The number of days to wait between every automatic rotation (7-365)
 - `split_level` (Number) The number of fragments that the item will be split into (not includes customer fragment)

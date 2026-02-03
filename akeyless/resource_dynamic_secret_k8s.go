@@ -224,7 +224,10 @@ func resourceDynamicSecretK8sCreate(d *schema.ResourceData, m interface{}) error
 	useGwServiceAccount := d.Get("use_gw_service_account").(bool)
 	description := d.Get("description").(string)
 	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -423,17 +426,25 @@ func resourceDynamicSecretK8sRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.CustomFields != nil {
-		err = d.Set("item_custom_fields", *rOut.ItemGeneralInfo.CustomFields)
-		if err != nil {
-			return err
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -471,7 +482,10 @@ func resourceDynamicSecretK8sUpdate(d *schema.ResourceData, m interface{}) error
 	useGwServiceAccount := d.Get("use_gw_service_account").(bool)
 	description := d.Get("description").(string)
 	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)

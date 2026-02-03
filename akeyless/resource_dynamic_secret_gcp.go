@@ -369,8 +369,8 @@ func resourceDynamicSecretGcpRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemDescription != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.ItemDescription)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
@@ -390,8 +390,8 @@ func resourceDynamicSecretGcpRead(d *schema.ResourceData, m interface{}) error {
 	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
 		customFieldsMap := make(map[string]string)
 		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFieldsMap[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFieldsMap[*field.Name] = *field.Value
 			}
 		}
 		if len(customFieldsMap) > 0 {

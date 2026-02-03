@@ -320,8 +320,8 @@ func resourceRotatedSecretMongoRead(d *schema.ResourceData, m interface{}) error
 	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
 		customFields := make(map[string]string)
 		for _, field := range itemOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
 		if len(customFields) > 0 {

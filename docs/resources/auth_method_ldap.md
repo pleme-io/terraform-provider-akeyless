@@ -22,6 +22,7 @@ LDAP Auth Method Resource
 ### Optional
 
 - `access_expires` (Number) Access expiration date in Unix timestamp (select 0 for access without expiry date)
+- `allowed_client_type` (Set of String) Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]
 - `audit_logs_claims` (Set of String) Subclaims to include in audit logs
 - `bound_ips` (Set of String) A comma-separated CIDR block list to allow client access
 - `delete_protection` (String) Protection from accidental deletion of this object, [true/false]

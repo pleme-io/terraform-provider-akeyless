@@ -168,7 +168,10 @@ func resourceDynamicSecretEksCreate(d *schema.ResourceData, m interface{}) error
 	deleteProtection := d.Get("delete_protection").(string)
 	description := d.Get("description").(string)
 	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
@@ -200,7 +203,7 @@ func resourceDynamicSecretEksCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	common.GetAkeylessPtrInt64(&body.SecureAccessDelay, int64(secureAccessDelay))
+	common.GetAkeylessPtr(&body.SecureAccessDelay, int64(secureAccessDelay))
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretCreateEks(ctx).Body(body).Execute()
@@ -315,23 +318,31 @@ func resourceDynamicSecretEksRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", common.BoolToStr(*rOut.DeleteProtection))
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rOut.ItemCustomFieldsDetails != nil {
-		err = d.Set("item_custom_fields", *rOut.ItemCustomFieldsDetails)
-		if err != nil {
-			return err
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -365,7 +376,10 @@ func resourceDynamicSecretEksUpdate(d *schema.ResourceData, m interface{}) error
 	deleteProtection := d.Get("delete_protection").(string)
 	description := d.Get("description").(string)
 	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
@@ -397,7 +411,7 @@ func resourceDynamicSecretEksUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	common.GetAkeylessPtrInt64(&body.SecureAccessDelay, int64(secureAccessDelay))
+	common.GetAkeylessPtr(&body.SecureAccessDelay, int64(secureAccessDelay))
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretUpdateEks(ctx).Body(body).Execute()

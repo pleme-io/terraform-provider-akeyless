@@ -26,6 +26,7 @@ Classic Key resource
 - `cert_file_data` (String) PEM Certificate in a Base64 format.
 - `certificate_common_name` (String) Common name for the generated certificate. Relevant only for generate-self-signed-certificate.
 - `certificate_country` (String) Country name for the generated certificate. Relevant only for generate-self-signed-certificate.
+- `certificate_digest_algo` (String) Digest algorithm to be used for the certificate key signing
 - `certificate_format` (String) The format of the returned certificate [pem/der]
 - `certificate_locality` (String) Locality for the generated certificate. Relevant only for generate-self-signed-certificate.
 - `certificate_organization` (String) Organization name for the generated certificate. Relevant only for generate-self-signed-certificate.
@@ -37,6 +38,8 @@ Classic Key resource
 - `expiration_event_in` (Set of String) How many days before the expiration of the certificate would you like to be notified.
 - `generate_self_signed_certificate` (Boolean) Whether to generate a self signed certificate with the key. If set, certificate_ttl must be provided.
 - `gpg_alg` (String) gpg alg: Relevant only if GPG key type selected; options: [RSA1024, RSA2048, RSA3072, RSA4096, Ed25519]
+- `hash_algorithm` (String) Hash algorithm used for the encryption key's operations, available options: [SHA256, SHA384, SHA512]
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `key_data` (String, Sensitive) Base64-encoded classic key value provided by user
 - `protection_key_name` (String) The name of the key that protects the classic key value (if empty, the account default key will be used)
 - `rotation_event_in` (Set of String) How many days before the rotation of the item would you like to be notified.

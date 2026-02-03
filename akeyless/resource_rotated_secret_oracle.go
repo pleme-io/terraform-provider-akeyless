@@ -174,8 +174,7 @@ func resourceRotatedSecretOracleCreate(d *schema.ResourceData, m interface{}) er
 	rotatedUsername := d.Get("rotated_username").(string)
 	rotatedPassword := d.Get("rotated_password").(string)
 	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	maxVersions := d.Get("max_versions").(string)
 	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
 	rotationEventInList := d.Get("rotation_event_in").([]interface{})
@@ -285,8 +284,8 @@ func resourceRotatedSecretOracleRead(d *schema.ResourceData, m interface{}) erro
 	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
 		customFields := make(map[string]string)
 		for _, field := range itemOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
 		if len(customFields) > 0 {
@@ -350,11 +349,12 @@ func resourceRotatedSecretOracleRead(d *schema.ResourceData, m interface{}) erro
 				return err
 			}
 		}
-		if rsd.RotationEventIn != nil && len(rsd.RotationEventIn) > 0 {
-			err = d.Set("rotation_event_in", rsd.RotationEventIn)
-			if err != nil {
-				return err
-			}
+	}
+
+	if itemOut.ItemGeneralInfo != nil && itemOut.ItemGeneralInfo.NextRotationEvents != nil {
+		err := d.Set("rotation_event_in", common.ReadRotationEventInParam(itemOut.ItemGeneralInfo.NextRotationEvents))
+		if err != nil {
+			return err
 		}
 	}
 
@@ -452,8 +452,7 @@ func resourceRotatedSecretOracleUpdate(d *schema.ResourceData, m interface{}) er
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	keepPrevVersion := d.Get("keep_prev_version").(string)
 	maxVersions := d.Get("max_versions").(string)
 	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)

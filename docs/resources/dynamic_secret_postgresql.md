@@ -23,7 +23,10 @@ PostgreSQL dynamic secret resource
 
 - `creation_statements` (String) PostgreSQL Creation Statements
 - `custom_username_template` (String) Customize how temporary usernames are generated using go template
+- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
+- `description` (String) Description of the object
 - `encryption_key_name` (String) Encrypt dynamic secret details with following key
+- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `password_length` (String) The length of the password to be generated
 - `postgresql_db_name` (String) PostgreSQL DB name
 - `postgresql_host` (String) PostgreSQL host name
@@ -32,8 +35,10 @@ PostgreSQL dynamic secret resource
 - `postgresql_username` (String) PostgreSQL user
 - `revocation_statements` (String) PostgreSQL Revocation Statement
 - `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
+- `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_db_name` (String) The DB Name
 - `secure_access_db_schema` (String) The db schema
+- `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]
 - `secure_access_host` (Set of String) Target DB servers for connections., For multiple values repeat this flag.
 - `secure_access_web` (Boolean) Enable Web Secure Remote Access

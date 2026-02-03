@@ -24,14 +24,20 @@ Gets K8S Auth config data source
 - `am_token_expiration` (Number)
 - `auth_method_access_id` (String)
 - `auth_method_prv_key_pem` (String, Sensitive)
+- `cluster_api_type` (String) Defines types of API access to cluster
 - `disable_iss_validation` (Boolean)
 - `id` (String) The ID of this resource.
+- `k8s_auth_type` (String) Kubernetes auth type
 - `k8s_ca_cert` (String)
+- `k8s_client_cert_data` (String) The client certificate for k8s client certificate authentication
+- `k8s_client_key_data` (String) The client key for k8s client certificate authentication
 - `k8s_host` (String)
 - `k8s_issuer` (String)
 - `k8s_pub_keys_pem` (Set of String)
 - `k8s_token_reviewer_jwt` (String)
 - `protection_key` (String)
+- `rancher_api_key` (String) The bearer token for clusterApiTypeRancher
+- `rancher_cluster_id` (String) Cluster id as defined in rancher (in case of clusterApiTypeRancher)
 - `use_local_ca_jwt` (Boolean)
 
 

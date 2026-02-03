@@ -324,25 +324,23 @@ func resourceDynamicSecretRedshiftRead(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rOut.ItemCustomFieldsDetails != nil {
-		customFields := make(map[string]string)
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]interface{})
 		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
-		if len(customFields) > 0 {
-			err = d.Set("item_custom_fields", customFields)
-			if err != nil {
-				return err
-			}
+		err = d.Set("item_custom_fields", customFields)
+		if err != nil {
+			return err
 		}
 	}
 

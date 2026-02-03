@@ -356,18 +356,18 @@ func resourceDynamicSecretOracleRead(d *schema.ResourceData, m interface{}) erro
 		}
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.Description != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.Description)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
 	}
 
 	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
-		customFields := make(map[string]interface{})
+		customFields := make(map[string]string)
 		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
 		if len(customFields) > 0 {
@@ -378,33 +378,8 @@ func resourceDynamicSecretOracleRead(d *schema.ResourceData, m interface{}) erro
 		}
 	}
 
-	if rOut.SecureAccessCertificateIssuer != nil {
-		err = d.Set("secure_access_certificate_issuer", *rOut.SecureAccessCertificateIssuer)
-		if err != nil {
-			return err
-		}
-	}
-
-	if rOut.SecureAccessEnable != nil {
-		err = d.Set("secure_access_enable", *rOut.SecureAccessEnable)
-		if err != nil {
-			return err
-		}
-	}
-
-	if rOut.SecureAccessHost != nil {
-		err = d.Set("secure_access_host", rOut.SecureAccessHost)
-		if err != nil {
-			return err
-		}
-	}
-
-	if rOut.SecureAccessWeb != nil {
-		err = d.Set("secure_access_web", *rOut.SecureAccessWeb)
-		if err != nil {
-			return err
-		}
-	}
+	// Secure access fields are not available in DSProducerDetails in SDK v5
+	// These fields are managed through gateway configuration
 
 	d.SetId(path)
 

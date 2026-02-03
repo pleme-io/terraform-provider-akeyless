@@ -158,7 +158,10 @@ func resourceRotatedSecretSnowflakeCreate(d *schema.ResourceData, m interface{})
 	rotatedPassword := d.Get("rotated_password").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	maxVersions := d.Get("max_versions").(string)
 	privateKey := d.Get("private_key").(string)
 	privateKeyFileName := d.Get("private_key_file_name").(string)
@@ -261,8 +264,8 @@ func resourceRotatedSecretSnowflakeRead(d *schema.ResourceData, m interface{}) e
 	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
 		customFields := make(map[string]string)
 		for _, field := range itemOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
 		err = d.Set("item_custom_fields", customFields)
@@ -387,7 +390,10 @@ func resourceRotatedSecretSnowflakeUpdate(d *schema.ResourceData, m interface{})
 	tags := common.ExpandStringList(tagsSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
 	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	maxVersions := d.Get("max_versions").(string)
 	privateKey := d.Get("private_key").(string)
 	privateKeyFileName := d.Get("private_key_file_name").(string)

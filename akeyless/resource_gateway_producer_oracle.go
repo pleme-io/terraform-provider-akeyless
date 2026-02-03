@@ -358,8 +358,8 @@ func resourceProducerOracleRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.CustomUsernameTemplate != nil {
-		err = d.Set("custom_username_template", *rOut.CustomUsernameTemplate)
+	if rOut.UsernameTemplate != nil {
+		err = d.Set("custom_username_template", *rOut.UsernameTemplate)
 		if err != nil {
 			return err
 		}
@@ -370,10 +370,18 @@ func resourceProducerOracleRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.ItemCustomFields != nil {
-		err = d.Set("item_custom_fields", *rOut.ItemCustomFields)
-		if err != nil {
-			return err
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if rOut.PasswordLength != nil {
@@ -382,36 +390,9 @@ func resourceProducerOracleRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.SecureAccessBastionIssuer != nil {
-		err = d.Set("secure_access_bastion_issuer", *rOut.SecureAccessBastionIssuer)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.SecureAccessCertificateIssuer != nil {
-		err = d.Set("secure_access_certificate_issuer", *rOut.SecureAccessCertificateIssuer)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.SecureAccessEnable != nil {
-		err = d.Set("secure_access_enable", *rOut.SecureAccessEnable)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.SecureAccessHost != nil {
-		err = d.Set("secure_access_host", *rOut.SecureAccessHost)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.SecureAccessWeb != nil {
-		err = d.Set("secure_access_web", *rOut.SecureAccessWeb)
-		if err != nil {
-			return err
-		}
-	}
+
+	// Secure access fields are not available in DSProducerDetails in SDK v5
+	// These fields are managed through gateway configuration
 
 	d.SetId(path)
 

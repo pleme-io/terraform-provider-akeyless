@@ -18,6 +18,7 @@ Log Forwarding config for standard output
 ### Optional
 
 - `enable` (String) Enable Log Forwarding [true/false]
+- `json` (Boolean) Set output format to JSON
 - `output_format` (String) Logs format [text/json]
 - `pull_interval` (String) Pull interval in seconds
 

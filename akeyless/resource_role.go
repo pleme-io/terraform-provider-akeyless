@@ -445,10 +445,11 @@ func resourceRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	accessRulesOldValues := saveRoleAccessRuleOldValues(rules.PathRules)
 	description := d.Get("description").(string)
 	deleteProtection := d.Get("delete_protection").(string)
+	reverseRbacAccess := d.Get("reverse_rbac_access").(string)
 
-	err, ok = updateRoleAccessRules(ctx, name, description, deleteProtection, accessRulesNewValues, m)
+	err, ok = updateRoleAccessRules(ctx, name, description, deleteProtection, reverseRbacAccess, accessRulesNewValues, m)
 	if !ok {
-		errInner, okInner := updateRoleAccessRules(ctx, name, description, deleteProtection, accessRulesOldValues, m)
+		errInner, okInner := updateRoleAccessRules(ctx, name, description, deleteProtection, reverseRbacAccess, accessRulesOldValues, m)
 		if !okInner {
 			err = fmt.Errorf("fatal error, can't restore role access rules after bad update: %v", errInner)
 		}
@@ -992,7 +993,7 @@ func getNewAccessRules(d *schema.ResourceData) []interface{} {
 	return accessRules
 }
 
-func updateRoleAccessRules(ctx context.Context, name, description, deleteProtection string,
+func updateRoleAccessRules(ctx context.Context, name, description, deleteProtection, reverseRbacAccess string,
 	accessRules []interface{}, m interface{}) (error, bool) {
 
 	provider := m.(*providerMeta)
@@ -1035,8 +1036,6 @@ func updateRoleAccessRules(ctx context.Context, name, description, deleteProtect
 	}
 	common.GetAkeylessPtr(&updateBody.Description, description)
 	common.GetAkeylessPtr(&updateBody.DeleteProtection, deleteProtection)
-
-	reverseRbacAccess := d.Get("reverse_rbac_access").(string)
 	common.GetAkeylessPtr(&updateBody.ReverseRbacAccess, reverseRbacAccess)
 
 	var apiErr akeyless_api.GenericOpenAPIError

@@ -367,18 +367,10 @@ func resourceAuthMethodK8sRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	if rOut.ExpirationEvents != nil && len(rOut.ExpirationEvents) > 0 {
-		expirationEventIn := make([]string, 0)
-		for _, event := range rOut.ExpirationEvents {
-			if event.EventIn != nil {
-				expirationEventIn = append(expirationEventIn, strconv.FormatInt(*event.EventIn, 10))
-			}
-		}
-		if len(expirationEventIn) > 0 {
-			err = d.Set("expiration_event_in", expirationEventIn)
-			if err != nil {
-				return err
-			}
+	if rOut.ExpirationEvents != nil {
+		err := d.Set("expiration_event_in", common.ReadAuthExpirationEventInParam(rOut.ExpirationEvents))
+		if err != nil {
+			return err
 		}
 	}
 

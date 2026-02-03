@@ -172,12 +172,6 @@ func resourceRabbitmqTargetRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.Target.MaxVersions != nil {
-		err := d.Set("max_versions", *rOut.Target.MaxVersions)
-		if err != nil {
-			return err
-		}
-	}
 
 	d.SetId(path)
 

@@ -25,7 +25,13 @@ K8S Target resource
 ### Optional
 
 - `description` (String) Description of the object
+- `k8s_auth_type` (String) K8S auth type [token/certificate]
+- `k8s_client_certificate` (String, Sensitive) Content of the k8 client certificate (PEM format) in a Base64 format
+- `k8s_client_key` (String, Sensitive) Content of the k8 client private key (PEM format) in a Base64 format
+- `k8s_cluster_name` (String) K8S cluster name
 - `key` (String) Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.
+- `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults
+- `use_gw_service_account` (Boolean) Use the GW's service account
 
 ### Read-Only
 

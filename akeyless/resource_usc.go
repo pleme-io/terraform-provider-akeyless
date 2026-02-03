@@ -236,10 +236,12 @@ func resourceUscRead(d *schema.ResourceData, m any) error {
 		}
 	}
 
-	if rOut.ItemCustomFieldsDetails != nil {
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
 		itemCustomFields := make(map[string]string)
-		for k, v := range *rOut.ItemCustomFieldsDetails {
-			itemCustomFields[k] = v
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				itemCustomFields[*field.Name] = *field.Value
+			}
 		}
 		err := d.Set("item_custom_fields", itemCustomFields)
 		if err != nil {

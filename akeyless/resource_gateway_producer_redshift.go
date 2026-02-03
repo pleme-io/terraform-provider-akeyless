@@ -340,8 +340,8 @@ func resourceProducerRedshiftRead(d *schema.ResourceData, m interface{}) error {
 	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
 		customFields := make(map[string]string)
 		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
 		err = d.Set("item_custom_fields", customFields)

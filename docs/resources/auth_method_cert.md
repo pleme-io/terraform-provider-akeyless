@@ -23,6 +23,8 @@ Cert Auth Method Resource
 ### Optional
 
 - `access_expires` (Number) Access expiration date in Unix timestamp (select 0 for access without expiry date)
+- `allowed_client_type` (Set of String) Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]
+- `allowed_cors` (String) Comma separated list of allowed CORS domains to be validated as part of the authentication flow
 - `audit_logs_claims` (Set of String) Subclaims to include in audit logs
 - `bound_common_names` (Set of String) A list of names. At least one must exist in the Common Name. Supports globbing.
 - `bound_dns_sans` (Set of String) A list of DNS names. At least one must exist in the SANs. Supports globbing.
@@ -33,9 +35,13 @@ Cert Auth Method Resource
 - `bound_uri_sans` (Set of String) A list of URIs. At least one must exist in the SANs. Supports globbing.
 - `certificate_data` (String) The certificate data in base64, if no file was provided.
 - `delete_protection` (String) Protection from accidental deletion of this auth method, [true/false]
+- `description` (String) Auth Method description
+- `expiration_event_in` (Set of String) How many days before the expiration of the auth method would you like to be notified
 - `force_sub_claims` (Boolean) enforce role-association must include sub claims
 - `gw_bound_ips` (Set of String) A comma-separated CIDR block list as a trusted Gateway entity
 - `jwt_ttl` (Number) Creds expiration time in minutes
+- `new_name` (String) Auth Method new name
+- `product_type` (Set of String) Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]
 - `revoked_cert_ids` (Set of String) A list of revoked cert ids
 
 ### Read-Only

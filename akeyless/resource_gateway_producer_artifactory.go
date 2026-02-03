@@ -250,24 +250,32 @@ func resourceProducerArtifactoryRead(d *schema.ResourceData, m interface{}) erro
 		}
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.CustomUsernameTemplate != nil {
-		err = d.Set("custom_username_template", *rOut.ItemGeneralInfo.CustomUsernameTemplate)
+	if rOut.UsernameTemplate != nil {
+		err = d.Set("custom_username_template", *rOut.UsernameTemplate)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.DeleteProtection != nil {
-		err = d.Set("delete_protection", *rOut.ItemGeneralInfo.DeleteProtection)
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rOut.ItemCustomFieldsDetails != nil && rOut.ItemCustomFieldsDetails.ItemCustomFields != nil {
-		err = d.Set("item_custom_fields", *rOut.ItemCustomFieldsDetails.ItemCustomFields)
-		if err != nil {
-			return err
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

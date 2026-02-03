@@ -32,9 +32,11 @@ Generates PKI certificate data source
 ### Read-Only
 
 - `cert_display_id` (String)
+- `cert_item_id` (Number) The certificate item ID
 - `data` (String)
 - `id` (String) The ID of this resource.
 - `parent_cert` (String)
+- `path` (String) The path of the certificate
 - `reading_token` (String)
 
 

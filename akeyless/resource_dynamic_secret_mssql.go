@@ -191,7 +191,11 @@ func resourceDynamicSecretMssqlCreate(d *schema.ResourceData, m interface{}) err
 	customUsernameTemplate := d.Get("custom_username_template").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 	description := d.Get("description").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -223,11 +227,7 @@ func resourceDynamicSecretMssqlCreate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.Description, description)
 	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
+		body.ItemCustomFields = &itemCustomFields
 	}
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
@@ -365,22 +365,24 @@ func resourceDynamicSecretMssqlRead(d *schema.ResourceData, m interface{}) error
 			return err
 		}
 	}
-	if rOut.ItemMetadata != nil {
-		err = d.Set("description", *rOut.ItemMetadata)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
 	}
 	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
-		fields := make(map[string]string)
+		customFields := make(map[string]string)
 		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				fields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
-		err = d.Set("item_custom_fields", fields)
-		if err != nil {
-			return err
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -415,7 +417,10 @@ func resourceDynamicSecretMssqlUpdate(d *schema.ResourceData, m interface{}) err
 	deleteProtection := d.Get("delete_protection").(string)
 	description := d.Get("description").(string)
 	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
-	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -447,11 +452,7 @@ func resourceDynamicSecretMssqlUpdate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.Description, description)
 	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
+		body.ItemCustomFields = &itemCustomFields
 	}
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)

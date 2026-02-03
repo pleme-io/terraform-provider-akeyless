@@ -382,8 +382,8 @@ func resourceDynamicSecretAzureRead(d *schema.ResourceData, m interface{}) error
 			return err
 		}
 	}
-	if rOut.ItemDescription != nil {
-		err = d.Set("description", *rOut.ItemDescription)
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
 		if err != nil {
 			return err
 		}
@@ -403,8 +403,8 @@ func resourceDynamicSecretAzureRead(d *schema.ResourceData, m interface{}) error
 	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
 		customFields := make(map[string]string)
 		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
 		if len(customFields) > 0 {

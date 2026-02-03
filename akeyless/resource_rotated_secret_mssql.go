@@ -311,8 +311,8 @@ func resourceRotatedSecretMsSqlRead(d *schema.ResourceData, m interface{}) error
 	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
 		customFields := make(map[string]interface{})
 		for _, field := range itemOut.ItemCustomFieldsDetails {
-			if field.FieldName != nil && field.FieldValue != nil {
-				customFields[*field.FieldName] = *field.FieldValue
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
 			}
 		}
 		if len(customFields) > 0 {
@@ -377,11 +377,12 @@ func resourceRotatedSecretMsSqlRead(d *schema.ResourceData, m interface{}) error
 				return err
 			}
 		}
-		if rsd.RotationEventIn != nil && len(rsd.RotationEventIn) > 0 {
-			err = d.Set("rotation_event_in", rsd.RotationEventIn)
-			if err != nil {
-				return err
-			}
+	}
+
+	if itemOut.ItemGeneralInfo != nil && itemOut.ItemGeneralInfo.NextRotationEvents != nil {
+		err := d.Set("rotation_event_in", common.ReadRotationEventInParam(itemOut.ItemGeneralInfo.NextRotationEvents))
+		if err != nil {
+			return err
 		}
 	}
 

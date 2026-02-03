@@ -275,8 +275,8 @@ func resourceProducerCassandraRead(d *schema.ResourceData, m interface{}) error 
 			return err
 		}
 	}
-	if rOut.UserNameTemplate != nil {
-		err = d.Set("custom_username_template", *rOut.UserNameTemplate)
+	if rOut.UsernameTemplate != nil {
+		err = d.Set("custom_username_template", *rOut.UsernameTemplate)
 		if err != nil {
 			return err
 		}
@@ -287,8 +287,14 @@ func resourceProducerCassandraRead(d *schema.ResourceData, m interface{}) error 
 			return err
 		}
 	}
-	if rOut.ItemCustomFields != nil {
-		err = d.Set("item_custom_fields", *rOut.ItemCustomFields)
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]interface{})
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		err = d.Set("item_custom_fields", customFields)
 		if err != nil {
 			return err
 		}
@@ -299,14 +305,14 @@ func resourceProducerCassandraRead(d *schema.ResourceData, m interface{}) error 
 			return err
 		}
 	}
-	if rOut.DbUseSsl != nil {
-		err = d.Set("ssl", *rOut.DbUseSsl)
+	if rOut.SslConnectionMode != nil {
+		err = d.Set("ssl", *rOut.SslConnectionMode)
 		if err != nil {
 			return err
 		}
 	}
-	if rOut.DbCaCertificate != nil {
-		err = d.Set("ssl_certificate", *rOut.DbCaCertificate)
+	if rOut.SslConnectionCertificate != nil {
+		err = d.Set("ssl_certificate", *rOut.SslConnectionCertificate)
 		if err != nil {
 			return err
 		}

@@ -242,14 +242,14 @@ func resourceRotatedSecretRedisRead(d *schema.ResourceData, m interface{}) error
 			return err
 		}
 	}
-	if itemOut.ItemCustomFieldsDetails != nil {
-		err = d.Set("item_custom_fields", *itemOut.ItemCustomFieldsDetails)
-		if err != nil {
-			return err
+	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range itemOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
 		}
-	}
-	if itemOut.MaxVersions != nil {
-		err = d.Set("max_versions", strconv.Itoa(int(*itemOut.MaxVersions)))
+		err = d.Set("item_custom_fields", customFields)
 		if err != nil {
 			return err
 		}
@@ -302,11 +302,18 @@ func resourceRotatedSecretRedisRead(d *schema.ResourceData, m interface{}) error
 				return err
 			}
 		}
-		if rsd.RotationEventIn != nil {
-			err = d.Set("rotation_event_in", rsd.RotationEventIn)
+		if rsd.MaxVersions != nil {
+			err = d.Set("max_versions", strconv.Itoa(int(*rsd.MaxVersions)))
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	if itemOut.ItemGeneralInfo != nil && itemOut.ItemGeneralInfo.NextRotationEvents != nil {
+		err := d.Set("rotation_event_in", common.ReadRotationEventInParam(itemOut.ItemGeneralInfo.NextRotationEvents))
+		if err != nil {
+			return err
 		}
 	}
 

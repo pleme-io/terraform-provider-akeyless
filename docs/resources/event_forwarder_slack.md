@@ -24,10 +24,12 @@ Event Forwarder Slack resource
 
 - `auth_methods_event_source_locations` (Set of String) Auth Methods event sources to forward events about, for example: /abc/*
 - `description` (String) Description of the object
+- `enable` (String) Enable/Disable Event Forwarder [true/false]
 - `event_types` (Set of String) A comma-separated list of types of events to notify about
 - `every` (String) Rate of periodic runner repetition in hours
 - `gateways_event_source_locations` (Set of String) Gateways event sources to forward events about,for example the relevant Gateways cluster urls,: http://localhost:8000.
 - `items_event_source_locations` (Set of String) Items event sources to forward events about, for example: /abc/*
+- `keep_prev_version` (String) Whether to keep previous version [true/false]. If not set, use default according to account settings
 - `key` (String) Key name. The key will be used to encrypt the Event Forwarder secret value. If key name is not specified, the account default protection key is used
 - `runner_type` (String) Event Forwarder runner type [immediate/periodic]
 - `targets_event_source_locations` (Set of String) Targets event sources to forward events about, for example: /abc/*

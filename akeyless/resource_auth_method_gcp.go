@@ -398,8 +398,10 @@ func resourceAuthMethodGcpRead(d *schema.ResourceData, m interface{}) error {
 	if rOut.ExpirationEvents != nil {
 		expirationEventIn := make([]string, 0)
 		for _, event := range rOut.ExpirationEvents {
-			if event.EventInDays != nil {
-				expirationEventIn = append(expirationEventIn, strconv.Itoa(int(*event.EventInDays)))
+			if event.SecondsBefore != nil {
+				// Convert seconds to days (86400 seconds = 1 day)
+				days := int(*event.SecondsBefore) / 86400
+				expirationEventIn = append(expirationEventIn, strconv.Itoa(days))
 			}
 		}
 		err = d.Set("expiration_event_in", expirationEventIn)

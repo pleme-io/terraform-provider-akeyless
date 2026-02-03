@@ -26,7 +26,10 @@ Universal Secrets Connector secret resource
 - `description` (String) Description of the universal secret (relevant for aws/hashi target)
 - `namespace` (String) The namespace (relevant for Hashi vault target)
 - `object_type` (String) Either secret or certificate (Relevant only for Azure KV targets)
+- `pfx_password` (String, Sensitive) The passphrase that protects the private key within the pfx certificate (Relevant only for Azure KV certificates)
+- `region` (String) Create secret in a specific region (GCP only). If empty, a global secret will be created (provider default)
 - `tags` (Set of String) Tags for the universal secrets
+- `usc_encryption_key` (String) The name of the remote key that used to encrypt the secret value (if empty, the default key will be used)
 - `value` (String, Sensitive) Value of the universal secrets item, either text or base64 encoded binary
 - `version_id` (String) Version ID of the secret (if not specified, will retrieve the last version)
 
