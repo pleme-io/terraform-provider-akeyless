@@ -87,6 +87,17 @@ func resourceEventForwarderSlack() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable Event Forwarder [true/false]",
+				Default:     "true",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -211,6 +222,8 @@ func resourceEventForwarderSlackUpdate(d *schema.ResourceData, m interface{}) er
 	eventTypes := common.ExpandStringList(eventTypesSet.List())
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	enable := d.Get("enable").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.EventForwarderUpdateSlack{
 		Name:  name,
@@ -224,6 +237,8 @@ func resourceEventForwarderSlackUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.EventTypes, eventTypes)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Enable, enable)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, resp, err := client.EventForwarderUpdateSlack(ctx).Body(body).Execute()
 	if err != nil {

@@ -101,6 +101,62 @@ func resourceDynamicSecretGcp() *schema.Resource {
 				Optional:    true,
 				Description: "Protection from accidental deletion of this item, [true/false]",
 			},
+			"access_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Access type for the GCP dynamic secret",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"fixed_user_claim_keyname": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from",
+			},
+			"gcp_project_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "GCP Project ID override for dynamic secret operations",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"role_names": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Comma-separated list of GCP roles to assign to the user",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Destination URL to inject secrets",
+			},
+			"secure_access_web_browsing": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Secure browser via Akeyless's Secure Remote Access (SRA)",
+			},
+			"secure_access_web_proxy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
+			},
 		},
 	}
 }
@@ -127,6 +183,17 @@ func resourceDynamicSecretGcpCreate(d *schema.ResourceData, m interface{}) error
 	roleBinding := d.Get("role_binding").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	accessType := d.Get("access_type").(string)
+	description := d.Get("description").(string)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
+	gcpProjectId := d.Get("gcp_project_id").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	roleNames := d.Get("role_names").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	body := akeyless_api.DynamicSecretCreateGcp{
 		Name:  name,
@@ -145,6 +212,30 @@ func resourceDynamicSecretGcpCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.RoleBinding, roleBinding)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.AccessType, accessType)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
+	common.GetAkeylessPtr(&body.GcpProjectId, gcpProjectId)
+	common.GetAkeylessPtr(&body.RoleNames, roleNames)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
+	if secureAccessDelay != 0 {
+		secureAccessDelay64 := int64(secureAccessDelay)
+		body.SecureAccessDelay = &secureAccessDelay64
+	}
+	if d.Get("secure_access_web_browsing") != nil {
+		body.SecureAccessWebBrowsing = &secureAccessWebBrowsing
+	}
+	if d.Get("secure_access_web_proxy") != nil {
+		body.SecureAccessWebProxy = &secureAccessWebProxy
+	}
 
 	_, _, err := client.DynamicSecretCreateGcp(ctx).Body(body).Execute()
 	if err != nil {
@@ -272,6 +363,50 @@ func resourceDynamicSecretGcpRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.GcpAccessType != nil {
+		err = d.Set("access_type", *rOut.GcpAccessType)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemDescription != nil {
+		err = d.Set("description", *rOut.ItemGeneralInfo.ItemDescription)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.GcpFixedUserClaimKeyname != nil {
+		err = d.Set("fixed_user_claim_keyname", *rOut.GcpFixedUserClaimKeyname)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.GcpProjectId != nil {
+		err = d.Set("gcp_project_id", *rOut.GcpProjectId)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFieldsMap := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFieldsMap[*field.FieldName] = *field.FieldValue
+			}
+		}
+		if len(customFieldsMap) > 0 {
+			err = d.Set("item_custom_fields", customFieldsMap)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if rOut.GcpRoleNames != nil {
+		err = d.Set("role_names", *rOut.GcpRoleNames)
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -300,6 +435,17 @@ func resourceDynamicSecretGcpUpdate(d *schema.ResourceData, m interface{}) error
 	roleBinding := d.Get("role_binding").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	accessType := d.Get("access_type").(string)
+	description := d.Get("description").(string)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
+	gcpProjectId := d.Get("gcp_project_id").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	roleNames := d.Get("role_names").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	body := akeyless_api.DynamicSecretUpdateGcp{
 		Name:  name,
@@ -318,6 +464,30 @@ func resourceDynamicSecretGcpUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.RoleBinding, roleBinding)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.AccessType, accessType)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
+	common.GetAkeylessPtr(&body.GcpProjectId, gcpProjectId)
+	common.GetAkeylessPtr(&body.RoleNames, roleNames)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
+	if secureAccessDelay != 0 {
+		secureAccessDelay64 := int64(secureAccessDelay)
+		body.SecureAccessDelay = &secureAccessDelay64
+	}
+	if d.Get("secure_access_web_browsing") != nil {
+		body.SecureAccessWebBrowsing = &secureAccessWebBrowsing
+	}
+	if d.Get("secure_access_web_proxy") != nil {
+		body.SecureAccessWebProxy = &secureAccessWebProxy
+	}
 
 	_, _, err := client.DynamicSecretUpdateGcp(ctx).Body(body).Execute()
 	if err != nil {

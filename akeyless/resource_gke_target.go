@@ -76,6 +76,16 @@ func resourceGkeTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -96,6 +106,7 @@ func resourceGkeTargetCreate(d *schema.ResourceData, m interface{}) error {
 	key := d.Get("key").(string)
 	useGwCloudIdentity := d.Get("use_gw_cloud_identity").(bool)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateGke{
 		Name:  name,
@@ -109,6 +120,7 @@ func resourceGkeTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.UseGwCloudIdentity, useGwCloudIdentity)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateGke(ctx).Body(body).Execute()
 	if err != nil {
@@ -221,6 +233,8 @@ func resourceGkeTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	key := d.Get("key").(string)
 	useGwCloudIdentity := d.Get("use_gw_cloud_identity").(bool)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.TargetUpdateGke{
 		Name:  name,
@@ -234,6 +248,8 @@ func resourceGkeTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.UseGwCloudIdentity, useGwCloudIdentity)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, _, err := client.TargetUpdateGke(ctx).Body(body).Execute()
 	if err != nil {

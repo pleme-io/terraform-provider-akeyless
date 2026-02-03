@@ -95,6 +95,42 @@ func dataSourceGatewayGetK8sAuthConfig() *schema.Resource {
 				Required:    false,
 				Description: "",
 			},
+			"cluster_api_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Required:    false,
+				Description: "Defines types of API access to cluster",
+			},
+			"k8s_auth_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Required:    false,
+				Description: "Kubernetes auth type",
+			},
+			"k8s_client_cert_data": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Required:    false,
+				Description: "The client certificate for k8s client certificate authentication",
+			},
+			"k8s_client_key_data": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Required:    false,
+				Description: "The client key for k8s client certificate authentication",
+			},
+			"rancher_api_key": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Required:    false,
+				Description: "The bearer token for clusterApiTypeRancher",
+			},
+			"rancher_cluster_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Required:    false,
+				Description: "Cluster id as defined in rancher (in case of clusterApiTypeRancher)",
+			},
 		},
 	}
 }
@@ -200,6 +236,42 @@ func dataSourceGatewayGetK8sAuthConfigRead(d *schema.ResourceData, m interface{}
 	}
 	if rOut.UseLocalCaJwt != nil {
 		err = d.Set("use_local_ca_jwt", *rOut.UseLocalCaJwt)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ClusterApiType != nil {
+		err = d.Set("cluster_api_type", *rOut.ClusterApiType)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.K8sAuthType != nil {
+		err = d.Set("k8s_auth_type", *rOut.K8sAuthType)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.K8sClientCertData != nil {
+		err = d.Set("k8s_client_cert_data", *rOut.K8sClientCertData)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.K8sClientKeyData != nil {
+		err = d.Set("k8s_client_key_data", *rOut.K8sClientKeyData)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.RancherApiKey != nil {
+		err = d.Set("rancher_api_key", *rOut.RancherApiKey)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.RancherClusterId != nil {
+		err = d.Set("rancher_cluster_id", *rOut.RancherClusterId)
 		if err != nil {
 			return err
 		}

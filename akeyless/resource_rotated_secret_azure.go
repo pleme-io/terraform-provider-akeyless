@@ -108,6 +108,98 @@ func resourceRotatedSecretAzure() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"explicitly_set_sa": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "If set, explicitly provide the storage account details [true/false]",
+			},
+			"grace_rotation": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Create a new access key without deleting the old key from Azure for backup [true/false]",
+			},
+			"grace_rotation_hour": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The Hour of the grace rotation in UTC",
+			},
+			"grace_rotation_interval": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The number of days to wait before deleting the old key (must be bigger than rotation-interval)",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"resource_group_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The resource group name (only relevant when explicitly-set-sa=true)",
+			},
+			"resource_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the storage account (only relevant when explicitly-set-sa=true)",
+			},
+			"rotate_after_disconnect": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate the value of the secret after SRA session ends [true/false]",
+			},
+			"rotation_event_in": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "How many days before the rotation of the item would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_disable_concurrent_connections": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this flag to prevent simultaneous use of the same secret",
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Destination URL to inject secrets",
+			},
+			"secure_access_web": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable Web Secure Remote Access",
+			},
+			"secure_access_web_browsing": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Secure browser via Akeyless's Secure Remote Access (SRA)",
+			},
+			"secure_access_web_proxy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -136,6 +228,24 @@ func resourceRotatedSecretAzureCreate(d *schema.ResourceData, m interface{}) err
 	apiKey := d.Get("api_key").(string)
 	storageAccountKeyName := d.Get("storage_account_key_name").(string)
 	username := d.Get("username").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	explicitlySetSa := d.Get("explicitly_set_sa").(string)
+	graceRotation := d.Get("grace_rotation").(string)
+	graceRotationHour := d.Get("grace_rotation_hour").(int)
+	graceRotationInterval := d.Get("grace_rotation_interval").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxVersions := d.Get("max_versions").(string)
+	resourceGroupName := d.Get("resource_group_name").(string)
+	resourceName := d.Get("resource_name").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInList := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInList)
+	secureAccessDisableConcurrentConnections := d.Get("secure_access_disable_concurrent_connections").(bool)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	body := akeyless_api.RotatedSecretCreateAzure{
 		Name:        name,
@@ -156,6 +266,29 @@ func resourceRotatedSecretAzureCreate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.StorageAccountKeyName, storageAccountKeyName)
 	common.GetAkeylessPtr(&body.Username, username)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.ExplicitlySetSa, explicitlySetSa)
+	common.GetAkeylessPtr(&body.GraceRotation, graceRotation)
+	common.GetAkeylessPtr(&body.GraceRotationHour, graceRotationHour)
+	common.GetAkeylessPtr(&body.GraceRotationInterval, graceRotationInterval)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.ResourceGroupName, resourceGroupName)
+	common.GetAkeylessPtr(&body.ResourceName, resourceName)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SecureAccessDisableConcurrentConnections, secureAccessDisableConcurrentConnections)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
 
 	_, _, err := client.RotatedSecretCreateAzure(ctx).Body(body).Execute()
 	if err != nil {
@@ -353,6 +486,25 @@ func resourceRotatedSecretAzureUpdate(d *schema.ResourceData, m interface{}) err
 	apiKey := d.Get("api_key").(string)
 	storageAccountKeyName := d.Get("storage_account_key_name").(string)
 	username := d.Get("username").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	explicitlySetSa := d.Get("explicitly_set_sa").(string)
+	graceRotation := d.Get("grace_rotation").(string)
+	graceRotationHour := d.Get("grace_rotation_hour").(int)
+	graceRotationInterval := d.Get("grace_rotation_interval").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxVersions := d.Get("max_versions").(string)
+	resourceGroupName := d.Get("resource_group_name").(string)
+	resourceName := d.Get("resource_name").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInList := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInList)
+	secureAccessDisableConcurrentConnections := d.Get("secure_access_disable_concurrent_connections").(bool)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.RotatedSecretUpdateAzure{
 		Name:    name,
@@ -381,6 +533,30 @@ func resourceRotatedSecretAzureUpdate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.Username, username)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.ExplicitlySetSa, explicitlySetSa)
+	common.GetAkeylessPtr(&body.GraceRotation, graceRotation)
+	common.GetAkeylessPtr(&body.GraceRotationHour, graceRotationHour)
+	common.GetAkeylessPtr(&body.GraceRotationInterval, graceRotationInterval)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.ResourceGroupName, resourceGroupName)
+	common.GetAkeylessPtr(&body.ResourceName, resourceName)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SecureAccessDisableConcurrentConnections, secureAccessDisableConcurrentConnections)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, _, err = client.RotatedSecretUpdateAzure(ctx).Body(body).Execute()
 	if err != nil {

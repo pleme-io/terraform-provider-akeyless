@@ -35,6 +35,22 @@ func resourceDynamicSecretGke() *schema.Resource {
 				Optional:    true,
 				Description: "Name of existing target to use in dynamic secret creation",
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"gke_service_account_email": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -97,6 +113,16 @@ func resourceDynamicSecretGke() *schema.Resource {
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
 			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -116,6 +142,9 @@ func resourceDynamicSecretGkeCreate(d *schema.ResourceData, m interface{}) error
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	gkeServiceAccountEmail := d.Get("gke_service_account_email").(string)
 	gkeClusterEndpoint := d.Get("gke_cluster_endpoint").(string)
 	gkeClusterCert := d.Get("gke_cluster_cert").(string)
@@ -129,6 +158,8 @@ func resourceDynamicSecretGkeCreate(d *schema.ResourceData, m interface{}) error
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := int64(d.Get("secure_access_delay").(int))
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.DynamicSecretCreateGke{
@@ -136,6 +167,15 @@ func resourceDynamicSecretGkeCreate(d *schema.ResourceData, m interface{}) error
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, &customFields)
+	}
 	common.GetAkeylessPtr(&body.GkeServiceAccountEmail, gkeServiceAccountEmail)
 	common.GetAkeylessPtr(&body.GkeClusterEndpoint, gkeClusterEndpoint)
 	common.GetAkeylessPtr(&body.GkeClusterCert, gkeClusterCert)
@@ -148,6 +188,8 @@ func resourceDynamicSecretGkeCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelay)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretCreateGke(ctx).Body(body).Execute()
@@ -221,6 +263,30 @@ func resourceDynamicSecretGkeRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	if rOut.DeleteProtection != nil {
+		if *rOut.DeleteProtection {
+			err = d.Set("delete_protection", "true")
+		} else {
+			err = d.Set("delete_protection", "false")
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]interface{})
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		err = d.Set("item_custom_fields", customFields)
+		if err != nil {
+			return err
+		}
+	}
+
 	if rOut.ItemTargetsAssoc != nil {
 		targetName := common.GetTargetName(rOut.ItemTargetsAssoc)
 		err = d.Set("target_name", targetName)
@@ -265,6 +331,9 @@ func resourceDynamicSecretGkeUpdate(d *schema.ResourceData, m interface{}) error
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	gkeServiceAccountEmail := d.Get("gke_service_account_email").(string)
 	gkeClusterEndpoint := d.Get("gke_cluster_endpoint").(string)
 	gkeClusterCert := d.Get("gke_cluster_cert").(string)
@@ -278,6 +347,8 @@ func resourceDynamicSecretGkeUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := int64(d.Get("secure_access_delay").(int))
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.DynamicSecretUpdateGke{
@@ -285,6 +356,15 @@ func resourceDynamicSecretGkeUpdate(d *schema.ResourceData, m interface{}) error
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, &customFields)
+	}
 	common.GetAkeylessPtr(&body.GkeServiceAccountEmail, gkeServiceAccountEmail)
 	common.GetAkeylessPtr(&body.GkeClusterEndpoint, gkeClusterEndpoint)
 	common.GetAkeylessPtr(&body.GkeClusterCert, gkeClusterCert)
@@ -297,6 +377,8 @@ func resourceDynamicSecretGkeUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelay)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretUpdateGke(ctx).Body(body).Execute()

@@ -55,6 +55,11 @@ func resourceGatewayUpdateDefaults() *schema.Resource {
 				Description: "Trigger an event when Gateway status is changed [true/false]",
 				Default:     "false",
 			},
+			"hvp_route_version": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Hvp route version to use [1/2]",
+			},
 		},
 	}
 }
@@ -97,6 +102,12 @@ func resourceGatewayUpdateDefaultsRead(d *schema.ResourceData, m interface{}) er
 			return err
 		}
 	}
+	if rOut.HvpRouteVersion != nil {
+		err := d.Set("hvp_route_version", *rOut.HvpRouteVersion)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -113,6 +124,7 @@ func resourceGatewayUpdateDefaultsUpdate(d *schema.ResourceData, m interface{}) 
 	certAccessId := d.Get("cert_access_id").(string)
 	key := d.Get("key").(string)
 	eventOnStatusChange := d.Get("event_on_status_change").(string)
+	hvpRouteVersion := d.Get("hvp_route_version").(int)
 
 	body := akeyless_api.GatewayUpdateDefaults{
 		Token: &token,
@@ -122,6 +134,9 @@ func resourceGatewayUpdateDefaultsUpdate(d *schema.ResourceData, m interface{}) 
 	common.GetAkeylessPtr(&body.CertAccessId, certAccessId)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.EventOnStatusChange, eventOnStatusChange)
+	if hvpRouteVersion != 0 {
+		body.HvpRouteVersion = akeyless_api.PtrInt64(int64(hvpRouteVersion))
+	}
 
 	_, _, err := client.GatewayUpdateDefaults(ctx).Body(body).Execute()
 	if err != nil {
@@ -178,6 +193,12 @@ func resourceGatewayUpdateDefaultsImport(d *schema.ResourceData, m interface{}) 
 	}
 	if rOut.NotifyOnStatusChange != nil {
 		err := d.Set("event_on_status_change", strconv.FormatBool(*rOut.NotifyOnStatusChange))
+		if err != nil {
+			return nil, err
+		}
+	}
+	if rOut.HvpRouteVersion != nil {
+		err := d.Set("hvp_route_version", *rOut.HvpRouteVersion)
 		if err != nil {
 			return nil, err
 		}

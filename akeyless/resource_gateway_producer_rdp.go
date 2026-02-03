@@ -74,6 +74,12 @@ func resourceProducerRdp() *schema.Resource {
 				Description: "Enable fixed user only",
 				Default:     "false",
 			},
+			"fixed_user_claim_keyname": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from (relevant only for fixed-user-only=true)",
+			},
 			"producer_encryption_key_name": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -86,6 +92,43 @@ func resourceProducerRdp() *schema.Resource {
 				Optional:    true,
 				Description: "User TTL",
 				Default:     "60m",
+			},
+			"password_length": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "The length of the password to be generated",
+			},
+			"custom_username_template": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Customize how temporary usernames are generated using go template",
+			},
+			"allow_user_extend_session": {
+				Type:        schema.TypeInt,
+				Required:    false,
+				Optional:    true,
+				Description: "Allow user to extend session",
+			},
+			"warn_user_before_expiration": {
+				Type:        schema.TypeInt,
+				Required:    false,
+				Optional:    true,
+				Description: "Warn user before expiration",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Required:    false,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -126,6 +169,30 @@ func resourceProducerRdp() *schema.Resource {
 				Description: "Allow providing external user for a domain users",
 				Default:     "false",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Deprecated. use secure-access-certificate-issuer",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Required:    false,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
+			"secure_access_rd_gateway_server": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "RD Gateway server",
+			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Required:    false,
@@ -152,8 +219,15 @@ func resourceProducerRdpCreate(d *schema.ResourceData, m interface{}) error {
 	rdpAdminPwd := d.Get("rdp_admin_pwd").(string)
 	rdpHostPort := d.Get("rdp_host_port").(string)
 	fixedUserOnly := d.Get("fixed_user_only").(string)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
+	passwordLength := d.Get("password_length").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	allowUserExtendSession := d.Get("allow_user_extend_session").(int)
+	warnUserBeforeExpiration := d.Get("warn_user_before_expiration").(int)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -162,6 +236,10 @@ func resourceProducerRdpCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessRdGatewayServer := d.Get("secure_access_rd_gateway_server").(string)
 
 	body := akeyless_api.GatewayCreateProducerRdp{
 		Name:  name,
@@ -174,14 +252,37 @@ func resourceProducerRdpCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.RdpAdminPwd, rdpAdminPwd)
 	common.GetAkeylessPtr(&body.RdpHostPort, rdpHostPort)
 	common.GetAkeylessPtr(&body.FixedUserOnly, fixedUserOnly)
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	if allowUserExtendSession != 0 {
+		body.AllowUserExtendSession = &[]int64{int64(allowUserExtendSession)}[0]
+	}
+	if warnUserBeforeExpiration != 0 {
+		body.WarnUserBeforeExpiration = &[]int64{int64(warnUserBeforeExpiration)}[0]
+	}
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
 	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay != 0 {
+		body.SecureAccessDelay = &[]int64{int64(secureAccessDelay)}[0]
+	}
+	common.GetAkeylessPtr(&body.SecureAccessRdGatewayServer, secureAccessRdGatewayServer)
 
 	_, _, err := client.GatewayCreateProducerRdp(ctx).Body(body).Execute()
 	if err != nil {
@@ -307,8 +408,15 @@ func resourceProducerRdpUpdate(d *schema.ResourceData, m interface{}) error {
 	rdpAdminPwd := d.Get("rdp_admin_pwd").(string)
 	rdpHostPort := d.Get("rdp_host_port").(string)
 	fixedUserOnly := d.Get("fixed_user_only").(string)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
+	passwordLength := d.Get("password_length").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	allowUserExtendSession := d.Get("allow_user_extend_session").(int)
+	warnUserBeforeExpiration := d.Get("warn_user_before_expiration").(int)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -317,6 +425,10 @@ func resourceProducerRdpUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessRdGatewayServer := d.Get("secure_access_rd_gateway_server").(string)
 
 	body := akeyless_api.GatewayUpdateProducerRdp{
 		Name:  name,
@@ -329,14 +441,37 @@ func resourceProducerRdpUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.RdpAdminPwd, rdpAdminPwd)
 	common.GetAkeylessPtr(&body.RdpHostPort, rdpHostPort)
 	common.GetAkeylessPtr(&body.FixedUserOnly, fixedUserOnly)
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	if allowUserExtendSession != 0 {
+		body.AllowUserExtendSession = &[]int64{int64(allowUserExtendSession)}[0]
+	}
+	if warnUserBeforeExpiration != 0 {
+		body.WarnUserBeforeExpiration = &[]int64{int64(warnUserBeforeExpiration)}[0]
+	}
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
 	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay != 0 {
+		body.SecureAccessDelay = &[]int64{int64(secureAccessDelay)}[0]
+	}
+	common.GetAkeylessPtr(&body.SecureAccessRdGatewayServer, secureAccessRdGatewayServer)
 
 	_, _, err := client.GatewayUpdateProducerRdp(ctx).Body(body).Execute()
 	if err != nil {

@@ -51,6 +51,16 @@ func resourceGatewayAllowedAccess() *schema.Resource {
 				Optional:    true,
 				Description: "Comma-seperated list of permissions for this allowed access. Available permissions: [defaults,targets,classic_keys,automatic_migration,ldap_auth,dynamic_secret,k8s_auth,log_forwarding,zero_knowledge_encryption,rotated_secret,caching,event_forwarding,admin,kmip,general]",
 			},
+			"case_sensitive": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Treat sub claims as case-sensitive [true/false]",
+			},
+			"sub_claims_case_insensitive": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Treat sub claims as case-insensitive",
+			},
 		},
 	}
 }
@@ -67,6 +77,8 @@ func resourceGatewayAllowedAccessCreate(d *schema.ResourceData, m interface{}) e
 	accessId := d.Get("access_id").(string)
 	subClaims := readSubClaims(d)
 	permissions := d.Get("permissions").(string)
+	caseSensitive := d.Get("case_sensitive").(string)
+	subClaimsCaseInsensitive := d.Get("sub_claims_case_insensitive").(bool)
 
 	if err := validatePermissions(permissions); err != nil {
 		return err
@@ -81,6 +93,10 @@ func resourceGatewayAllowedAccessCreate(d *schema.ResourceData, m interface{}) e
 
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Permissions, permissions)
+	common.GetAkeylessPtr(&body.CaseSensitive, caseSensitive)
+	if d.HasChange("sub_claims_case_insensitive") || subClaimsCaseInsensitive {
+		body.SubClaimsCaseInsensitive = &subClaimsCaseInsensitive
+	}
 
 	_, _, err := client.GatewayCreateAllowedAccess(ctx).Body(body).Execute()
 	if err != nil {
@@ -156,6 +172,12 @@ func resourceGatewayAllowedAccessRead(d *schema.ResourceData, m interface{}) err
 			return err
 		}
 	}
+	if rOut.SubClaimsCaseInsensitive != nil {
+		err = d.Set("sub_claims_case_insensitive", *rOut.SubClaimsCaseInsensitive)
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -174,6 +196,8 @@ func resourceGatewayAllowedAccessUpdate(d *schema.ResourceData, m interface{}) e
 	accessId := d.Get("access_id").(string)
 	subClaims := readSubClaims(d)
 	permissions := d.Get("permissions").(string)
+	caseSensitive := d.Get("case_sensitive").(string)
+	subClaimsCaseInsensitive := d.Get("sub_claims_case_insensitive").(bool)
 
 	if err := validatePermissions(permissions); err != nil {
 		return err
@@ -188,6 +212,10 @@ func resourceGatewayAllowedAccessUpdate(d *schema.ResourceData, m interface{}) e
 
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Permissions, permissions)
+	common.GetAkeylessPtr(&body.CaseSensitive, caseSensitive)
+	if d.HasChange("sub_claims_case_insensitive") || subClaimsCaseInsensitive {
+		body.SubClaimsCaseInsensitive = &subClaimsCaseInsensitive
+	}
 
 	_, _, err := client.GatewayUpdateAllowedAccess(ctx).Body(body).Execute()
 	if err != nil {

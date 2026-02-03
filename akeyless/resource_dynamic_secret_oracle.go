@@ -110,6 +110,43 @@ func resourceDynamicSecretOracle() *schema.Resource {
 				Optional:    true,
 				Description: "Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is given. It is also included in the client's handshake to support virtual hosting unless it is an IP address",
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_host": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_web": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable Web Secure Remote Access",
+			},
 		},
 	}
 }
@@ -138,6 +175,14 @@ func resourceDynamicSecretOracleCreate(d *schema.ResourceData, m interface{}) er
 	tags := common.ExpandStringList(tagsSet.List())
 	dbServerCertificates := d.Get("db_server_certificates").(string)
 	dbServerName := d.Get("db_server_name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
+	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
+	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.DynamicSecretCreateOracleDb{
 		Name:  name,
@@ -158,6 +203,19 @@ func resourceDynamicSecretOracleCreate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.DbServerCertificates, dbServerCertificates)
 	common.GetAkeylessPtr(&body.DbServerName, dbServerName)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretCreateOracleDb(ctx).Body(body).Execute()
 	if err != nil {
@@ -287,6 +345,67 @@ func resourceDynamicSecretOracleRead(d *schema.ResourceData, m interface{}) erro
 		}
 	}
 
+	if rOut.DeleteProtection != nil {
+		if *rOut.DeleteProtection {
+			err = d.Set("delete_protection", "true")
+		} else {
+			err = d.Set("delete_protection", "false")
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.Description != nil {
+		err = d.Set("description", *rOut.ItemGeneralInfo.Description)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]interface{})
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if rOut.SecureAccessCertificateIssuer != nil {
+		err = d.Set("secure_access_certificate_issuer", *rOut.SecureAccessCertificateIssuer)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.SecureAccessEnable != nil {
+		err = d.Set("secure_access_enable", *rOut.SecureAccessEnable)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.SecureAccessHost != nil {
+		err = d.Set("secure_access_host", rOut.SecureAccessHost)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.SecureAccessWeb != nil {
+		err = d.Set("secure_access_web", *rOut.SecureAccessWeb)
+		if err != nil {
+			return err
+		}
+	}
+
 	d.SetId(path)
 
 	return nil
@@ -316,6 +435,14 @@ func resourceDynamicSecretOracleUpdate(d *schema.ResourceData, m interface{}) er
 	tags := common.ExpandStringList(tagsSet.List())
 	dbServerCertificates := d.Get("db_server_certificates").(string)
 	dbServerName := d.Get("db_server_name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
+	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
+	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.DynamicSecretUpdateOracleDb{
 		Name:  name,
@@ -336,6 +463,19 @@ func resourceDynamicSecretOracleUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.DbServerCertificates, dbServerCertificates)
 	common.GetAkeylessPtr(&body.DbServerName, dbServerName)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.DynamicSecretUpdateOracleDb(ctx).Body(body).Execute()
 	if err != nil {

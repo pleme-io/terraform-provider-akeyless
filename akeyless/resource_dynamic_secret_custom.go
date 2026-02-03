@@ -82,6 +82,22 @@ func resourceDynamicSecretCustom() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -105,6 +121,9 @@ func resourceDynamicSecretCustomCreate(d *schema.ResourceData, m interface{}) er
 	timeoutSec := d.Get("timeout_sec").(int)
 	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
 	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.DynamicSecretCreateCustom{
 		Name:          name,
@@ -120,6 +139,15 @@ func resourceDynamicSecretCustomCreate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.TimeoutSec, timeoutSec)
 	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
 	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, adminRotationIntervalDays)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
 
 	_, _, err := client.DynamicSecretCreateCustom(ctx).Body(body).Execute()
 	if err != nil {
@@ -221,6 +249,30 @@ func resourceDynamicSecretCustomRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 	}
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		err = d.Set("item_custom_fields", customFields)
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -246,6 +298,9 @@ func resourceDynamicSecretCustomUpdate(d *schema.ResourceData, m interface{}) er
 	timeoutSec := d.Get("timeout_sec").(int)
 	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
 	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.DynamicSecretUpdateCustom{
 		Name:          name,
@@ -261,6 +316,15 @@ func resourceDynamicSecretCustomUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.TimeoutSec, timeoutSec)
 	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
 	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, adminRotationIntervalDays)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
 
 	_, _, err := client.DynamicSecretUpdateCustom(ctx).Body(body).Execute()
 	if err != nil {

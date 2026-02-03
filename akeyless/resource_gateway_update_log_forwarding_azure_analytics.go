@@ -31,6 +31,12 @@ func resourceGatewayUpdateLogForwardingAzureAnalytics() *schema.Resource {
 				Description: "Enable Log Forwarding [true/false]",
 				Default:     "true",
 			},
+			"enable_batch": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable batch forwarding [true/false]",
+				Default:     "true",
+			},
 			"output_format": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -86,6 +92,12 @@ func resourceGatewayUpdateLogForwardingAzureAnalyticsRead(d *schema.ResourceData
 
 	config := rOut.AzureAnalyticsConfig
 	if config != nil {
+		if config.AzureEnableBatch != nil && d.Get("enable_batch") != "" {
+			err := d.Set("enable_batch", *config.AzureEnableBatch)
+			if err != nil {
+				return err
+			}
+		}
 		if config.AzureWorkspaceId != nil && d.Get("workspace_id") != "" {
 			err := d.Set("workspace_id", *config.AzureWorkspaceId)
 			if err != nil {
@@ -111,6 +123,7 @@ func resourceGatewayUpdateLogForwardingAzureAnalyticsUpdate(d *schema.ResourceDa
 	var apiErr akeyless_api.GenericOpenAPIError
 	ctx := context.Background()
 	enable := d.Get("enable").(string)
+	enableBatch := d.Get("enable_batch").(string)
 	outputFormat := d.Get("output_format").(string)
 	pullInterval := d.Get("pull_interval").(string)
 	workspaceId := d.Get("workspace_id").(string)
@@ -120,6 +133,7 @@ func resourceGatewayUpdateLogForwardingAzureAnalyticsUpdate(d *schema.ResourceDa
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.Enable, enable)
+	common.GetAkeylessPtr(&body.EnableBatch, enableBatch)
 	common.GetAkeylessPtr(&body.OutputFormat, outputFormat)
 	common.GetAkeylessPtr(&body.PullInterval, pullInterval)
 	common.GetAkeylessPtr(&body.WorkspaceId, workspaceId)
@@ -174,6 +188,12 @@ func resourceGatewayUpdateLogForwardingAzureAnalyticsImport(d *schema.ResourceDa
 
 	config := rOut.AzureAnalyticsConfig
 	if config != nil {
+		if config.AzureEnableBatch != nil {
+			err := d.Set("enable_batch", *config.AzureEnableBatch)
+			if err != nil {
+				return nil, err
+			}
+		}
 		if config.AzureWorkspaceId != nil {
 			err := d.Set("workspace_id", *config.AzureWorkspaceId)
 			if err != nil {

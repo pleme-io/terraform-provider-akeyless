@@ -34,6 +34,12 @@ func resourceDbTarget() *schema.Resource {
 				Required:    true,
 				Description: "Database type: mysql/mssql/postgres/mongodb/snowflake/oracle/cassandra/redshift",
 			},
+			"connection_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Type of connection to mssql database [credentials/cloud-identity/wallet/parent-target]",
+				Default:     "credentials",
+			},
 			"user_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -85,6 +91,16 @@ func resourceDbTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Snowflake account name",
 			},
+			"snowflake_api_private_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "RSA Private key (base64 encoded)",
+			},
+			"snowflake_api_private_key_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The Private key passphrase",
+			},
 			"mongodb_atlas": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -115,6 +131,56 @@ func resourceDbTarget() *schema.Resource {
 				Optional:    true,
 				Description: "MongoDB Atlas private key",
 			},
+			"oracle_service_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Oracle db service name",
+			},
+			"oracle_wallet_login_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Oracle Wallet login type (password/mtls)",
+			},
+			"oracle_wallet_p12_file_data": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Oracle wallet p12 file data in base64",
+			},
+			"oracle_wallet_sso_file_data": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Oracle wallet sso file data in base64",
+			},
+			"azure_client_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Client id (relevant for cloud-service-provider only)",
+			},
+			"azure_client_secret": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Client secret (relevant for cloud-service-provider only)",
+			},
+			"azure_tenant_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Tenant id (relevant for cloud-service-provider only)",
+			},
+			"cloud_service_provider": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Cloud service provider (currently only supports Azure)",
+			},
+			"cluster_mode": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Cluster Mode",
+			},
+			"parent_target_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of the parent target, relevant only when connection-type is parent-target",
+			},
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -124,11 +190,6 @@ func resourceDbTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Description of the object",
-			},
-			"oracle_service_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "oracle db service name",
 			},
 		},
 	}
@@ -143,6 +204,7 @@ func resourceDbTargetCreate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	dbType := d.Get("db_type").(string)
+	connectionType := d.Get("connection_type").(string)
 	userName := d.Get("user_name").(string)
 	host := d.Get("host").(string)
 	pwd := d.Get("pwd").(string)
@@ -153,20 +215,32 @@ func resourceDbTargetCreate(d *schema.ResourceData, m interface{}) error {
 	ssl := d.Get("ssl").(bool)
 	sslCertificate := d.Get("ssl_certificate").(string)
 	snowflakeAccount := d.Get("snowflake_account").(string)
+	snowflakeApiPrivateKey := d.Get("snowflake_api_private_key").(string)
+	snowflakeApiPrivateKeyPassword := d.Get("snowflake_api_private_key_password").(string)
 	mongodbAtlas := d.Get("mongodb_atlas").(bool)
 	mongodbDefaultAuthDb := d.Get("mongodb_default_auth_db").(string)
 	mongodbUriOptions := d.Get("mongodb_uri_options").(string)
 	mongodbAtlasProjectId := d.Get("mongodb_atlas_project_id").(string)
 	mongodbAtlasApiPublicKey := d.Get("mongodb_atlas_api_public_key").(string)
 	mongodbAtlasApiPrivateKey := d.Get("mongodb_atlas_api_private_key").(string)
+	oracleServiceName := d.Get("oracle_service_name").(string)
+	oracleWalletLoginType := d.Get("oracle_wallet_login_type").(string)
+	oracleWalletP12FileData := d.Get("oracle_wallet_p12_file_data").(string)
+	oracleWalletSsoFileData := d.Get("oracle_wallet_sso_file_data").(string)
+	azureClientId := d.Get("azure_client_id").(string)
+	azureClientSecret := d.Get("azure_client_secret").(string)
+	azureTenantId := d.Get("azure_tenant_id").(string)
+	cloudServiceProvider := d.Get("cloud_service_provider").(string)
+	clusterMode := d.Get("cluster_mode").(bool)
+	parentTargetName := d.Get("parent_target_name").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
-	oracleServiceName := d.Get("oracle_service_name").(string)
 
 	body := akeyless_api.TargetCreateDB{
-		Name:   name,
-		DbType: dbType,
-		Token:  &token,
+		Name:           name,
+		DbType:         dbType,
+		ConnectionType: connectionType,
+		Token:          &token,
 	}
 	common.GetAkeylessPtr(&body.UserName, userName)
 	common.GetAkeylessPtr(&body.Host, host)
@@ -178,15 +252,26 @@ func resourceDbTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Ssl, ssl)
 	common.GetAkeylessPtr(&body.SslCertificate, sslCertificate)
 	common.GetAkeylessPtr(&body.SnowflakeAccount, snowflakeAccount)
+	common.GetAkeylessPtr(&body.SnowflakeApiPrivateKey, snowflakeApiPrivateKey)
+	common.GetAkeylessPtr(&body.SnowflakeApiPrivateKeyPassword, snowflakeApiPrivateKeyPassword)
 	common.GetAkeylessPtr(&body.MongodbAtlas, mongodbAtlas)
 	common.GetAkeylessPtr(&body.MongodbDefaultAuthDb, mongodbDefaultAuthDb)
 	common.GetAkeylessPtr(&body.MongodbUriOptions, mongodbUriOptions)
 	common.GetAkeylessPtr(&body.MongodbAtlasProjectId, mongodbAtlasProjectId)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPublicKey, mongodbAtlasApiPublicKey)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPrivateKey, mongodbAtlasApiPrivateKey)
+	common.GetAkeylessPtr(&body.OracleServiceName, oracleServiceName)
+	common.GetAkeylessPtr(&body.OracleWalletLoginType, oracleWalletLoginType)
+	common.GetAkeylessPtr(&body.OracleWalletP12FileData, oracleWalletP12FileData)
+	common.GetAkeylessPtr(&body.OracleWalletSsoFileData, oracleWalletSsoFileData)
+	common.GetAkeylessPtr(&body.AzureClientId, azureClientId)
+	common.GetAkeylessPtr(&body.AzureClientSecret, azureClientSecret)
+	common.GetAkeylessPtr(&body.AzureTenantId, azureTenantId)
+	common.GetAkeylessPtr(&body.CloudServiceProvider, cloudServiceProvider)
+	common.GetAkeylessPtr(&body.ClusterMode, clusterMode)
+	common.GetAkeylessPtr(&body.ParentTargetName, parentTargetName)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
-	common.GetAkeylessPtr(&body.OracleServiceName, oracleServiceName)
 
 	_, _, err := client.TargetCreateDB(ctx).Body(body).Execute()
 	if err != nil {
@@ -236,6 +321,12 @@ func resourceDbTargetRead(d *schema.ResourceData, m interface{}) error {
 
 	if rOut.Value.DbTargetDetails != nil {
 		dbTargetDetails := *rOut.Value.DbTargetDetails
+		if dbTargetDetails.ConnectionType != nil {
+			err := d.Set("connection_type", *dbTargetDetails.ConnectionType)
+			if err != nil {
+				return err
+			}
+		}
 		if dbTargetDetails.DbHostName != nil {
 			err := d.Set("host", *dbTargetDetails.DbHostName)
 			if err != nil {
@@ -303,6 +394,75 @@ func resourceDbTargetRead(d *schema.ResourceData, m interface{}) error {
 			if err != nil {
 				return err
 			}
+		}
+		if dbTargetDetails.DbPrivateKey != nil {
+			err := d.Set("snowflake_api_private_key", *dbTargetDetails.DbPrivateKey)
+			if err != nil {
+				return err
+			}
+		}
+		if dbTargetDetails.DbPrivateKeyPassphrase != nil {
+			err := d.Set("snowflake_api_private_key_password", *dbTargetDetails.DbPrivateKeyPassphrase)
+			if err != nil {
+				return err
+			}
+		}
+		if dbTargetDetails.DbClientId != nil {
+			err := d.Set("azure_client_id", *dbTargetDetails.DbClientId)
+			if err != nil {
+				return err
+			}
+		}
+		if dbTargetDetails.DbClientSecret != nil {
+			err := d.Set("azure_client_secret", *dbTargetDetails.DbClientSecret)
+			if err != nil {
+				return err
+			}
+		}
+		if dbTargetDetails.DbTenantId != nil {
+			err := d.Set("azure_tenant_id", *dbTargetDetails.DbTenantId)
+			if err != nil {
+				return err
+			}
+		}
+		if dbTargetDetails.CloudServiceProvider != nil {
+			err := d.Set("cloud_service_provider", *dbTargetDetails.CloudServiceProvider)
+			if err != nil {
+				return err
+			}
+		}
+		if dbTargetDetails.ClusterMode != nil {
+			err := d.Set("cluster_mode", *dbTargetDetails.ClusterMode)
+			if err != nil {
+				return err
+			}
+		}
+		if dbTargetDetails.OracleWalletDetails != nil {
+			walletDetails := *dbTargetDetails.OracleWalletDetails
+			if walletDetails.LoginType != nil {
+				err := d.Set("oracle_wallet_login_type", *walletDetails.LoginType)
+				if err != nil {
+					return err
+				}
+			}
+			if walletDetails.P12DataBase64 != nil {
+				err := d.Set("oracle_wallet_p12_file_data", *walletDetails.P12DataBase64)
+				if err != nil {
+					return err
+				}
+			}
+			if walletDetails.SsoDataBase64 != nil {
+				err := d.Set("oracle_wallet_sso_file_data", *walletDetails.SsoDataBase64)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if rOut.Target.ParentTargetName != nil {
+		err := d.Set("parent_target_name", *rOut.Target.ParentTargetName)
+		if err != nil {
+			return err
 		}
 	}
 	if rOut.Value.MongoDbTargetDetails != nil {
@@ -372,6 +532,7 @@ func resourceDbTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	dbType := d.Get("db_type").(string)
+	connectionType := d.Get("connection_type").(string)
 	userName := d.Get("user_name").(string)
 	host := d.Get("host").(string)
 	pwd := d.Get("pwd").(string)
@@ -382,20 +543,32 @@ func resourceDbTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	ssl := d.Get("ssl").(bool)
 	sslCertificate := d.Get("ssl_certificate").(string)
 	snowflakeAccount := d.Get("snowflake_account").(string)
+	snowflakeApiPrivateKey := d.Get("snowflake_api_private_key").(string)
+	snowflakeApiPrivateKeyPassword := d.Get("snowflake_api_private_key_password").(string)
 	mongodbAtlas := d.Get("mongodb_atlas").(bool)
 	mongodbDefaultAuthDb := d.Get("mongodb_default_auth_db").(string)
 	mongodbUriOptions := d.Get("mongodb_uri_options").(string)
 	mongodbAtlasProjectId := d.Get("mongodb_atlas_project_id").(string)
 	mongodbAtlasApiPublicKey := d.Get("mongodb_atlas_api_public_key").(string)
 	mongodbAtlasApiPrivateKey := d.Get("mongodb_atlas_api_private_key").(string)
+	oracleServiceName := d.Get("oracle_service_name").(string)
+	oracleWalletLoginType := d.Get("oracle_wallet_login_type").(string)
+	oracleWalletP12FileData := d.Get("oracle_wallet_p12_file_data").(string)
+	oracleWalletSsoFileData := d.Get("oracle_wallet_sso_file_data").(string)
+	azureClientId := d.Get("azure_client_id").(string)
+	azureClientSecret := d.Get("azure_client_secret").(string)
+	azureTenantId := d.Get("azure_tenant_id").(string)
+	cloudServiceProvider := d.Get("cloud_service_provider").(string)
+	clusterMode := d.Get("cluster_mode").(bool)
+	parentTargetName := d.Get("parent_target_name").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
-	oracleServiceName := d.Get("oracle_service_name").(string)
 
 	body := akeyless_api.TargetUpdateDB{
-		Name:   name,
-		DbType: dbType,
-		Token:  &token,
+		Name:           name,
+		DbType:         dbType,
+		ConnectionType: connectionType,
+		Token:          &token,
 	}
 	common.GetAkeylessPtr(&body.UserName, userName)
 	common.GetAkeylessPtr(&body.Host, host)
@@ -407,15 +580,26 @@ func resourceDbTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Ssl, ssl)
 	common.GetAkeylessPtr(&body.SslCertificate, sslCertificate)
 	common.GetAkeylessPtr(&body.SnowflakeAccount, snowflakeAccount)
+	common.GetAkeylessPtr(&body.SnowflakeApiPrivateKey, snowflakeApiPrivateKey)
+	common.GetAkeylessPtr(&body.SnowflakeApiPrivateKeyPassword, snowflakeApiPrivateKeyPassword)
 	common.GetAkeylessPtr(&body.MongodbAtlas, mongodbAtlas)
 	common.GetAkeylessPtr(&body.MongodbDefaultAuthDb, mongodbDefaultAuthDb)
 	common.GetAkeylessPtr(&body.MongodbUriOptions, mongodbUriOptions)
 	common.GetAkeylessPtr(&body.MongodbAtlasProjectId, mongodbAtlasProjectId)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPublicKey, mongodbAtlasApiPublicKey)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPrivateKey, mongodbAtlasApiPrivateKey)
+	common.GetAkeylessPtr(&body.OracleServiceName, oracleServiceName)
+	common.GetAkeylessPtr(&body.OracleWalletLoginType, oracleWalletLoginType)
+	common.GetAkeylessPtr(&body.OracleWalletP12FileData, oracleWalletP12FileData)
+	common.GetAkeylessPtr(&body.OracleWalletSsoFileData, oracleWalletSsoFileData)
+	common.GetAkeylessPtr(&body.AzureClientId, azureClientId)
+	common.GetAkeylessPtr(&body.AzureClientSecret, azureClientSecret)
+	common.GetAkeylessPtr(&body.AzureTenantId, azureTenantId)
+	common.GetAkeylessPtr(&body.CloudServiceProvider, cloudServiceProvider)
+	common.GetAkeylessPtr(&body.ClusterMode, clusterMode)
+	common.GetAkeylessPtr(&body.ParentTargetName, parentTargetName)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
-	common.GetAkeylessPtr(&body.OracleServiceName, oracleServiceName)
 
 	_, _, err := client.TargetUpdateDB(ctx).Body(body).Execute()
 	if err != nil {

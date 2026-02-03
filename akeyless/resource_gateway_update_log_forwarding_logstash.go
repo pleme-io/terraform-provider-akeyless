@@ -65,6 +65,16 @@ func resourceGatewayUpdateLogForwardingLogstash() *schema.Resource {
 				Description: "Logstash tls certificate (PEM format) in a Base64 format",
 				Default:     "use-existing",
 			},
+			"json": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Set output format to JSON",
+			},
+			"uid_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The universal identity token, Required only for universal_identity authentication",
+			},
 		},
 	}
 }
@@ -140,6 +150,8 @@ func resourceGatewayUpdateLogForwardingLogstashUpdate(d *schema.ResourceData, m 
 	protocol := d.Get("protocol").(string)
 	enableTls := d.Get("enable_tls").(bool)
 	tlsCertificate := d.Get("tls_certificate").(string)
+	json := d.Get("json").(bool)
+	uidToken := d.Get("uid_token").(string)
 
 	body := akeyless_api.GatewayUpdateLogForwardingLogstash{
 		Token: &token,
@@ -151,6 +163,8 @@ func resourceGatewayUpdateLogForwardingLogstashUpdate(d *schema.ResourceData, m 
 	common.GetAkeylessPtr(&body.Protocol, protocol)
 	common.GetAkeylessPtr(&body.EnableTls, enableTls)
 	common.GetAkeylessPtr(&body.TlsCertificate, tlsCertificate)
+	common.GetAkeylessPtr(&body.Json, json)
+	common.GetAkeylessPtr(&body.UidToken, uidToken)
 
 	_, _, err := client.GatewayUpdateLogForwardingLogstash(ctx).Body(body).Execute()
 	if err != nil {

@@ -125,6 +125,17 @@ func resourceEventForwarderServiceNow() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable Event Forwarder [true/false]",
+				Default:     "true",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -262,6 +273,12 @@ func resourceEventForwarderServiceNowRead(d *schema.ResourceData, m interface{})
 			return err
 		}
 	}
+	if rOut.IsEnabled != nil {
+		err = d.Set("enable", fmt.Sprintf("%t", *rOut.IsEnabled))
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(name)
 
@@ -301,6 +318,8 @@ func resourceEventForwarderServiceNowUpdate(d *schema.ResourceData, m interface{
 	clientSecret := d.Get("client_secret").(string)
 	appPrivateKeyBase64 := d.Get("app_private_key_base64").(string)
 	description := d.Get("description").(string)
+	enable := d.Get("enable").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.EventForwarderUpdateServiceNow{
 		Name:  name,
@@ -321,6 +340,8 @@ func resourceEventForwarderServiceNowUpdate(d *schema.ResourceData, m interface{
 	common.GetAkeylessPtr(&body.ClientSecret, clientSecret)
 	common.GetAkeylessPtr(&body.AppPrivateKeyBase64, appPrivateKeyBase64)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Enable, enable)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, resp, err := client.EventForwarderUpdateServiceNow(ctx).Body(body).Execute()
 	if err != nil {

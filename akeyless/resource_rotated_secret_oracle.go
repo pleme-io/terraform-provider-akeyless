@@ -93,6 +93,61 @@ func resourceRotatedSecretOracle() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"rotate_after_disconnect": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate the value of the secret after SRA session ends [true/false]",
+				Default:     "false",
+			},
+			"rotation_event_in": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "How many days before the rotation of the item would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_db_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The DB name (relevant only for DB Dynamic-Secret)",
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_host": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_web": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable Web Secure Remote Access",
+				Default:     false,
+			},
 		},
 	}
 }
@@ -118,6 +173,18 @@ func resourceRotatedSecretOracleCreate(d *schema.ResourceData, m interface{}) er
 	authenticationCredentials := d.Get("authentication_credentials").(string)
 	rotatedUsername := d.Get("rotated_username").(string)
 	rotatedPassword := d.Get("rotated_password").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInList := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInList)
+	secureAccessDbName := d.Get("secure_access_db_name").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostList := d.Get("secure_access_host").([]interface{})
+	secureAccessHost := common.ExpandStringList(secureAccessHostList)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.RotatedSecretCreateOracledb{
 		Name:        name,
@@ -135,6 +202,15 @@ func resourceRotatedSecretOracleCreate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.RotatedUsername, rotatedUsername)
 	common.GetAkeylessPtr(&body.RotatedPassword, rotatedPassword)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.RotatedSecretCreateOracledb(ctx).Body(body).Execute()
 	if err != nil {
@@ -200,6 +276,26 @@ func resourceRotatedSecretOracleRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 	}
+	if itemOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
+		if err != nil {
+			return err
+		}
+	}
+	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range itemOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	if itemOut.AutoRotate != nil {
 		if *itemOut.AutoRotate || d.Get("auto_rotate").(string) != "" {
 			err = d.Set("auto_rotate", strconv.FormatBool(*itemOut.AutoRotate))
@@ -244,6 +340,52 @@ func resourceRotatedSecretOracleRead(d *schema.ResourceData, m interface{}) erro
 		}
 		if rsd.RotationStatement != nil {
 			err = d.Set("rotator_custom_cmd", *rsd.RotationStatement)
+			if err != nil {
+				return err
+			}
+		}
+		if rsd.MaxVersions != nil {
+			err = d.Set("max_versions", strconv.Itoa(int(*rsd.MaxVersions)))
+			if err != nil {
+				return err
+			}
+		}
+		if rsd.RotationEventIn != nil && len(rsd.RotationEventIn) > 0 {
+			err = d.Set("rotation_event_in", rsd.RotationEventIn)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if itemOut.ItemGeneralInfo != nil && itemOut.ItemGeneralInfo.SecureRemoteAccessDetails != nil {
+		sra := itemOut.ItemGeneralInfo.SecureRemoteAccessDetails
+		if sra.DbName != nil {
+			err = d.Set("secure_access_db_name", *sra.DbName)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.Enable != nil {
+			err = d.Set("secure_access_enable", strconv.FormatBool(*sra.Enable))
+			if err != nil {
+				return err
+			}
+		}
+		if sra.Host != nil && len(sra.Host) > 0 {
+			err = d.Set("secure_access_host", sra.Host)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.IsWeb != nil {
+			err = d.Set("secure_access_web", *sra.IsWeb)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.RotateAfterDisconnect != nil {
+			err = d.Set("rotate_after_disconnect", strconv.FormatBool(*sra.RotateAfterDisconnect))
 			if err != nil {
 				return err
 			}
@@ -309,6 +451,19 @@ func resourceRotatedSecretOracleUpdate(d *schema.ResourceData, m interface{}) er
 	rotatedPassword := d.Get("rotated_password").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInList := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInList)
+	secureAccessDbName := d.Get("secure_access_db_name").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostList := d.Get("secure_access_host").([]interface{})
+	secureAccessHost := common.ExpandStringList(secureAccessHostList)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.RotatedSecretUpdateOracledb{
 		Name:    name,
@@ -334,6 +489,16 @@ func resourceRotatedSecretOracleUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.RotatedPassword, rotatedPassword)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err = client.RotatedSecretUpdateOracledb(ctx).Body(body).Execute()
 	if err != nil {

@@ -28,6 +28,22 @@ func resourceDynamicSecretGithub() *schema.Resource {
 				Description: "Dynamic secret name",
 				ForceNew:    true,
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Add tags attached to this object",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"installation_id": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -94,6 +110,10 @@ func resourceDynamicSecretGithubCreate(d *schema.ResourceData, m interface{}) er
 	var apiErr akeyless_api.GenericOpenAPIError
 	ctx := context.Background()
 	name := d.Get("name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	tagsSet := d.Get("tags").(*schema.Set)
+	tags := common.ExpandStringList(tagsSet.List())
 	installationId := d.Get("installation_id").(int)
 	installationOrganization := d.Get("installation_organization").(string)
 	installationRepository := d.Get("installation_repository").(string)
@@ -111,6 +131,9 @@ func resourceDynamicSecretGithubCreate(d *schema.ResourceData, m interface{}) er
 		Name:  name,
 		Token: &token,
 	}
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.InstallationId, installationId)
 	common.GetAkeylessPtr(&body.InstallationOrganization, installationOrganization)
 	common.GetAkeylessPtr(&body.InstallationRepository, installationRepository)
@@ -161,6 +184,24 @@ func resourceDynamicSecretGithubRead(d *schema.ResourceData, m interface{}) erro
 			return fmt.Errorf("can't value: %v", string(apiErr.Body()))
 		}
 		return fmt.Errorf("can't get value: %v", err)
+	}
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
+		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemTags != nil {
+		err = d.Set("tags", *rOut.ItemTags)
+		if err != nil {
+			return err
+		}
 	}
 	if rOut.GithubAppId != nil {
 		err = d.Set("github_app_id", *rOut.GithubAppId)
@@ -255,6 +296,10 @@ func resourceDynamicSecretGithubUpdate(d *schema.ResourceData, m interface{}) er
 	var apiErr akeyless_api.GenericOpenAPIError
 	ctx := context.Background()
 	name := d.Get("name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	tagsSet := d.Get("tags").(*schema.Set)
+	tags := common.ExpandStringList(tagsSet.List())
 	installationId := d.Get("installation_id").(int)
 	installationOrganization := d.Get("installation_organization").(string)
 	installationRepository := d.Get("installation_repository").(string)
@@ -272,6 +317,9 @@ func resourceDynamicSecretGithubUpdate(d *schema.ResourceData, m interface{}) er
 		Name:  name,
 		Token: &token,
 	}
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.InstallationId, installationId)
 	common.GetAkeylessPtr(&body.InstallationOrganization, installationOrganization)
 	common.GetAkeylessPtr(&body.InstallationRepository, installationRepository)

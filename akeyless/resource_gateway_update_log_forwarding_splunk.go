@@ -43,6 +43,12 @@ func resourceGatewayUpdateLogForwardingSplunk() *schema.Resource {
 				Description: "Pull interval in seconds",
 				Default:     "10",
 			},
+			"enable_batch": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable batch forwarding [true/false]",
+				Default:     "true",
+			},
 			"splunk_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -145,6 +151,12 @@ func resourceGatewayUpdateLogForwardingSplunkRead(d *schema.ResourceData, m inte
 				return err
 			}
 		}
+		if config.SplunkEnableBatch != nil && d.Get("enable_batch").(string) != "" {
+			err := d.Set("enable_batch", *config.SplunkEnableBatch)
+			if err != nil {
+				return err
+			}
+		}
 		if config.SplunkEnableTls != nil {
 			err := d.Set("enable_tls", *config.SplunkEnableTls)
 			if err != nil {
@@ -172,6 +184,7 @@ func resourceGatewayUpdateLogForwardingSplunkUpdate(d *schema.ResourceData, m in
 	enable := d.Get("enable").(string)
 	outputFormat := d.Get("output_format").(string)
 	pullInterval := d.Get("pull_interval").(string)
+	enableBatch := d.Get("enable_batch").(string)
 	splunkUrl := d.Get("splunk_url").(string)
 	splunkToken := d.Get("splunk_token").(string)
 	source := d.Get("source").(string)
@@ -186,6 +199,7 @@ func resourceGatewayUpdateLogForwardingSplunkUpdate(d *schema.ResourceData, m in
 	common.GetAkeylessPtr(&body.Enable, enable)
 	common.GetAkeylessPtr(&body.OutputFormat, outputFormat)
 	common.GetAkeylessPtr(&body.PullInterval, pullInterval)
+	common.GetAkeylessPtr(&body.EnableBatch, enableBatch)
 	common.GetAkeylessPtr(&body.SplunkUrl, splunkUrl)
 	common.GetAkeylessPtr(&body.SplunkToken, splunkToken)
 	common.GetAkeylessPtr(&body.Source, source)
@@ -269,6 +283,12 @@ func resourceGatewayUpdateLogForwardingSplunkImport(d *schema.ResourceData, m in
 		}
 		if config.SplunkIndex != nil {
 			err := d.Set("index", *config.SplunkIndex)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if config.SplunkEnableBatch != nil {
+			err := d.Set("enable_batch", *config.SplunkEnableBatch)
 			if err != nil {
 				return nil, err
 			}

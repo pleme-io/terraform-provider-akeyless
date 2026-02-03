@@ -145,6 +145,168 @@ func resourceRotatedSecret() *schema.Resource {
 				Description: "Retrieve the Secret value without checking the Gateway's cache [true/false]",
 				Default:     "false",
 			},
+			"provider_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Provider type",
+			},
+			"application_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "ApplicationId (used in azure)",
+			},
+			"aws_region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Aws Region (relevant only for aws)",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"gcp_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Base64-encoded service account private key text",
+			},
+			"gcp_service_account_email": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The email of the gcp service account to rotate",
+			},
+			"gcp_service_account_key_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The key id of the gcp service account to rotate",
+			},
+			"grace_rotation": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Create a new access key without deleting the old key from AWS for backup (relevant only for AWS) [true/false]",
+			},
+			"host_provider": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Host provider type [explicit/target], Default Host provider is explicit, Relevant only for Secure Remote Access of ssh cert issuer, ldap rotated secret and ldap dynamic secret",
+			},
+			"password_length": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The length of the password to be generated",
+			},
+			"rotate_after_disconnect": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate the value of the secret after SRA session ends [true/false]",
+			},
+			"same_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate same password for each host from the Linked Target (relevant only for Linked Target)",
+			},
+			"secure_access_allow_external_user": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Allow providing external user for a domain users (relevant only for rdp)",
+			},
+			"secure_access_aws_account_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The AWS account id (relevant only for aws)",
+			},
+			"secure_access_aws_native_cli": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "The AWS native cli",
+			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_db_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The DB name (relevant only for DB Dynamic-Secret)",
+			},
+			"secure_access_db_schema": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The db schema (relevant only for mssql or postgresql)",
+			},
+			"secure_access_disable_concurrent_connections": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this flag to prevent simultaneous use of the same secret",
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_host": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_rdp_domain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Required when the Dynamic Secret is used for a domain user (relevant only for RDP Dynamic-Secret)",
+			},
+			"secure_access_rdp_user": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Override the RDP Domain username (relevant only for rdp)",
+			},
+			"secure_access_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Destination URL to inject secrets",
+			},
+			"secure_access_web": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable Web Secure Remote Access",
+			},
+			"secure_access_web_browsing": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Secure browser via Akeyless's Secure Remote Access (SRA) (relevant only for aws or azure)",
+			},
+			"secure_access_web_proxy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA) (relevant only for aws or azure)",
+			},
+			"storage_account_key_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the storage account key to rotate [key1/key2/kerb1/kerb2] (relevant to azure-storage-account)",
+			},
+			"target": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "A list of linked targets to be associated, Relevant only for Secure Remote Access for ssh cert issuer, ldap rotated secret and ldap dynamic secret",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"host": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Get rotated secret value of specific Host (relevant only for Linked Target)",
+			},
 		},
 	}
 }
@@ -175,6 +337,38 @@ func resourceRotatedSecretCreate(d *schema.ResourceData, m interface{}) error {
 	userDn := d.Get("user_dn").(string)
 	userAttribute := d.Get("user_attribute").(string)
 	customPayload := d.Get("custom_payload").(string)
+	providerType := d.Get("provider_type").(string)
+	applicationId := d.Get("application_id").(string)
+	awsRegion := d.Get("aws_region").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	gcpKey := d.Get("gcp_key").(string)
+	gcpServiceAccountEmail := d.Get("gcp_service_account_email").(string)
+	gcpServiceAccountKeyId := d.Get("gcp_service_account_key_id").(string)
+	graceRotation := d.Get("grace_rotation").(string)
+	hostProvider := d.Get("host_provider").(string)
+	passwordLength := d.Get("password_length").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	samePassword := d.Get("same_password").(string)
+	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
+	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
+	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDbName := d.Get("secure_access_db_name").(string)
+	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
+	secureAccessDisableConcurrentConnections := d.Get("secure_access_disable_concurrent_connections").(bool)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
+	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
+	secureAccessRdpDomain := d.Get("secure_access_rdp_domain").(string)
+	secureAccessRdpUser := d.Get("secure_access_rdp_user").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
+	storageAccountKeyName := d.Get("storage_account_key_name").(string)
+	targetSet := d.Get("target").(*schema.Set)
+	target := common.ExpandStringList(targetSet.List())
 
 	body := akeyless_api.CreateRotatedSecret{
 		Name:        name,
@@ -197,6 +391,36 @@ func resourceRotatedSecretCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.UserDn, userDn)
 	common.GetAkeylessPtr(&body.UserAttribute, userAttribute)
 	common.GetAkeylessPtr(&body.CustomPayload, customPayload)
+	common.GetAkeylessPtr(&body.ProviderType, providerType)
+	common.GetAkeylessPtr(&body.ApplicationId, applicationId)
+	common.GetAkeylessPtr(&body.AwsRegion, awsRegion)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.GcpKey, gcpKey)
+	common.GetAkeylessPtr(&body.GcpServiceAccountEmail, gcpServiceAccountEmail)
+	common.GetAkeylessPtr(&body.GcpServiceAccountKeyId, gcpServiceAccountKeyId)
+	common.GetAkeylessPtr(&body.GraceRotation, graceRotation)
+	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.SamePassword, samePassword)
+	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
+	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
+	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
+	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
+	common.GetAkeylessPtr(&body.SecureAccessDisableConcurrentConnections, secureAccessDisableConcurrentConnections)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
+	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	common.GetAkeylessPtr(&body.StorageAccountKeyName, storageAccountKeyName)
+	common.GetAkeylessPtr(&body.Target, target)
 
 	_, _, err := client.CreateRotatedSecret(ctx).Body(body).Execute()
 	if err != nil {
@@ -227,6 +451,8 @@ func resourceRotatedSecretRead(d *schema.ResourceData, m interface{}) error {
 	}
 	ignoreCache := d.Get("ignore_cache").(string)
 	common.GetAkeylessPtr(&body.IgnoreCache, ignoreCache)
+	host := d.Get("host").(string)
+	common.GetAkeylessPtr(&body.Host, host)
 
 	item := akeyless_api.DescribeItem{
 		Name:         path,
@@ -411,6 +637,34 @@ func resourceRotatedSecretUpdate(d *schema.ResourceData, m interface{}) error {
 	tags := common.ExpandStringList(tagsSet.List())
 	description := d.Get("description").(string)
 	rotatorCustomCmd := d.Get("rotator_custom_cmd").(string)
+	userDn := d.Get("user_dn").(string)
+	userAttribute := d.Get("user_attribute").(string)
+	providerType := d.Get("provider_type").(string)
+	awsRegion := d.Get("aws_region").(string)
+	gcpKey := d.Get("gcp_key").(string)
+	graceRotation := d.Get("grace_rotation").(string)
+	hostProvider := d.Get("host_provider").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	samePassword := d.Get("same_password").(string)
+	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
+	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
+	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDbName := d.Get("secure_access_db_name").(string)
+	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
+	secureAccessDisableConcurrentConnections := d.Get("secure_access_disable_concurrent_connections").(bool)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
+	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
+	secureAccessRdpDomain := d.Get("secure_access_rdp_domain").(string)
+	secureAccessRdpUser := d.Get("secure_access_rdp_user").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
+	storageAccountKeyName := d.Get("storage_account_key_name").(string)
 
 	body := akeyless_api.UpdateRotatedSecret{
 		Name:  name,
@@ -438,6 +692,33 @@ func resourceRotatedSecretUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.RotatedPassword, rotatedPassword)
 	common.GetAkeylessPtr(&body.CustomPayload, customPayload)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.UserDn, userDn)
+	common.GetAkeylessPtr(&body.UserAttribute, userAttribute)
+	common.GetAkeylessPtr(&body.ProviderType, providerType)
+	common.GetAkeylessPtr(&body.AwsRegion, awsRegion)
+	common.GetAkeylessPtr(&body.GcpKey, gcpKey)
+	common.GetAkeylessPtr(&body.GraceRotation, graceRotation)
+	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.SamePassword, samePassword)
+	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
+	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
+	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
+	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
+	common.GetAkeylessPtr(&body.SecureAccessDisableConcurrentConnections, secureAccessDisableConcurrentConnections)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
+	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	common.GetAkeylessPtr(&body.StorageAccountKeyName, storageAccountKeyName)
 
 	bodyItem := akeyless_api.UpdateItem{
 		Name:    name,

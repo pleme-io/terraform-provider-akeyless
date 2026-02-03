@@ -48,6 +48,11 @@ func dataSourceGetSSHCertificate() *schema.Resource {
 				Sensitive:   true,
 				Description: "",
 			},
+			"path": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The path of the SSH certificate",
+			},
 		},
 	}
 }
@@ -89,6 +94,12 @@ func dataSourceGetSSHCertificateRead(d *schema.ResourceData, m interface{}) erro
 
 	if rOut.Data != nil {
 		err = d.Set("data", *rOut.Data)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Path != nil {
+		err = d.Set("path", *rOut.Path)
 		if err != nil {
 			return err
 		}

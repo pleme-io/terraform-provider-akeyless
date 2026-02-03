@@ -130,6 +130,42 @@ func resourceDynamicSecretAzure() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"azure_administrative_unit": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Azure AD administrative unit (relevant only when azure-user-portal-access=true)",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"fixed_user_claim_keyname": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Fixed user claim keyname",
+			},
+			"fixed_user_only": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Fixed user only",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_web_proxy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
+			},
 		},
 	}
 }
@@ -161,6 +197,13 @@ func resourceDynamicSecretAzureCreate(d *schema.ResourceData, m interface{}) err
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
+	azureAdministrativeUnit := d.Get("azure_administrative_unit").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
+	fixedUserOnly := d.Get("fixed_user_only").(bool)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	body := akeyless_api.DynamicSecretCreateAzure{
 		Name:  name,
@@ -184,6 +227,19 @@ func resourceDynamicSecretAzureCreate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.AzureAdministrativeUnit, azureAdministrativeUnit)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
+	common.GetAkeylessPtr(&body.FixedUserOnly, fixedUserOnly)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
 
 	_, _, err := client.DynamicSecretCreateAzure(ctx).Body(body).Execute()
 	if err != nil {
@@ -314,6 +370,51 @@ func resourceDynamicSecretAzureRead(d *schema.ResourceData, m interface{}) error
 		}
 	}
 
+	if rOut.AzureAdministrativeUnit != nil {
+		err = d.Set("azure_administrative_unit", *rOut.AzureAdministrativeUnit)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemDescription != nil {
+		err = d.Set("description", *rOut.ItemDescription)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.AzureFixedUserNameSubClaimKey != nil {
+		err = d.Set("fixed_user_claim_keyname", *rOut.AzureFixedUserNameSubClaimKey)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.AzureFixedUserOnly != nil {
+		err = d.Set("fixed_user_only", *rOut.AzureFixedUserOnly)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	common.GetSra(d, rOut.SecureRemoteAccessDetails, "DYNAMIC_SECERT")
 
 	d.SetId(path)
@@ -348,6 +449,13 @@ func resourceDynamicSecretAzureUpdate(d *schema.ResourceData, m interface{}) err
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
+	azureAdministrativeUnit := d.Get("azure_administrative_unit").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
+	fixedUserOnly := d.Get("fixed_user_only").(bool)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	body := akeyless_api.DynamicSecretUpdateAzure{
 		Name:  name,
@@ -371,6 +479,19 @@ func resourceDynamicSecretAzureUpdate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.AzureAdministrativeUnit, azureAdministrativeUnit)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
+	common.GetAkeylessPtr(&body.FixedUserOnly, fixedUserOnly)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
 
 	_, _, err := client.DynamicSecretUpdateAzure(ctx).Body(body).Execute()
 	if err != nil {

@@ -161,6 +161,17 @@ func resourceRole() *schema.Resource {
 				Optional:    true,
 				Description: "Allow this role to manage Event Forwarders. Currently only 'none' and 'all' values are supported.",
 			},
+			"event_forwarders_name": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Allow this role to manage the following Event Forwarders.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"reverse_rbac_access": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Allow this role to view Reverse RBAC. Supported values: 'scoped', 'all'.",
+			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -205,6 +216,9 @@ func resourceRoleCreate(ctx context.Context, d *schema.ResourceData, m interface
 	usageReportsAccess := d.Get("usage_reports_access").(string)
 	eventCenterAccess := d.Get("event_center_access").(string)
 	eventForwardersAccess := d.Get("event_forwarders_access").(string)
+	eventForwardersNameSet := d.Get("event_forwarders_name").(*schema.Set)
+	eventForwardersName := common.ExpandStringList(eventForwardersNameSet.List())
+	reverseRbacAccess := d.Get("reverse_rbac_access").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 
 	var apiErr akeyless_api.GenericOpenAPIError
@@ -220,6 +234,10 @@ func resourceRoleCreate(ctx context.Context, d *schema.ResourceData, m interface
 	common.GetAkeylessPtr(&body.UsageReportsAccess, usageReportsAccess)
 	common.GetAkeylessPtr(&body.EventCenterAccess, eventCenterAccess)
 	common.GetAkeylessPtr(&body.EventForwardersAccess, eventForwardersAccess)
+	if len(eventForwardersName) > 0 {
+		body.EventForwardersName = eventForwardersName
+	}
+	common.GetAkeylessPtr(&body.ReverseRbacAccess, reverseRbacAccess)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 
 	_, _, err := client.CreateRole(ctx).Body(body).Execute()
@@ -1017,6 +1035,9 @@ func updateRoleAccessRules(ctx context.Context, name, description, deleteProtect
 	}
 	common.GetAkeylessPtr(&updateBody.Description, description)
 	common.GetAkeylessPtr(&updateBody.DeleteProtection, deleteProtection)
+
+	reverseRbacAccess := d.Get("reverse_rbac_access").(string)
+	common.GetAkeylessPtr(&updateBody.ReverseRbacAccess, reverseRbacAccess)
 
 	var apiErr akeyless_api.GenericOpenAPIError
 	_, _, err := client.UpdateRole(ctx).Body(updateBody).Execute()

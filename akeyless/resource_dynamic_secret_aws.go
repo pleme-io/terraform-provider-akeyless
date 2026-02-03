@@ -105,6 +105,62 @@ func resourceDynamicSecretAws() *schema.Resource {
 				Optional:    true,
 				Description: "Customize how temporary usernames are generated using go template",
 			},
+			"admin_rotation_interval_days": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Admin credentials rotation interval (days)",
+			},
+			"aws_external_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The AWS External ID associated with the AWS role (relevant only for assume_role mode)",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"enable_admin_rotation": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Automatic admin credentials rotation",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
+			"secure_access_web_proxy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
+			},
+			"session_tags": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "String of Key value session tags comma separated, relevant only for Assumed Role",
+			},
+			"transitive_tag_keys": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "String of transitive tag keys space separated, relevant only for Assumed Role",
+			},
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -178,6 +234,21 @@ func resourceDynamicSecretAwsCreate(d *schema.ResourceData, m interface{}) error
 	producerEncryptionKeyName := d.Get("encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
+	awsExternalId := d.Get("aws_external_id").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
+	sessionTags := d.Get("session_tags").(string)
+	transitiveTagKeys := d.Get("transitive_tag_keys").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -205,6 +276,23 @@ func resourceDynamicSecretAwsCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	if adminRotationIntervalDays != 0 {
+		body.AdminRotationIntervalDays = &[]int64{int64(adminRotationIntervalDays)}[0]
+	}
+	common.GetAkeylessPtr(&body.AwsExternalId, awsExternalId)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
+	if len(itemCustomFields) > 0 {
+		body.ItemCustomFields = &itemCustomFields
+	}
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay != 0 {
+		body.SecureAccessDelay = &[]int64{int64(secureAccessDelay)}[0]
+	}
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	common.GetAkeylessPtr(&body.SessionTags, sessionTags)
+	common.GetAkeylessPtr(&body.TransitiveTagKeys, transitiveTagKeys)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
@@ -344,6 +432,48 @@ func resourceDynamicSecretAwsRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.AdminRotationIntervalDays != nil {
+		err = d.Set("admin_rotation_interval_days", *rOut.AdminRotationIntervalDays)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.AwsExternalId != nil {
+		err = d.Set("aws_external_id", *rOut.AwsExternalId)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", common.BoolToString(*rOut.DeleteProtection))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
+		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.EnableAdminRotation != nil {
+		err = d.Set("enable_admin_rotation", *rOut.EnableAdminRotation)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.AwsSessionTags != nil {
+		err = d.Set("session_tags", *rOut.AwsSessionTags)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.AwsTransitiveTagKeys != nil {
+		err = d.Set("transitive_tag_keys", *rOut.AwsTransitiveTagKeys)
+		if err != nil {
+			return err
+		}
+	}
 
 	if rOut.ItemTargetsAssoc != nil {
 		targetName := common.GetTargetName(rOut.ItemTargetsAssoc)
@@ -381,6 +511,21 @@ func resourceDynamicSecretAwsUpdate(d *schema.ResourceData, m interface{}) error
 	producerEncryptionKeyName := d.Get("encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
+	awsExternalId := d.Get("aws_external_id").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
+	sessionTags := d.Get("session_tags").(string)
+	transitiveTagKeys := d.Get("transitive_tag_keys").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -408,6 +553,23 @@ func resourceDynamicSecretAwsUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	if adminRotationIntervalDays != 0 {
+		body.AdminRotationIntervalDays = &[]int64{int64(adminRotationIntervalDays)}[0]
+	}
+	common.GetAkeylessPtr(&body.AwsExternalId, awsExternalId)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
+	if len(itemCustomFields) > 0 {
+		body.ItemCustomFields = &itemCustomFields
+	}
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay != 0 {
+		body.SecureAccessDelay = &[]int64{int64(secureAccessDelay)}[0]
+	}
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	common.GetAkeylessPtr(&body.SessionTags, sessionTags)
+	common.GetAkeylessPtr(&body.TransitiveTagKeys, transitiveTagKeys)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)

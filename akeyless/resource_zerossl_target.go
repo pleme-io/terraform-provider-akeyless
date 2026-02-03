@@ -78,6 +78,21 @@ func resourceZerosslTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"new_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "New target name",
+			},
 		},
 	}
 }
@@ -99,6 +114,7 @@ func resourceZerosslTargetCreate(d *schema.ResourceData, m interface{}) error {
 	timeout := d.Get("timeout").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateZeroSSL{
 		Name:         name,
@@ -113,6 +129,7 @@ func resourceZerosslTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ImapPort, imapPort)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateZeroSSL(ctx).Body(body).Execute()
 	if err != nil {
@@ -244,6 +261,9 @@ func resourceZerosslTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	timeout := d.Get("timeout").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.TargetUpdateZeroSSL{
 		Name:         name,
@@ -258,6 +278,9 @@ func resourceZerosslTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ImapPort, imapPort)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.TargetUpdateZeroSSL(ctx).Body(body).Execute()
 	if err != nil {

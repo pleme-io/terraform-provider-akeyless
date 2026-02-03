@@ -95,6 +95,35 @@ func resourceAuthMethodK8s() *schema.Resource {
 				Description: "Subclaims to include in audit logs",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"allowed_client_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Auth Method description",
+			},
+			"expiration_event_in": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"gw_bound_ips": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "A CIDR whitelist with the GW IPs that the access is restricted to",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"product_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -139,6 +168,15 @@ func resourceAuthMethodK8sCreate(d *schema.ResourceData, m interface{}) error {
 	boundNamespaces := common.ExpandStringList(boundNamespacesSet.List())
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
 
 	body := akeyless_api.AuthMethodCreateK8s{
@@ -157,6 +195,11 @@ func resourceAuthMethodK8sCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.PublicKey, publicKey)
 	common.GetAkeylessPtr(&body.GenKey, genKey)
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
+	common.GetAkeylessPtr(&body.ProductType, productType)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 
 	rOut, _, err := client.AuthMethodCreateK8s(ctx).Body(body).Execute()
@@ -310,6 +353,49 @@ func resourceAuthMethodK8sRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	if rOut.AccessInfo.AllowedClientType != nil {
+		err = d.Set("allowed_client_type", rOut.AccessInfo.AllowedClientType)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.Description != nil {
+		err = d.Set("description", *rOut.Description)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ExpirationEvents != nil && len(rOut.ExpirationEvents) > 0 {
+		expirationEventIn := make([]string, 0)
+		for _, event := range rOut.ExpirationEvents {
+			if event.EventIn != nil {
+				expirationEventIn = append(expirationEventIn, strconv.FormatInt(*event.EventIn, 10))
+			}
+		}
+		if len(expirationEventIn) > 0 {
+			err = d.Set("expiration_event_in", expirationEventIn)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if rOut.AccessInfo.GwCidrWhitelist != nil && *rOut.AccessInfo.GwCidrWhitelist != "" {
+		err = d.Set("gw_bound_ips", strings.Split(*rOut.AccessInfo.GwCidrWhitelist, ","))
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.ProductTypes != nil {
+		err = d.Set("product_type", rOut.AccessInfo.ProductTypes)
+		if err != nil {
+			return err
+		}
+	}
+
 	if rOut.DeleteProtection != nil {
 		err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
 		if err != nil {
@@ -345,6 +431,15 @@ func resourceAuthMethodK8sUpdate(d *schema.ResourceData, m interface{}) error {
 	boundNamespaces := common.ExpandStringList(boundNamespacesSet.List())
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
 
 	body := akeyless_api.AuthMethodUpdateK8s{
@@ -362,6 +457,11 @@ func resourceAuthMethodK8sUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.PublicKey, publicKey)
 	common.GetAkeylessPtr(&body.GenKey, "false")
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
+	common.GetAkeylessPtr(&body.ProductType, productType)
 	common.GetAkeylessPtr(&body.NewName, name)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 

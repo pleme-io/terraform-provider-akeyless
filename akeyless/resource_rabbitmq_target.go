@@ -56,6 +56,21 @@ func resourceRabbitmqTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"new_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "New target name",
+			},
 		},
 	}
 }
@@ -73,6 +88,7 @@ func resourceRabbitmqTargetCreate(d *schema.ResourceData, m interface{}) error {
 	rabbitmqServerUri := d.Get("rabbitmq_server_uri").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateRabbitMq{
 		Name:  name,
@@ -83,6 +99,7 @@ func resourceRabbitmqTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.RabbitmqServerPassword, rabbitmqServerPassword)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateRabbitMq(ctx).Body(body).Execute()
 	if err != nil {
@@ -155,6 +172,12 @@ func resourceRabbitmqTargetRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.Target.MaxVersions != nil {
+		err := d.Set("max_versions", *rOut.Target.MaxVersions)
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -174,6 +197,9 @@ func resourceRabbitmqTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	rabbitmqServerUri := d.Get("rabbitmq_server_uri").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.TargetUpdateRabbitMq{
 		Name:  name,
@@ -184,6 +210,9 @@ func resourceRabbitmqTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.RabbitmqServerUri, rabbitmqServerUri)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.TargetUpdateRabbitMq(ctx).Body(body).Execute()
 	if err != nil {

@@ -98,6 +98,22 @@ func resourceEventForwarderEmail() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable Event Forwarder [true/false]",
+				Default:     "true",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"new_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "New EventForwarder name",
+			},
 		},
 	}
 }
@@ -220,6 +236,12 @@ func resourceEventForwarderEmailRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 	}
+	if rOut.IsEnabled != nil {
+		err = d.Set("enable", strconv.FormatBool(*rOut.IsEnabled))
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(name)
 
@@ -254,6 +276,9 @@ func resourceEventForwarderEmailUpdate(d *schema.ResourceData, m interface{}) er
 	overrideUrl := d.Get("override_url").(string)
 	includeError := d.Get("include_error").(string)
 	description := d.Get("description").(string)
+	enable := d.Get("enable").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.EventForwarderUpdateEmail{
 		Name:  name,
@@ -269,6 +294,9 @@ func resourceEventForwarderEmailUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.OverrideUrl, overrideUrl)
 	common.GetAkeylessPtr(&body.IncludeError, includeError)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Enable, enable)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, resp, err := client.EventForwarderUpdateEmail(ctx).Body(body).Execute()
 	if err != nil {

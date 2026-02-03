@@ -51,6 +51,21 @@ func resourceLinkedTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"add_hosts": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A comma seperated list of new server hosts and server descriptions joined by semicolon ';' that will be added to the Linked Target hosts",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"rm_hosts": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Comma separated list of existing hosts that will be removed from Linked Target hosts",
+			},
 		},
 	}
 }
@@ -197,6 +212,9 @@ func resourceLinkedTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	parentTargetName := d.Get("parent_target_name").(string)
 	hostType := d.Get("type").(string)
 	description := d.Get("description").(string)
+	addHosts := d.Get("add_hosts").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	rmHosts := d.Get("rm_hosts").(string)
 
 	body := akeyless_api.TargetUpdateLinked{
 		Name:  name,
@@ -206,6 +224,9 @@ func resourceLinkedTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ParentTargetName, parentTargetName)
 	common.GetAkeylessPtr(&body.Type, hostType)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.AddHosts, addHosts)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.RmHosts, rmHosts)
 
 	_, _, err := client.TargetUpdateLinked(ctx).Body(body).Execute()
 	if err != nil {

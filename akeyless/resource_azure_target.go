@@ -47,11 +47,41 @@ func resourceAzureTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Azure client secret",
 			},
+			"connection_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Type of connection [credentials/cloud-identity]",
+			},
+			"subscription_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Azure Subscription Id",
+			},
+			"resource_group_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The Resource Group name in your Azure subscription",
+			},
+			"resource_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the relevant Resource",
+			},
 			"use_gw_cloud_identity": {
 				Type:        schema.TypeBool,
 				Required:    false,
 				Optional:    true,
 				Description: "Use the GW's Cloud IAM",
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
 			},
 			"key": {
 				Type:        schema.TypeString,
@@ -79,7 +109,12 @@ func resourceAzureTargetCreate(d *schema.ResourceData, m interface{}) error {
 	clientId := d.Get("client_id").(string)
 	tenantId := d.Get("tenant_id").(string)
 	clientSecret := d.Get("client_secret").(string)
+	connectionType := d.Get("connection_type").(string)
+	subscriptionId := d.Get("subscription_id").(string)
+	resourceGroupName := d.Get("resource_group_name").(string)
+	resourceName := d.Get("resource_name").(string)
 	useGwCloudIdentity := d.Get("use_gw_cloud_identity").(bool)
+	maxVersions := d.Get("max_versions").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
 
@@ -90,7 +125,12 @@ func resourceAzureTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ClientId, clientId)
 	common.GetAkeylessPtr(&body.TenantId, tenantId)
 	common.GetAkeylessPtr(&body.ClientSecret, clientSecret)
+	common.GetAkeylessPtr(&body.ConnectionType, connectionType)
+	common.GetAkeylessPtr(&body.SubscriptionId, subscriptionId)
+	common.GetAkeylessPtr(&body.ResourceGroupName, resourceGroupName)
+	common.GetAkeylessPtr(&body.ResourceName, resourceName)
 	common.GetAkeylessPtr(&body.UseGwCloudIdentity, useGwCloudIdentity)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
 
@@ -159,6 +199,24 @@ func resourceAzureTargetRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.Value.AzureTargetDetails.AzureSubscriptionId != nil {
+		err = d.Set("subscription_id", *rOut.Value.AzureTargetDetails.AzureSubscriptionId)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Value.AzureTargetDetails.AzureResourceGroupName != nil {
+		err = d.Set("resource_group_name", *rOut.Value.AzureTargetDetails.AzureResourceGroupName)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Value.AzureTargetDetails.AzureResourceName != nil {
+		err = d.Set("resource_name", *rOut.Value.AzureTargetDetails.AzureResourceName)
+		if err != nil {
+			return err
+		}
+	}
 	if rOut.Target.ProtectionKeyName != nil {
 		err = d.Set("key", *rOut.Target.ProtectionKeyName)
 		if err != nil {
@@ -188,7 +246,13 @@ func resourceAzureTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	clientId := d.Get("client_id").(string)
 	tenantId := d.Get("tenant_id").(string)
 	clientSecret := d.Get("client_secret").(string)
+	connectionType := d.Get("connection_type").(string)
+	subscriptionId := d.Get("subscription_id").(string)
+	resourceGroupName := d.Get("resource_group_name").(string)
+	resourceName := d.Get("resource_name").(string)
 	useGwCloudIdentity := d.Get("use_gw_cloud_identity").(bool)
+	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
 
@@ -199,7 +263,13 @@ func resourceAzureTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ClientId, clientId)
 	common.GetAkeylessPtr(&body.TenantId, tenantId)
 	common.GetAkeylessPtr(&body.ClientSecret, clientSecret)
+	common.GetAkeylessPtr(&body.ConnectionType, connectionType)
+	common.GetAkeylessPtr(&body.SubscriptionId, subscriptionId)
+	common.GetAkeylessPtr(&body.ResourceGroupName, resourceGroupName)
+	common.GetAkeylessPtr(&body.ResourceName, resourceName)
 	common.GetAkeylessPtr(&body.UseGwCloudIdentity, useGwCloudIdentity)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
 

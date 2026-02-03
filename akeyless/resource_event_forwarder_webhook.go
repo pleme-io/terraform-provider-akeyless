@@ -126,6 +126,17 @@ func resourceEventForwarderWebhook() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable Event Forwarder [true/false]",
+				Default:     "true",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -292,6 +303,8 @@ func resourceEventForwarderWebhookUpdate(d *schema.ResourceData, m interface{}) 
 	clientCertData := d.Get("client_cert_data").(string)
 	privateKeyData := d.Get("private_key_data").(string)
 	description := d.Get("description").(string)
+	enable := d.Get("enable").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.EventForwarderUpdateWebhook{
 		Name:  name,
@@ -312,6 +325,8 @@ func resourceEventForwarderWebhookUpdate(d *schema.ResourceData, m interface{}) 
 	common.GetAkeylessPtr(&body.ClientCertData, clientCertData)
 	common.GetAkeylessPtr(&body.PrivateKeyData, privateKeyData)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.Enable, enable)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, resp, err := client.EventForwarderUpdateWebhook(ctx).Body(body).Execute()
 	if err != nil {

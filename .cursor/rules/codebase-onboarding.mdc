@@ -1,0 +1,65 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Codebase Onboarding Protocol
+
+This rule outlines the process for an AI assistant to help a developer get onboarded to an unfamiliar, large codebase.
+
+## Objective
+
+To provide a structured and efficient onboarding experience by systematically analyzing a codebase and generating a comprehensive "Onboarding Guide."
+
+## Phase 1: Automated Codebase Analysis
+
+The AI assistant must first perform a thorough analysis of the codebase.
+
+### 1.1. Initial Reconnaissance
+- **Identify Project Goal & Tech Stack**: Read high-level documentation (`README.md`, `CONTRIBUTING.md`, etc.) and analyze dependency files (`requirements.txt`, `package.json`, `pom.xml`, `build.gradle`, `Gemfile`, `Dockerfile`) to understand the project's purpose and identify the technology stack.
+- **Map Directory Structure**: Scan the repository to create a high-level map of the key directories and infer their purpose from their names and contents (e.g., `src`, `lib`, `pkg`, `cmd`, `internal`, `api`, `ui`, `tests`).
+
+### 1.2. In-Depth Analysis
+- **Identify Entry Points**: Search for main execution files (e.g., `main.py`, `cmd/server/main.go`, `src/index.js`) to understand how the application is started and what its primary workflows are.
+- **Analyze Core Modules**: For each major directory, examine the source code to determine its specific role, its primary functions or classes, and its key interactions with other modules by tracking imports and function calls.
+- **Trace a Key Workflow**: Follow the execution path of at least one critical business workflow through the system, from an entry point to its conclusion, to understand the practical application of the code.
+
+## Phase 2: Onboarding Guide Generation
+
+Based on the analysis, the AI assistant will generate a single, well-structured `CODEBASE_ONBOARDING.md` document. This guide should contain the following sections:
+
+### 2.1. High-Level Overview
+- **Project Purpose**: A concise summary of what the codebase accomplishes.
+- **Technology Stack**: A list of key languages, frameworks, and libraries.
+- **System Architecture**: A high-level description of the architecture (e.g., monolith, microservices, event-driven). Include a simple Mermaid diagram to visualize the main components and their interactions.
+
+**Example Diagram:**
+```mermaid
+graph TD;
+    UserRequest --> API_Gateway;
+    API_Gateway --> AuthService;
+    API_Gateway --> ProductService;
+    ProductService --> Database;
+```
+
+### 2.2. Getting Started
+- **Prerequisites**: A list of required software and tools.
+- **Installation**: Simple, copy-pasteable commands to install dependencies.
+- **How to Run**: Instructions for starting the main application, running tests, and any other key development processes.
+
+### 2.3. Codebase Structure
+A breakdown of the most important directories with brief explanations for each:
+- **`src/`**: Core application source code.
+- **`api/`**: API definitions (e.g., Protobuf, OpenAPI/Swagger files).
+- **`tests/`**: Unit, integration, and end-to-end tests.
+- **`scripts/`**: Helper scripts for build, deployment, or other tasks.
+- **`docs/`**: Project documentation.
+
+### 2.4. Core Concepts & Workflows
+An explanation of the key domain concepts and a step-by-step walkthrough of a primary workflow (e.g., "User Authentication Flow" or "Data Processing Pipeline").
+
+### 2.5. Suggested Exploration Path
+A recommended path for a new developer to explore the codebase effectively.
+1.  Start with the main entry point file.
+2.  Next, explore the core service/module directory.
+3.  Finally, review the test suites for that module to see it in action.

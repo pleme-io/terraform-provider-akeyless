@@ -54,6 +54,21 @@ func resourceArtifactoryTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"new_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "New target name",
+			},
 		},
 	}
 }
@@ -71,6 +86,7 @@ func resourceArtifactoryTargetCreate(d *schema.ResourceData, m interface{}) erro
 	artifactoryAdminPwd := d.Get("artifactory_admin_pwd").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateArtifactory{
 		Name:                 name,
@@ -81,6 +97,7 @@ func resourceArtifactoryTargetCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateArtifactory(ctx).Body(body).Execute()
 	if err != nil {
@@ -171,6 +188,9 @@ func resourceArtifactoryTargetUpdate(d *schema.ResourceData, m interface{}) erro
 	artifactoryAdminPwd := d.Get("artifactory_admin_pwd").(string)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.TargetUpdateArtifactory{
 		Name:                 name,
@@ -181,6 +201,9 @@ func resourceArtifactoryTargetUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.TargetUpdateArtifactory(ctx).Body(body).Execute()
 	if err != nil {

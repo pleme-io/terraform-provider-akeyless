@@ -81,6 +81,22 @@ func resourceDynamicSecretArtifactory() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this item",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -104,6 +120,13 @@ func resourceDynamicSecretArtifactoryCreate(d *schema.ResourceData, m interface{
 	customUsernameTemplate := d.Get("custom_username_template").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	deleteProtection := d.Get("delete_protection").(bool)
+	description := d.Get("description").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 
 	body := akeyless_api.DynamicSecretCreateArtifactory{
 		Name:                     name,
@@ -119,6 +142,13 @@ func resourceDynamicSecretArtifactoryCreate(d *schema.ResourceData, m interface{
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
 	common.GetAkeylessPtr(&body.Tags, tags)
+	if deleteProtection {
+		common.GetAkeylessPtr(&body.DeleteProtection, "true")
+	}
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		body.ItemCustomFields = &itemCustomFields
+	}
 
 	_, _, err := client.DynamicSecretCreateArtifactory(ctx).Body(body).Execute()
 	if err != nil {
@@ -225,6 +255,35 @@ func resourceDynamicSecretArtifactoryRead(d *schema.ResourceData, m interface{})
 		}
 	}
 
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.Metadata != nil {
+		err = d.Set("description", *rOut.Metadata)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	d.SetId(path)
 
 	return nil
@@ -249,6 +308,13 @@ func resourceDynamicSecretArtifactoryUpdate(d *schema.ResourceData, m interface{
 	customUsernameTemplate := d.Get("custom_username_template").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	deleteProtection := d.Get("delete_protection").(bool)
+	description := d.Get("description").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 
 	body := akeyless_api.DynamicSecretUpdateArtifactory{
 		Name:                     name,
@@ -264,6 +330,13 @@ func resourceDynamicSecretArtifactoryUpdate(d *schema.ResourceData, m interface{
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
 	common.GetAkeylessPtr(&body.Tags, tags)
+	if deleteProtection {
+		common.GetAkeylessPtr(&body.DeleteProtection, "true")
+	}
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		body.ItemCustomFields = &itemCustomFields
+	}
 
 	_, _, err := client.DynamicSecretUpdateArtifactory(ctx).Body(body).Execute()
 	if err != nil {

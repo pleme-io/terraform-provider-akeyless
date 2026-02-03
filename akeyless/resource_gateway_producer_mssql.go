@@ -36,6 +36,49 @@ func resourceProducerMssql() *schema.Resource {
 				Optional:    true,
 				Description: "Name of existing target to use in producer creation",
 			},
+			"custom_username_template": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Customize how temporary usernames are generated using go template",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Required:    false,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"mssql_allowed_db_names": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "CSV of allowed DB names for runtime selection when getting the secret value. Empty => use target DB only; \"*\" => any DB allowed; One or more names => user must choose from this list",
+			},
+			"password_length": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "The length of the password to be generated",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Required:    false,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
 			"mssql_dbname": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -154,6 +197,10 @@ func resourceProducerMssqlCreate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	mssqlAllowedDbNames := d.Get("mssql_allowed_db_names").(string)
 	mssqlDbname := d.Get("mssql_dbname").(string)
 	mssqlUsername := d.Get("mssql_username").(string)
 	mssqlPassword := d.Get("mssql_password").(string)
@@ -161,12 +208,15 @@ func resourceProducerMssqlCreate(d *schema.ResourceData, m interface{}) error {
 	mssqlPort := d.Get("mssql_port").(string)
 	mssqlCreateStatements := d.Get("mssql_create_statements").(string)
 	mssqlRevocationStatements := d.Get("mssql_revocation_statements").(string)
+	passwordLength := d.Get("password_length").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -177,6 +227,16 @@ func resourceProducerMssqlCreate(d *schema.ResourceData, m interface{}) error {
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, fields)
+	}
+	common.GetAkeylessPtr(&body.MssqlAllowedDbNames, mssqlAllowedDbNames)
 	common.GetAkeylessPtr(&body.MssqlDbname, mssqlDbname)
 	common.GetAkeylessPtr(&body.MssqlUsername, mssqlUsername)
 	common.GetAkeylessPtr(&body.MssqlPassword, mssqlPassword)
@@ -184,11 +244,17 @@ func resourceProducerMssqlCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.MssqlPort, mssqlPort)
 	common.GetAkeylessPtr(&body.MssqlCreateStatements, mssqlCreateStatements)
 	common.GetAkeylessPtr(&body.MssqlRevocationStatements, mssqlRevocationStatements)
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay > 0 {
+		delay := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, delay)
+	}
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
@@ -318,6 +384,10 @@ func resourceProducerMssqlUpdate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	mssqlAllowedDbNames := d.Get("mssql_allowed_db_names").(string)
 	mssqlDbname := d.Get("mssql_dbname").(string)
 	mssqlUsername := d.Get("mssql_username").(string)
 	mssqlPassword := d.Get("mssql_password").(string)
@@ -325,12 +395,15 @@ func resourceProducerMssqlUpdate(d *schema.ResourceData, m interface{}) error {
 	mssqlPort := d.Get("mssql_port").(string)
 	mssqlCreateStatements := d.Get("mssql_create_statements").(string)
 	mssqlRevocationStatements := d.Get("mssql_revocation_statements").(string)
+	passwordLength := d.Get("password_length").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
@@ -341,6 +414,16 @@ func resourceProducerMssqlUpdate(d *schema.ResourceData, m interface{}) error {
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, fields)
+	}
+	common.GetAkeylessPtr(&body.MssqlAllowedDbNames, mssqlAllowedDbNames)
 	common.GetAkeylessPtr(&body.MssqlDbname, mssqlDbname)
 	common.GetAkeylessPtr(&body.MssqlUsername, mssqlUsername)
 	common.GetAkeylessPtr(&body.MssqlPassword, mssqlPassword)
@@ -348,11 +431,17 @@ func resourceProducerMssqlUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.MssqlPort, mssqlPort)
 	common.GetAkeylessPtr(&body.MssqlCreateStatements, mssqlCreateStatements)
 	common.GetAkeylessPtr(&body.MssqlRevocationStatements, mssqlRevocationStatements)
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay > 0 {
+		delay := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, delay)
+	}
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)

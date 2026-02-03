@@ -94,6 +94,23 @@ func resourceDfcKey() *schema.Resource {
 				Optional:    true,
 				Description: "Province name for the generated certificate. Relevant only for generate-self-signed-certificate.",
 			},
+			"certificate_digest_algo": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Digest algorithm to be used for the certificate key signing",
+			},
+			"hash_algorithm": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies the hash algorithm used for the encryption key's operations, available options: [SHA256, SHA384, SHA512]",
+				Default:     "SHA256",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"cert_data_base64": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -170,6 +187,13 @@ func resourceDfcKeyCreate(d *schema.ResourceData, m interface{}) error {
 	certificateCountry := d.Get("certificate_country").(string)
 	certificateLocality := d.Get("certificate_locality").(string)
 	certificateProvince := d.Get("certificate_province").(string)
+	certificateDigestAlgo := d.Get("certificate_digest_algo").(string)
+	hashAlgorithm := d.Get("hash_algorithm").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 	confFileData := d.Get("conf_file_data").(string)
 	certificateFormat := d.Get("certificate_format").(string)
 	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
@@ -196,6 +220,9 @@ func resourceDfcKeyCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.CertificateCountry, certificateCountry)
 	common.GetAkeylessPtr(&body.CertificateLocality, certificateLocality)
 	common.GetAkeylessPtr(&body.CertificateProvince, certificateProvince)
+	common.GetAkeylessPtr(&body.CertificateDigestAlgo, certificateDigestAlgo)
+	common.GetAkeylessPtr(&body.HashAlgorithm, hashAlgorithm)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
 	common.GetAkeylessPtr(&body.ConfFileData, confFileData)
 	common.GetAkeylessPtr(&body.CertificateFormat, certificateFormat)
 	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
@@ -266,6 +293,12 @@ func resourceDfcKeyRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if rOut.RotationInterval != nil {
 		err = d.Set("rotation_interval", strconv.FormatInt(*rOut.RotationInterval, 10))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil {
+		err := d.Set("item_custom_fields", *rOut.ItemCustomFieldsDetails)
 		if err != nil {
 			return err
 		}
@@ -375,6 +408,11 @@ func resourceDfcKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	deleteProtection := d.Get("delete_protection").(bool)
 	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
 	expirationEventInList := common.ExpandStringList(expirationEventInSet.List())
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 
 	body := akeyless_api.UpdateItem{
 		Name:  name,
@@ -385,6 +423,7 @@ func resourceDfcKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.CertificateFormat, certificateFormat)
 	common.GetAkeylessPtr(&body.DeleteProtection, strconv.FormatBool(deleteProtection))
 	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventInList)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
 
 	add, remove, err := common.GetTagsForUpdate(d, name, token, tagList, client)
 	if err == nil {
@@ -522,6 +561,7 @@ func validateDfcKeyUpdateParams(d *schema.ResourceData) error {
 		"generate_self_signed_certificate", "certificate_ttl",
 		"certificate_common_name", "certificate_organization",
 		"certificate_country", "certificate_locality", "certificate_province",
+		"certificate_digest_algo", "hash_algorithm",
 		"conf_file_data"}
 	return common.GetErrorOnUpdateParam(d, paramsMustNotUpdate)
 }

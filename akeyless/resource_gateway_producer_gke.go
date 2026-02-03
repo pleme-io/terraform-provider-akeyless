@@ -37,6 +37,19 @@ func resourceProducerGke() *schema.Resource {
 				Optional:    true,
 				Description: "Name of existing target to use in producer creation",
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Required:    false,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"gke_service_account_email": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -111,6 +124,18 @@ func resourceProducerGke() *schema.Resource {
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
 			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Required:    false,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Required:    false,
@@ -131,6 +156,8 @@ func resourceProducerGkeCreate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	gkeServiceAccountEmail := d.Get("gke_service_account_email").(string)
 	gkeClusterEndpoint := d.Get("gke_cluster_endpoint").(string)
 	gkeClusterCert := d.Get("gke_cluster_cert").(string)
@@ -144,6 +171,8 @@ func resourceProducerGkeCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.GatewayCreateProducerGke{
@@ -151,6 +180,14 @@ func resourceProducerGkeCreate(d *schema.ResourceData, m interface{}) error {
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, &customFields)
+	}
 	common.GetAkeylessPtr(&body.GkeServiceAccountEmail, gkeServiceAccountEmail)
 	common.GetAkeylessPtr(&body.GkeClusterEndpoint, gkeClusterEndpoint)
 	common.GetAkeylessPtr(&body.GkeClusterCert, gkeClusterCert)
@@ -163,6 +200,11 @@ func resourceProducerGkeCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay > 0 {
+		secureAccessDelay64 := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, &secureAccessDelay64)
+	}
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.GatewayCreateProducerGke(ctx).Body(body).Execute()
@@ -280,6 +322,8 @@ func resourceProducerGkeUpdate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	gkeServiceAccountEmail := d.Get("gke_service_account_email").(string)
 	gkeClusterEndpoint := d.Get("gke_cluster_endpoint").(string)
 	gkeClusterCert := d.Get("gke_cluster_cert").(string)
@@ -293,6 +337,8 @@ func resourceProducerGkeUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.GatewayUpdateProducerGke{
@@ -300,6 +346,14 @@ func resourceProducerGkeUpdate(d *schema.ResourceData, m interface{}) error {
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, &customFields)
+	}
 	common.GetAkeylessPtr(&body.GkeServiceAccountEmail, gkeServiceAccountEmail)
 	common.GetAkeylessPtr(&body.GkeClusterEndpoint, gkeClusterEndpoint)
 	common.GetAkeylessPtr(&body.GkeClusterCert, gkeClusterCert)
@@ -312,6 +366,11 @@ func resourceProducerGkeUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay > 0 {
+		secureAccessDelay64 := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, &secureAccessDelay64)
+	}
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.GatewayUpdateProducerGke(ctx).Body(body).Execute()

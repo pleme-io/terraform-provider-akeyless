@@ -77,6 +77,16 @@ func dataSourceGetPKICertificate() *schema.Resource {
 				Computed:    true,
 				Description: "",
 			},
+			"cert_item_id": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The certificate item ID",
+			},
+			"path": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The path of the certificate",
+			},
 		},
 	}
 }
@@ -142,6 +152,18 @@ func dataSourceGetPKICertificateRead(d *schema.ResourceData, m interface{}) erro
 	}
 	if rOut.CertDisplayId != nil {
 		err = d.Set("cert_display_id", *rOut.CertDisplayId)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.CertItemId != nil {
+		err = d.Set("cert_item_id", *rOut.CertItemId)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.Path != nil {
+		err = d.Set("path", *rOut.Path)
 		if err != nil {
 			return err
 		}

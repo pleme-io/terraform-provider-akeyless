@@ -36,6 +36,17 @@ func resourceStaticSecret() *schema.Resource {
 				Description: "Secret type [generic/password]",
 				Default:     "generic",
 			},
+			"accessibility": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "For personal password manager",
+				Default:     "regular",
+			},
+			"change_event": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Trigger an event when a secret value changed [true/false] (Relevant only for Static Secret)",
+			},
 			"value": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -167,6 +178,37 @@ func resourceStaticSecret() *schema.Resource {
 				Description: "Enable Web Secure Remote Access ",
 				Computed:    true,
 			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_gateway": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Secure Remote Access Gateway",
+			},
+			"secure_access_rdp_user": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Remote Desktop Username",
+			},
+			"secure_access_web_proxy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
+			},
 		},
 	}
 }
@@ -180,6 +222,8 @@ func resourceStaticSecretCreate(d *schema.ResourceData, m any) error {
 	secretType := d.Get("type").(string)
 	value := d.Get("value").(string)
 	format := d.Get("format").(string)
+	accessibility := d.Get("accessibility").(string)
+	changeEvent := d.Get("change_event").(string)
 	injectUrlSet := d.Get("inject_url").(*schema.Set)
 	injectUrl := common.ExpandStringList(injectUrlSet.List())
 	password := d.Get("password").(string)
@@ -197,6 +241,12 @@ func resourceStaticSecretCreate(d *schema.ResourceData, m any) error {
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessSshUser := d.Get("secure_access_ssh_user").(string)
 	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]any)
+	maxVersions := d.Get("max_versions").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessGateway := d.Get("secure_access_gateway").(string)
+	secureAccessRdpUser := d.Get("secure_access_rdp_user").(string)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	tags := d.Get("tags").(*schema.Set)
 	tagsList := common.ExpandStringList(tags.List())
@@ -215,6 +265,8 @@ func resourceStaticSecretCreate(d *schema.ResourceData, m any) error {
 	}
 	common.GetAkeylessPtr(&body.Tags, tagsList)
 
+	common.GetAkeylessPtr(&body.Accessibility, accessibility)
+	common.GetAkeylessPtr(&body.ChangeEvent, changeEvent)
 	common.GetAkeylessPtr(&body.Format, format)
 	common.GetAkeylessPtr(&body.InjectUrl, injectUrl)
 	common.GetAkeylessPtr(&body.Password, password)
@@ -229,6 +281,12 @@ func resourceStaticSecretCreate(d *schema.ResourceData, m any) error {
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessSshUser, secureAccessSshUser)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessGateway, secureAccessGateway)
+	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
 
 	_, _, err := client.CreateSecret(ctx).Body(body).Execute()
 	if err != nil {
@@ -458,6 +516,7 @@ func resourceStaticSecretUpdate(d *schema.ResourceData, m any) error {
 	tags := d.Get("tags").(*schema.Set)
 	tagsList := common.ExpandStringList(tags.List())
 	description := d.Get("description").(string)
+	changeEvent := d.Get("change_event").(string)
 
 	secureAccessHost := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHostList := common.ExpandStringList(secureAccessHost.List())
@@ -468,6 +527,12 @@ func resourceStaticSecretUpdate(d *schema.ResourceData, m any) error {
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessSshUser := d.Get("secure_access_ssh_user").(string)
 	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]any)
+	maxVersions := d.Get("max_versions").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessGateway := d.Get("secure_access_gateway").(string)
+	secureAccessRdpUser := d.Get("secure_access_rdp_user").(string)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	bodyItem := akeyless_api.UpdateItem{
 		Name:    path,
@@ -486,6 +551,7 @@ func resourceStaticSecretUpdate(d *schema.ResourceData, m any) error {
 	}
 
 	common.GetAkeylessPtr(&bodyItem.Description, description)
+	common.GetAkeylessPtr(&bodyItem.ChangeEvent, changeEvent)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessHost, secureAccessHostList)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessSshCreds, secureAccessSshCreds)
@@ -495,6 +561,12 @@ func resourceStaticSecretUpdate(d *schema.ResourceData, m any) error {
 	common.GetAkeylessPtr(&bodyItem.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&bodyItem.SecureAccessSshCredsUser, secureAccessSshUser)
 	common.GetAkeylessPtr(&bodyItem.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&bodyItem.ItemCustomFields, itemCustomFields)
+	common.GetAkeylessPtr(&bodyItem.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&bodyItem.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&bodyItem.SecureAccessGateway, secureAccessGateway)
+	common.GetAkeylessPtr(&bodyItem.SecureAccessRdpUser, secureAccessRdpUser)
+	common.GetAkeylessPtr(&bodyItem.SecureAccessWebProxy, secureAccessWebProxy)
 
 	_, _, err = client.UpdateItem(ctx).Body(bodyItem).Execute()
 	if err != nil {

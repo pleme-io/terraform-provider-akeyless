@@ -37,6 +37,12 @@ func resourceAuthMethodGcp() *schema.Resource {
 				Description: "Access expiration date in Unix timestamp (select 0 for access without expiry date)",
 				Default:     0,
 			},
+			"allowed_client_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"bound_ips": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -106,6 +112,34 @@ func resourceAuthMethodGcp() *schema.Resource {
 				Description: "Subclaims to include in audit logs",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Auth Method description",
+			},
+			"expiration_event_in": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"gw_bound_ips": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "A CIDR whitelist with the GW IPs that the access is restricted to",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"product_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"unique_identifier": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A unique identifier (ID) value which is a \"sub claim\" name that contains details uniquely identifying that resource",
+			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -130,6 +164,8 @@ func resourceAuthMethodGcpCreate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	accessExpires := d.Get("access_expires").(int)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
 	boundIpsSet := d.Get("bound_ips").(*schema.Set)
 	boundIps := common.ExpandStringList(boundIpsSet.List())
 	forceSubClaims := d.Get("force_sub_claims").(bool)
@@ -149,6 +185,14 @@ func resourceAuthMethodGcpCreate(d *schema.ResourceData, m interface{}) error {
 	boundLabels := common.ExpandStringList(boundLabelsSet.List())
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
+	uniqueIdentifier := d.Get("unique_identifier").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 
 	body := akeyless_api.AuthMethodCreateGcp{
@@ -158,6 +202,7 @@ func resourceAuthMethodGcpCreate(d *schema.ResourceData, m interface{}) error {
 		Token:    &token,
 	}
 	common.GetAkeylessPtr(&body.AccessExpires, accessExpires)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
 	common.GetAkeylessPtr(&body.BoundIps, boundIps)
 	common.GetAkeylessPtr(&body.ForceSubClaims, forceSubClaims)
 	common.GetAkeylessPtr(&body.JwtTtl, jwtTtl)
@@ -168,6 +213,11 @@ func resourceAuthMethodGcpCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.BoundRegions, boundRegions)
 	common.GetAkeylessPtr(&body.BoundLabels, boundLabels)
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
+	common.GetAkeylessPtr(&body.ProductType, productType)
+	common.GetAkeylessPtr(&body.UniqueIdentifier, uniqueIdentifier)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 
 	rOut, _, err := client.AuthMethodCreateGcp(ctx).Body(body).Execute()
@@ -236,8 +286,22 @@ func resourceAuthMethodGcpRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	if rOut.AccessInfo.AllowedClientType != nil {
+		err = d.Set("allowed_client_type", rOut.AccessInfo.AllowedClientType)
+		if err != nil {
+			return err
+		}
+	}
+
 	if rOut.AccessInfo.CidrWhitelist != nil && *rOut.AccessInfo.CidrWhitelist != "" {
 		err = d.Set("bound_ips", strings.Split(*rOut.AccessInfo.CidrWhitelist, ","))
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.GwCidrWhitelist != nil && *rOut.AccessInfo.GwCidrWhitelist != "" {
+		err = d.Set("gw_bound_ips", strings.Split(*rOut.AccessInfo.GwCidrWhitelist, ","))
 		if err != nil {
 			return err
 		}
@@ -324,6 +388,40 @@ func resourceAuthMethodGcpRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	if rOut.Description != nil {
+		err = d.Set("description", *rOut.Description)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ExpirationEvents != nil {
+		expirationEventIn := make([]string, 0)
+		for _, event := range rOut.ExpirationEvents {
+			if event.EventInDays != nil {
+				expirationEventIn = append(expirationEventIn, strconv.Itoa(int(*event.EventInDays)))
+			}
+		}
+		err = d.Set("expiration_event_in", expirationEventIn)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.ProductTypes != nil {
+		err = d.Set("product_type", rOut.AccessInfo.ProductTypes)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.GcpAccessRules.UniqueIdentifier != nil {
+		err = d.Set("unique_identifier", *rOut.AccessInfo.GcpAccessRules.UniqueIdentifier)
+		if err != nil {
+			return err
+		}
+	}
+
 	if rOut.DeleteProtection != nil {
 		err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
 		if err != nil {
@@ -345,6 +443,8 @@ func resourceAuthMethodGcpUpdate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	accessExpires := d.Get("access_expires").(int)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
 	boundIpsSet := d.Get("bound_ips").(*schema.Set)
 	boundIps := common.ExpandStringList(boundIpsSet.List())
 	forceSubClaims := d.Get("force_sub_claims").(bool)
@@ -364,6 +464,14 @@ func resourceAuthMethodGcpUpdate(d *schema.ResourceData, m interface{}) error {
 	boundLabels := common.ExpandStringList(boundLabelsSet.List())
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
+	uniqueIdentifier := d.Get("unique_identifier").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 
 	body := akeyless_api.AuthMethodUpdateGcp{
@@ -373,6 +481,7 @@ func resourceAuthMethodGcpUpdate(d *schema.ResourceData, m interface{}) error {
 		Token:    &token,
 	}
 	common.GetAkeylessPtr(&body.AccessExpires, accessExpires)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
 	common.GetAkeylessPtr(&body.BoundIps, boundIps)
 	common.GetAkeylessPtr(&body.ForceSubClaims, forceSubClaims)
 	common.GetAkeylessPtr(&body.JwtTtl, jwtTtl)
@@ -384,6 +493,11 @@ func resourceAuthMethodGcpUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.BoundLabels, boundLabels)
 	common.GetAkeylessPtr(&body.NewName, name)
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
+	common.GetAkeylessPtr(&body.ProductType, productType)
+	common.GetAkeylessPtr(&body.UniqueIdentifier, uniqueIdentifier)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 
 	_, _, err := client.AuthMethodUpdateGcp(ctx).Body(body).Execute()

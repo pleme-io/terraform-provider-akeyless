@@ -42,6 +42,12 @@ func resourceAuthMethodLdap() *schema.Resource {
 				Description: "Access expiration date in Unix timestamp (select 0 for access without expiry date)",
 				Default:     "0",
 			},
+			"allowed_client_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"bound_ips": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -131,6 +137,8 @@ func resourceAuthMethodLdapCreate(d *schema.ResourceData, m interface{}) error {
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	accessExpires := d.Get("access_expires").(int)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
 	boundIpsSet := d.Get("bound_ips").(*schema.Set)
 	boundIps := common.ExpandStringList(boundIpsSet.List())
 	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
@@ -154,6 +162,7 @@ func resourceAuthMethodLdapCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.AccessExpires, accessExpires)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
 	common.GetAkeylessPtr(&body.BoundIps, boundIps)
 	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
 	common.GetAkeylessPtr(&body.ForceSubClaims, forceSubClaims)
@@ -227,6 +236,12 @@ func resourceAuthMethodLdapRead(d *schema.ResourceData, m interface{}) error {
 	if rOut.AccessInfo != nil {
 		if rOut.AccessInfo.AccessExpires != nil {
 			err = d.Set("access_expires", *rOut.AccessInfo.AccessExpires)
+			if err != nil {
+				return err
+			}
+		}
+		if rOut.AccessInfo.AllowedClientType != nil {
+			err = d.Set("allowed_client_type", rOut.AccessInfo.AllowedClientType)
 			if err != nil {
 				return err
 			}
@@ -328,6 +343,8 @@ func resourceAuthMethodLdapUpdate(d *schema.ResourceData, m interface{}) error {
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	accessExpires := d.Get("access_expires").(int)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
 	boundIpsSet := d.Get("bound_ips").(*schema.Set)
 	boundIps := common.ExpandStringList(boundIpsSet.List())
 	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
@@ -352,6 +369,7 @@ func resourceAuthMethodLdapUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.AccessExpires, accessExpires)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
 	common.GetAkeylessPtr(&body.BoundIps, boundIps)
 	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
 	common.GetAkeylessPtr(&body.ForceSubClaims, forceSubClaims)

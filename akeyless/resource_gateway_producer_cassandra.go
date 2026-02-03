@@ -88,6 +88,38 @@ func resourceProducerCassandra() *schema.Resource {
 				Optional:    true,
 				Description: "Dynamic producer encryption key",
 			},
+			"custom_username_template": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Customize how temporary usernames are generated using go template",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"password_length": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The length of the password to be generated",
+			},
+			"ssl": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable/Disable SSL [true/false]",
+				Default:     false,
+			},
+			"ssl_certificate": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "SSL CA certificate in base64 encoding generated from a trusted Certificate Authority (CA)",
+			},
 		},
 	}
 }
@@ -110,6 +142,12 @@ func resourceProducerCassandraCreate(d *schema.ResourceData, m interface{}) erro
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	passwordLength := d.Get("password_length").(string)
+	ssl := d.Get("ssl").(bool)
+	sslCertificate := d.Get("ssl_certificate").(string)
 
 	body := akeyless_api.GatewayCreateProducerCassandra{
 		Name:  name,
@@ -124,6 +162,22 @@ func resourceProducerCassandraCreate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.SslCertificate, sslCertificate)
+
+	if itemCustomFields != nil && len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
+
+	if d.HasChange("ssl") {
+		body.Ssl = &ssl
+	}
 
 	_, _, err := client.GatewayCreateProducerCassandra(ctx).Body(body).Execute()
 	if err != nil {
@@ -221,6 +275,42 @@ func resourceProducerCassandraRead(d *schema.ResourceData, m interface{}) error 
 			return err
 		}
 	}
+	if rOut.UserNameTemplate != nil {
+		err = d.Set("custom_username_template", *rOut.UserNameTemplate)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", *rOut.DeleteProtection)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFields != nil {
+		err = d.Set("item_custom_fields", *rOut.ItemCustomFields)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.PasswordLength != nil {
+		err = d.Set("password_length", *rOut.PasswordLength)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DbUseSsl != nil {
+		err = d.Set("ssl", *rOut.DbUseSsl)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DbCaCertificate != nil {
+		err = d.Set("ssl_certificate", *rOut.DbCaCertificate)
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -245,6 +335,12 @@ func resourceProducerCassandraUpdate(d *schema.ResourceData, m interface{}) erro
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	passwordLength := d.Get("password_length").(string)
+	ssl := d.Get("ssl").(bool)
+	sslCertificate := d.Get("ssl_certificate").(string)
 
 	/*
 	 */
@@ -262,6 +358,22 @@ func resourceProducerCassandraUpdate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.SslCertificate, sslCertificate)
+
+	if itemCustomFields != nil && len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
+
+	if d.HasChange("ssl") {
+		body.Ssl = &ssl
+	}
 
 	_, _, err := client.GatewayUpdateProducerCassandra(ctx).Body(body).Execute()
 	if err != nil {

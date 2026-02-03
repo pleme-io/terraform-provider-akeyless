@@ -74,6 +74,55 @@ func resourceProducerPostgresql() *schema.Resource {
 				Description: "PostgreSQL Creation Statements",
 				Default:     "CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}';GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";GRANT CONNECT ON DATABASE postgres TO \"{{name}}\";GRANT USAGE ON SCHEMA public TO \"{{name}}\";",
 			},
+			"custom_username_template": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Customize how temporary usernames are generated using go template",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Required:    false,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"password_length": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "The length of the password to be generated",
+			},
+			"revocation_statement": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "PostgreSQL Revocation statements",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Required:    false,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
+			"ssl": {
+				Type:        schema.TypeBool,
+				Required:    false,
+				Optional:    true,
+				Description: "Enable/Disable SSL [true/false]",
+			},
 			"producer_encryption_key": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -152,6 +201,14 @@ func resourceProducerPostgresqlCreate(d *schema.ResourceData, m interface{}) err
 	postgresqlHost := d.Get("postgresql_host").(string)
 	postgresqlPort := d.Get("postgresql_port").(string)
 	creationStatements := d.Get("creation_statements").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	passwordLength := d.Get("password_length").(string)
+	revocationStatement := d.Get("revocation_statement").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	ssl := d.Get("ssl").(bool)
 	producerEncryptionKey := d.Get("producer_encryption_key").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
@@ -174,6 +231,23 @@ func resourceProducerPostgresqlCreate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.PostgresqlHost, postgresqlHost)
 	common.GetAkeylessPtr(&body.PostgresqlPort, postgresqlPort)
 	common.GetAkeylessPtr(&body.CreationStatements, creationStatements)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.RevocationStatement, revocationStatement)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay != 0 {
+		secureAccessDelayInt64 := int64(secureAccessDelay)
+		body.SecureAccessDelay = &secureAccessDelayInt64
+	}
+	common.GetAkeylessPtr(&body.Ssl, ssl)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKey, producerEncryptionKey)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
@@ -308,6 +382,14 @@ func resourceProducerPostgresqlUpdate(d *schema.ResourceData, m interface{}) err
 	postgresqlHost := d.Get("postgresql_host").(string)
 	postgresqlPort := d.Get("postgresql_port").(string)
 	creationStatements := d.Get("creation_statements").(string)
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	passwordLength := d.Get("password_length").(string)
+	revocationStatement := d.Get("revocation_statement").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
+	ssl := d.Get("ssl").(bool)
 	producerEncryptionKey := d.Get("producer_encryption_key").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
@@ -330,6 +412,23 @@ func resourceProducerPostgresqlUpdate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.PostgresqlHost, postgresqlHost)
 	common.GetAkeylessPtr(&body.PostgresqlPort, postgresqlPort)
 	common.GetAkeylessPtr(&body.CreationStatements, creationStatements)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFieldsMap
+	}
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.RevocationStatement, revocationStatement)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay != 0 {
+		secureAccessDelayInt64 := int64(secureAccessDelay)
+		body.SecureAccessDelay = &secureAccessDelayInt64
+	}
+	common.GetAkeylessPtr(&body.Ssl, ssl)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKey, producerEncryptionKey)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)

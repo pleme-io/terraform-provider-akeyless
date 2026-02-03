@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
 	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
@@ -90,6 +91,16 @@ func resourceDynamicSecretMongo() *schema.Resource {
 				Optional:    true,
 				Description: "MongoDB Atlas private key",
 			},
+			"mongodb_custom_data": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "MongoDB custom data",
+			},
+			"mongodb_scopes": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "MongoDB Scopes (Atlas only)",
+			},
 			"user_ttl": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -111,6 +122,22 @@ func resourceDynamicSecretMongo() *schema.Resource {
 				Optional:    true,
 				Description: "Customize how temporary usernames are generated using go template",
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -126,6 +153,11 @@ func resourceDynamicSecretMongo() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
 			},
 			"secure_access_host": {
 				Type:        schema.TypeSet,
@@ -144,6 +176,11 @@ func resourceDynamicSecretMongo() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "The DB name",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
 			},
 		},
 	}
@@ -169,17 +206,25 @@ func resourceDynamicSecretMongoCreate(d *schema.ResourceData, m interface{}) err
 	mongodbAtlasProjectId := d.Get("mongodb_atlas_project_id").(string)
 	mongodbAtlasApiPublicKey := d.Get("mongodb_atlas_api_public_key").(string)
 	mongodbAtlasApiPrivateKey := d.Get("mongodb_atlas_api_private_key").(string)
+	mongodbCustomData := d.Get("mongodb_custom_data").(string)
+	mongodbScopes := d.Get("mongodb_scopes").(string)
 	passwordLength := d.Get("password_length").(string)
 	producerEncryptionKeyName := d.Get("encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := common.ConvertMapToStringPointer(itemCustomFieldsMap)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 
 	body := akeyless_api.DynamicSecretCreateMongoDb{
 		Name:  name,
@@ -197,15 +242,25 @@ func resourceDynamicSecretMongoCreate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.MongodbAtlasProjectId, mongodbAtlasProjectId)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPublicKey, mongodbAtlasApiPublicKey)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPrivateKey, mongodbAtlasApiPrivateKey)
+	common.GetAkeylessPtr(&body.MongodbCustomData, mongodbCustomData)
+	common.GetAkeylessPtr(&body.MongodbScopes, mongodbScopes)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	if secureAccessDelay != 0 {
+		secureAccessDelayInt64 := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelayInt64)
+	}
 
 	_, _, err := client.DynamicSecretCreateMongoDb(ctx).Body(body).Execute()
 	if err != nil {
@@ -301,8 +356,44 @@ func resourceDynamicSecretMongoRead(d *schema.ResourceData, m interface{}) error
 			return err
 		}
 	}
+	if rOut.MongodbCustomData != nil {
+		err = d.Set("mongodb_custom_data", *rOut.MongodbCustomData)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.MongodbScopes != nil {
+		err = d.Set("mongodb_scopes", *rOut.MongodbScopes)
+		if err != nil {
+			return err
+		}
+	}
 	if rOut.UserTtl != nil {
 		err = d.Set("user_ttl", *rOut.UserTtl)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
+		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		err = d.Set("item_custom_fields", customFields)
 		if err != nil {
 			return err
 		}
@@ -375,17 +466,25 @@ func resourceDynamicSecretMongoUpdate(d *schema.ResourceData, m interface{}) err
 	mongodbAtlasProjectId := d.Get("mongodb_atlas_project_id").(string)
 	mongodbAtlasApiPublicKey := d.Get("mongodb_atlas_api_public_key").(string)
 	mongodbAtlasApiPrivateKey := d.Get("mongodb_atlas_api_private_key").(string)
+	mongodbCustomData := d.Get("mongodb_custom_data").(string)
+	mongodbScopes := d.Get("mongodb_scopes").(string)
 	passwordLength := d.Get("password_length").(string)
 	producerEncryptionKeyName := d.Get("encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := common.ConvertMapToStringPointer(itemCustomFieldsMap)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 
 	body := akeyless_api.DynamicSecretUpdateMongoDb{
 		Name:  name,
@@ -403,15 +502,25 @@ func resourceDynamicSecretMongoUpdate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.MongodbAtlasProjectId, mongodbAtlasProjectId)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPublicKey, mongodbAtlasApiPublicKey)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPrivateKey, mongodbAtlasApiPrivateKey)
+	common.GetAkeylessPtr(&body.MongodbCustomData, mongodbCustomData)
+	common.GetAkeylessPtr(&body.MongodbScopes, mongodbScopes)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	if secureAccessDelay != 0 {
+		secureAccessDelayInt64 := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelayInt64)
+	}
 
 	_, _, err := client.DynamicSecretUpdateMongoDb(ctx).Body(body).Execute()
 	if err != nil {

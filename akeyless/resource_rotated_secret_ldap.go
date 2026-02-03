@@ -105,6 +105,77 @@ func resourceRotatedSecretLdap() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"host_provider": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Host provider type [explicit/target], Default Host provider is explicit, Relevant only for Secure Remote Access of ssh cert issuer, ldap rotated secret and ldap dynamic secret",
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"rotate_after_disconnect": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate the value of the secret after SRA session ends [true/false]",
+				Default:     "false",
+			},
+			"rotation_event_in": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "How many days before the rotation of the item would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_host": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_rdp_domain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Default domain name server. i.e. microsoft.com",
+			},
+			"secure_access_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Destination URL to inject secrets",
+			},
+			"secure_access_web": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable Web Secure Remote Access",
+				Default:     false,
+			},
+			"secure_access_web_browsing": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Secure browser via Akeyless's Secure Remote Access (SRA)",
+				Default:     false,
+			},
+			"secure_access_web_proxy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
+				Default:     false,
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
 		},
 	}
 }
@@ -132,6 +203,19 @@ func resourceRotatedSecretLdapCreate(d *schema.ResourceData, m interface{}) erro
 	rotatedPassword := d.Get("rotated_password").(string)
 	userDn := d.Get("user_dn").(string)
 	userAttribute := d.Get("user_attribute").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	hostProvider := d.Get("host_provider").(string)
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventIn := d.Get("rotation_event_in").([]interface{})
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHost := d.Get("secure_access_host").([]interface{})
+	secureAccessRdpDomain := d.Get("secure_access_rdp_domain").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 
 	body := akeyless_api.RotatedSecretCreateLdap{
 		Name:        name,
@@ -151,6 +235,19 @@ func resourceRotatedSecretLdapCreate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.UserDn, userDn)
 	common.GetAkeylessPtr(&body.UserAttribute, userAttribute)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, common.ExpandStringList(rotationEventIn))
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, common.ExpandStringList(secureAccessHost))
+	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 
 	_, _, err := client.RotatedSecretCreateLdap(ctx).Body(body).Execute()
 	if err != nil {
@@ -342,6 +439,19 @@ func resourceRotatedSecretLdapUpdate(d *schema.ResourceData, m interface{}) erro
 	userAttribute := d.Get("user_attribute").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	deleteProtection := d.Get("delete_protection").(string)
+	hostProvider := d.Get("host_provider").(string)
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventIn := d.Get("rotation_event_in").([]interface{})
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHost := d.Get("secure_access_host").([]interface{})
+	secureAccessRdpDomain := d.Get("secure_access_rdp_domain").(string)
+	secureAccessUrl := d.Get("secure_access_url").(string)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
+	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
 
 	body := akeyless_api.RotatedSecretUpdateLdap{
 		Name:    name,
@@ -369,6 +479,19 @@ func resourceRotatedSecretLdapUpdate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.UserAttribute, userAttribute)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, common.ExpandStringList(rotationEventIn))
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, common.ExpandStringList(secureAccessHost))
+	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
+	common.GetAkeylessPtr(&body.SecureAccessUrl, secureAccessUrl)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
 
 	_, _, err = client.RotatedSecretUpdateLdap(ctx).Body(body).Execute()
 	if err != nil {

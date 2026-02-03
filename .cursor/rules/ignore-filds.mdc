@@ -1,0 +1,21 @@
+---
+alwaysApply: true
+---
+
+## Fields to Ignore in SDK
+When working with SDK files, **exclude** the following fields:
+1. **`new_name`** - Name changes are not permitted in the provider
+2. **`uid_token`** - Not relevant to Terraform implementation
+
+## Test Cases to Exclude
+Do **not** create or update test cases for:
+- **Any commands that require a gateway like dynamic secret/rotated secret/log forwarding/automatic migration etc**
+**Rationale**: These resources require gateway infrastructure that is not available in the standard test environment.
+
+## Dynamic Secret Field Locations
+For all dynamic secret resources:
+- **`ItemCustomFields`** is located in `ItemCustomFieldsDetails`, **NOT** in `ItemGeneralInfo`
+When reading dynamic secret data, ensure you retrieve custom fields from the correct response structure.
+
+## Deprecated Fields
+**Exclude all fields marked as deprecated** in their SDK description. Do not implement, update, or maintain deprecated fields in the Terraform provider.

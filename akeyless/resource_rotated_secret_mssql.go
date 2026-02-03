@@ -93,6 +93,76 @@ func resourceRotatedSecretMsSql() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"rotate_after_disconnect": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate the value of the secret after SRA session ends [true/false]",
+				Default:     "false",
+			},
+			"rotation_event_in": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "How many days before the rotation of the item would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_db_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The DB name (relevant only for DB Dynamic-Secret)",
+			},
+			"secure_access_db_schema": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The DB schema",
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_host": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_web": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable Web Secure Remote Access",
+				Default:     false,
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -118,6 +188,20 @@ func resourceRotatedSecretMsSqlCreate(d *schema.ResourceData, m interface{}) err
 	authenticationCredentials := d.Get("authentication_credentials").(string)
 	rotatedUsername := d.Get("rotated_username").(string)
 	rotatedPassword := d.Get("rotated_password").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInSet := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInSet)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDbName := d.Get("secure_access_db_name").(string)
+	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostSet := d.Get("secure_access_host").([]interface{})
+	secureAccessHost := common.ExpandStringList(secureAccessHostSet)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.RotatedSecretCreateMssql{
 		Name:        name,
@@ -135,6 +219,24 @@ func resourceRotatedSecretMsSqlCreate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.RotatedUsername, rotatedUsername)
 	common.GetAkeylessPtr(&body.RotatedPassword, rotatedPassword)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
+	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
 
 	_, _, err := client.RotatedSecretCreateMssql(ctx).Body(body).Execute()
 	if err != nil {
@@ -200,6 +302,33 @@ func resourceRotatedSecretMsSqlRead(d *schema.ResourceData, m interface{}) error
 			return err
 		}
 	}
+	if itemOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
+		if err != nil {
+			return err
+		}
+	}
+	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]interface{})
+		for _, field := range itemOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		if len(customFields) > 0 {
+			err = d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if itemOut.ItemVersions != nil && len(itemOut.ItemVersions) > 0 {
+		maxVersions := len(itemOut.ItemVersions)
+		err = d.Set("max_versions", strconv.Itoa(maxVersions))
+		if err != nil {
+			return err
+		}
+	}
 	if itemOut.AutoRotate != nil {
 		if *itemOut.AutoRotate || d.Get("auto_rotate").(string) != "" {
 			err = d.Set("auto_rotate", strconv.FormatBool(*itemOut.AutoRotate))
@@ -244,6 +373,62 @@ func resourceRotatedSecretMsSqlRead(d *schema.ResourceData, m interface{}) error
 		}
 		if rsd.RotationStatement != nil {
 			err = d.Set("rotator_custom_cmd", *rsd.RotationStatement)
+			if err != nil {
+				return err
+			}
+		}
+		if rsd.RotationEventIn != nil && len(rsd.RotationEventIn) > 0 {
+			err = d.Set("rotation_event_in", rsd.RotationEventIn)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if itemOut.ItemGeneralInfo != nil && itemOut.ItemGeneralInfo.SecureRemoteAccessDetails != nil {
+		sra := itemOut.ItemGeneralInfo.SecureRemoteAccessDetails
+		if sra.RotateAfterDisconnect != nil {
+			err = d.Set("rotate_after_disconnect", strconv.FormatBool(*sra.RotateAfterDisconnect))
+			if err != nil {
+				return err
+			}
+		}
+		if sra.BastionIssuer != nil {
+			err = d.Set("secure_access_bastion_issuer", *sra.BastionIssuer)
+			if err != nil {
+				return err
+			}
+			err = d.Set("secure_access_certificate_issuer", *sra.BastionIssuer)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.DbName != nil {
+			err = d.Set("secure_access_db_name", *sra.DbName)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.Schema != nil {
+			err = d.Set("secure_access_db_schema", *sra.Schema)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.Enable != nil {
+			err = d.Set("secure_access_enable", strconv.FormatBool(*sra.Enable))
+			if err != nil {
+				return err
+			}
+		}
+		if sra.Host != nil && len(sra.Host) > 0 {
+			err = d.Set("secure_access_host", sra.Host)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.IsWeb != nil {
+			err = d.Set("secure_access_web", *sra.IsWeb)
 			if err != nil {
 				return err
 			}
@@ -309,6 +494,21 @@ func resourceRotatedSecretMsSqlUpdate(d *schema.ResourceData, m interface{}) err
 	rotatedPassword := d.Get("rotated_password").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInSet := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInSet)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDbName := d.Get("secure_access_db_name").(string)
+	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostSet := d.Get("secure_access_host").([]interface{})
+	secureAccessHost := common.ExpandStringList(secureAccessHostSet)
+	secureAccessWeb := d.Get("secure_access_web").(bool)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.RotatedSecretUpdateMssql{
 		Name:    name,
@@ -334,6 +534,25 @@ func resourceRotatedSecretMsSqlUpdate(d *schema.ResourceData, m interface{}) err
 	common.GetAkeylessPtr(&body.RotatedPassword, rotatedPassword)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDbName, secureAccessDbName)
+	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		body.ItemCustomFields = &fields
+	}
 
 	_, _, err = client.RotatedSecretUpdateMssql(ctx).Body(body).Execute()
 	if err != nil {

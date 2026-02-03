@@ -58,6 +58,11 @@ func resourceGithubTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
 		},
 	}
 }
@@ -75,6 +80,7 @@ func resourceGithubTargetCreate(d *schema.ResourceData, m interface{}) error {
 	githubBaseUrl := d.Get("github_base_url").(string)
 	description := d.Get("description").(string)
 	key := d.Get("key").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateGithub{
 		Name:  name,
@@ -86,6 +92,7 @@ func resourceGithubTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.GithubBaseUrl, githubBaseUrl)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateGithub(ctx).Body(body).Execute()
 	if err != nil {
@@ -177,6 +184,7 @@ func resourceGithubTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	githubBaseUrl := d.Get("github_base_url").(string)
 	description := d.Get("description").(string)
 	key := d.Get("key").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetUpdateGithub{
 		Name:  name,
@@ -188,6 +196,7 @@ func resourceGithubTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.GithubBaseUrl, githubBaseUrl)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetUpdateGithub(ctx).Body(body).Execute()
 	if err != nil {

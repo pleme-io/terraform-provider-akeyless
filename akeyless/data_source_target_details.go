@@ -137,14 +137,20 @@ func extractTargetDetailsByType(details *akeyless_api.TargetTypeDetailsInput, ta
 		return extractEksTargetDetails(details.EksTargetDetails)
 	case details.GcpTargetDetails != nil:
 		return extractGcpTargetDetails(details.GcpTargetDetails)
+	case details.GeminiTargetDetails != nil:
+		return extractGeminiTargetDetails(details.GeminiTargetDetails)
 	case details.GithubTargetDetails != nil:
 		return extractGithubTargetDetails(details.GithubTargetDetails)
+	case details.GitlabTargetDetails != nil:
+		return extractGitlabTargetDetails(details.GitlabTargetDetails)
 	case details.GkeTargetDetails != nil:
 		return extractGkeTargetDetails(details.GkeTargetDetails)
 	case details.GlobalsignAtlasTargetDetails != nil:
 		return extractGlobalsignAtlasTargetDetails(details.GlobalsignAtlasTargetDetails)
 	case details.GlobalsignTargetDetails != nil:
 		return extractGlobalsignTargetDetails(details.GlobalsignTargetDetails)
+	case details.GodaddyTargetDetails != nil:
+		return extractGodaddyTargetDetails(details.GodaddyTargetDetails)
 	case details.HashiVaultTargetDetails != nil:
 		return extractHashiTargetDetails(details.HashiVaultTargetDetails)
 	case details.LdapTargetDetails != nil:
@@ -155,12 +161,16 @@ func extractTargetDetailsByType(details *akeyless_api.TargetTypeDetailsInput, ta
 		return extractMongoDbTargetDetails(details.MongoDbTargetDetails)
 	case details.NativeK8sTargetDetails != nil:
 		return extractNativeK8sTargetDetails(details.NativeK8sTargetDetails)
+	case details.OpenaiTargetDetails != nil:
+		return extractOpenaiTargetDetails(details.OpenaiTargetDetails)
 	case details.PingTargetDetails != nil:
 		return extractPingTargetDetails(details.PingTargetDetails)
 	case details.RabbitMqTargetDetails != nil:
 		return extractRabbitMqTargetDetails(details.RabbitMqTargetDetails)
 	case details.SalesforceTargetDetails != nil:
 		return extractSalesforceTargetDetails(details.SalesforceTargetDetails)
+	case details.SectigoTargetDetails != nil:
+		return extractSectigoTargetDetails(details.SectigoTargetDetails)
 	case details.SshTargetDetails != nil:
 		return extractSshTargetDetails(details.SshTargetDetails)
 	case details.VenafiTargetDetails != nil:
@@ -902,6 +912,144 @@ func extractZerosslTargetDetails(details *akeyless_api.ZeroSSLTargetDetails) (ma
 	}
 
 	value, err := buildTargetDetailsVal(m, "zerossl_target_details")
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+func extractGeminiTargetDetails(details *akeyless_api.GeminiTargetDetails) (map[string]string, error) {
+
+	m := make(map[string]interface{})
+
+	if details.ApiKey != nil {
+		m["api_key"] = *details.ApiKey
+	}
+	if details.GeminiUrl != nil {
+		m["gemini_url"] = *details.GeminiUrl
+	}
+
+	value, err := buildTargetDetailsVal(m, "gemini_target_details")
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+func extractOpenaiTargetDetails(details *akeyless_api.OpenAITargetDetails) (map[string]string, error) {
+
+	m := make(map[string]interface{})
+
+	if details.ApiKey != nil {
+		m["api_key"] = *details.ApiKey
+	}
+	if details.ApiKeyId != nil {
+		m["api_key_id"] = *details.ApiKeyId
+	}
+	if details.OpenaiUrl != nil {
+		m["openai_url"] = *details.OpenaiUrl
+	}
+	if details.OrganizationId != nil {
+		m["organization_id"] = *details.OrganizationId
+	}
+	if details.ProjectId != nil {
+		m["project_id"] = *details.ProjectId
+	}
+
+	value, err := buildTargetDetailsVal(m, "openai_target_details")
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+func extractGodaddyTargetDetails(details *akeyless_api.GodaddyTargetDetails) (map[string]string, error) {
+
+	m := make(map[string]interface{})
+
+	if details.Key != nil {
+		m["key"] = *details.Key
+	}
+	if details.Secret != nil {
+		m["secret"] = *details.Secret
+	}
+	if details.ImapUser != nil {
+		m["imap_username"] = *details.ImapUser
+	}
+	if details.ImapPassword != nil {
+		m["imap_password"] = *details.ImapPassword
+	}
+	if details.ImapFqdn != nil {
+		m["imap_fqdn"] = *details.ImapFqdn
+	}
+	if details.ImapPort != nil {
+		m["imap_port"] = *details.ImapPort
+	}
+	if details.ValidationEmail != nil {
+		m["validation_email"] = *details.ValidationEmail
+	}
+	if details.ShopperId != nil {
+		m["shopper_id"] = *details.ShopperId
+	}
+	if details.Timeout != nil {
+		m["timeout"] = *details.Timeout
+	}
+
+	value, err := buildTargetDetailsVal(m, "godaddy_target_details")
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+func extractGitlabTargetDetails(details *akeyless_api.GitlabTargetDetails) (map[string]string, error) {
+
+	m := make(map[string]interface{})
+
+	if details.GitlabAccessToken != nil {
+		m["access_token"] = *details.GitlabAccessToken
+	}
+	if details.GitlabCertificate != nil {
+		m["certificate"] = *details.GitlabCertificate
+	}
+	if details.GitlabUrl != nil {
+		m["url"] = *details.GitlabUrl
+	}
+
+	value, err := buildTargetDetailsVal(m, "gitlab_target_details")
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+func extractSectigoTargetDetails(details *akeyless_api.SectigoTargetDetails) (map[string]string, error) {
+
+	m := make(map[string]interface{})
+
+	if details.Username != nil {
+		m["username"] = *details.Username
+	}
+	if details.Password != nil {
+		m["password"] = *details.Password
+	}
+	if details.CustomerUri != nil {
+		m["customer_uri"] = *details.CustomerUri
+	}
+	if details.OrgId != nil {
+		m["org_id"] = *details.OrgId
+	}
+	if details.CertificateProfileId != nil {
+		m["certificate_profile_id"] = *details.CertificateProfileId
+	}
+	if details.ExternalRequester != nil {
+		m["external_requester"] = *details.ExternalRequester
+	}
+	if details.Timeout != nil {
+		m["timeout"] = *details.Timeout
+	}
+
+	value, err := buildTargetDetailsVal(m, "sectigo_target_details")
 	if err != nil {
 		return nil, err
 	}

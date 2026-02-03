@@ -56,6 +56,16 @@ func resourceGitlabTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -73,6 +83,7 @@ func resourceGitlabTargetCreate(d *schema.ResourceData, m interface{}) error {
 	gitlabUrl := d.Get("gitlab_url").(string)
 	description := d.Get("description").(string)
 	key := d.Get("key").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateGitlab{
 		Name:  name,
@@ -83,6 +94,7 @@ func resourceGitlabTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.GitlabUrl, gitlabUrl)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateGitlab(ctx).Body(body).Execute()
 	if err != nil {
@@ -176,6 +188,8 @@ func resourceGitlabTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	gitlabUrl := d.Get("gitlab_url").(string)
 	description := d.Get("description").(string)
 	key := d.Get("key").(string)
+	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.TargetUpdateGitlab{
 		Name:  name,
@@ -186,6 +200,8 @@ func resourceGitlabTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.GitlabUrl, gitlabUrl)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, _, err := client.TargetUpdateGitlab(ctx).Body(body).Execute()
 	if err != nil {

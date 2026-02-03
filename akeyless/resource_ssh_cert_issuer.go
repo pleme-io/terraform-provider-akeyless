@@ -103,6 +103,53 @@ func resourceSSHCertIssuer() *schema.Resource {
 				Optional:    true,
 				Description: "Protection from accidental deletion of this item, [true/false]",
 			},
+			"fixed_user_claim_keyname": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from (relevant only for external-username=true)",
+			},
+			"host_provider": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Host provider type [explicit/target], Default Host provider is explicit, Relevant only for Secure Remote Access of ssh cert issuer, ldap rotated secret and ldap dynamic secret",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_api": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Secure Access SSH control API endpoint. E.g. https://my.sra-server:9900",
+			},
+			"secure_access_enforce_hosts_restriction": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this flag to enforce connections only to the hosts listed in --secure-access-host",
+			},
+			"secure_access_gateway": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Secure Access Gateway",
+			},
+			"secure_access_ssh": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Bastion's SSH server. E.g. my.sra-server:22",
+			},
+			"secure_access_use_internal_ssh_access": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use internal SSH Access",
+			},
+			"target": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "A list of linked targets to be associated, Relevant only for Secure Remote Access for ssh cert issuer, ldap rotated secret and ldap dynamic secret, To specify multiple targets use argument multiple times",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -131,6 +178,16 @@ func resourceSSHCertIssuerCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessUseInternalBastion := d.Get("secure_access_use_internal_bastion").(bool)
 	deleteProtection := d.Get("delete_protection").(bool)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
+	hostProvider := d.Get("host_provider").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessApi := d.Get("secure_access_api").(string)
+	secureAccessEnforceHostsRestriction := d.Get("secure_access_enforce_hosts_restriction").(bool)
+	secureAccessGateway := d.Get("secure_access_gateway").(string)
+	secureAccessSsh := d.Get("secure_access_ssh").(string)
+	secureAccessUseInternalSshAccess := d.Get("secure_access_use_internal_ssh_access").(bool)
+	targetSet := d.Get("target").(*schema.Set)
+	target := common.ExpandStringList(targetSet.List())
 
 	body := akeyless_api.CreateSSHCertIssuer{
 		Name:          name,
@@ -151,6 +208,15 @@ func resourceSSHCertIssuerCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessUseInternalBastion, secureAccessUseInternalBastion)
 	common.GetAkeylessPtr(&body.DeleteProtection, strconv.FormatBool(deleteProtection))
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
+	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
+	common.GetAkeylessPtr(&body.SecureAccessApi, secureAccessApi)
+	common.GetAkeylessPtr(&body.SecureAccessEnforceHostsRestriction, secureAccessEnforceHostsRestriction)
+	common.GetAkeylessPtr(&body.SecureAccessGateway, secureAccessGateway)
+	common.GetAkeylessPtr(&body.SecureAccessSsh, secureAccessSsh)
+	common.GetAkeylessPtr(&body.SecureAccessUseInternalSshAccess, secureAccessUseInternalSshAccess)
+	common.GetAkeylessPtr(&body.Target, target)
 
 	_, _, err := client.CreateSSHCertIssuer(ctx).Body(body).Execute()
 	if err != nil {
@@ -275,6 +341,14 @@ func resourceSSHCertIssuerUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessUseInternalBastion := d.Get("secure_access_use_internal_bastion").(bool)
 	deleteProtection := d.Get("delete_protection").(bool)
+	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
+	hostProvider := d.Get("host_provider").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessApi := d.Get("secure_access_api").(string)
+	secureAccessEnforceHostsRestriction := d.Get("secure_access_enforce_hosts_restriction").(bool)
+	secureAccessGateway := d.Get("secure_access_gateway").(string)
+	secureAccessSsh := d.Get("secure_access_ssh").(string)
+	secureAccessUseInternalSshAccess := d.Get("secure_access_use_internal_ssh_access").(bool)
 
 	tagSet := d.Get("tags").(*schema.Set)
 	tagsList := common.ExpandStringList(tagSet.List())
@@ -306,6 +380,14 @@ func resourceSSHCertIssuerUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessUseInternalBastion, secureAccessUseInternalBastion)
 	common.GetAkeylessPtr(&body.DeleteProtection, strconv.FormatBool(deleteProtection))
+	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
+	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
+	common.GetAkeylessPtr(&body.SecureAccessApi, secureAccessApi)
+	common.GetAkeylessPtr(&body.SecureAccessEnforceHostsRestriction, secureAccessEnforceHostsRestriction)
+	common.GetAkeylessPtr(&body.SecureAccessGateway, secureAccessGateway)
+	common.GetAkeylessPtr(&body.SecureAccessSsh, secureAccessSsh)
+	common.GetAkeylessPtr(&body.SecureAccessUseInternalSshAccess, secureAccessUseInternalSshAccess)
 
 	_, _, err = client.UpdateSSHCertIssuer(ctx).Body(body).Execute()
 	if err != nil {

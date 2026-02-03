@@ -55,6 +55,16 @@ func resourceGatewayUpdateCache() *schema.Resource {
 				Description: "Secure backup interval in minutes. To ensure service continuity in case of power cycle and network outage secrets will be backed up periodically per backup interval",
 				Default:     "1",
 			},
+			"cache_encryption_key": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Cache encryption key",
+			},
+			"new_proactive_cache_enable": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "New proactive cache enable flag",
+			},
 		},
 	}
 }
@@ -92,6 +102,18 @@ func resourceGatewayUpdateCacheRead(d *schema.ResourceData, m interface{}) error
 	}
 	if rOut.ProactiveCacheDumpInterval != nil {
 		err := d.Set("backup_interval", *rOut.ProactiveCacheDumpInterval)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.CacheEncryptionKey != nil {
+		err := d.Set("cache_encryption_key", *rOut.CacheEncryptionKey)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.NewProactiveCacheEnable != nil {
+		err := d.Set("new_proactive_cache_enable", *rOut.NewProactiveCacheEnable)
 		if err != nil {
 			return err
 		}
@@ -176,6 +198,18 @@ func resourceGatewayUpdateCacheImport(d *schema.ResourceData, m interface{}) ([]
 	}
 	if rOut.ProactiveCacheDumpInterval != nil {
 		err := d.Set("backup_interval", *rOut.ProactiveCacheDumpInterval)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if rOut.CacheEncryptionKey != nil {
+		err := d.Set("cache_encryption_key", *rOut.CacheEncryptionKey)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if rOut.NewProactiveCacheEnable != nil {
+		err := d.Set("new_proactive_cache_enable", *rOut.NewProactiveCacheEnable)
 		if err != nil {
 			return nil, err
 		}

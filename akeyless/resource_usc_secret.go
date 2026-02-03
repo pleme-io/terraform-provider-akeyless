@@ -71,6 +71,22 @@ func resourceUscSecret() *schema.Resource {
 				Description: "Either secret or certificate (Relevant only for Azure KV targets)",
 				Default:     "secret",
 			},
+			"pfx_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "The passphrase that protects the private key within the pfx certificate (Relevant only for Azure KV certificates)",
+			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Create secret in a specific region (GCP only). If empty, a global secret will be created (provider default)",
+			},
+			"usc_encryption_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the remote key that used to encrypt the secret value (if empty, the default key will be used)",
+			},
 			"secret_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -96,6 +112,9 @@ func resourceUscSecretCreate(d *schema.ResourceData, m any) error {
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	objectType := d.Get("object_type").(string)
+	pfxPassword := d.Get("pfx_password").(string)
+	region := d.Get("region").(string)
+	uscEncryptionKey := d.Get("usc_encryption_key").(string)
 
 	body := akeyless_api.UscCreate{
 		UscName:    uscName,
@@ -108,6 +127,9 @@ func resourceUscSecretCreate(d *schema.ResourceData, m any) error {
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.ObjectType, objectType)
+	common.GetAkeylessPtr(&body.PfxPassword, pfxPassword)
+	common.GetAkeylessPtr(&body.Region, region)
+	common.GetAkeylessPtr(&body.UscEncryptionKey, uscEncryptionKey)
 
 	out, resp, err := client.UscCreate(ctx).Body(body).Execute()
 	if err != nil {
@@ -221,6 +243,8 @@ func resourceUscSecretUpdate(d *schema.ResourceData, m any) error {
 	description := d.Get("description").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	pfxPassword := d.Get("pfx_password").(string)
+	uscEncryptionKey := d.Get("usc_encryption_key").(string)
 
 	body := akeyless_api.UscUpdate{
 		UscName:  uscName,
@@ -232,6 +256,8 @@ func resourceUscSecretUpdate(d *schema.ResourceData, m any) error {
 	common.GetAkeylessPtr(&body.Namespace, namespace)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Tags, tags)
+	common.GetAkeylessPtr(&body.PfxPassword, pfxPassword)
+	common.GetAkeylessPtr(&body.UscEncryptionKey, uscEncryptionKey)
 
 	_, resp, err := client.UscUpdate(ctx).Body(body).Execute()
 	if err != nil {
@@ -417,6 +443,7 @@ func validateUscSecretUpdateParams(d *schema.ResourceData) error {
 		"usc_name",
 		"secret_name",
 		"namespace",
+		"region",
 	}
 	return common.GetErrorOnUpdateParam(d, paramsMustNotUpdate)
 }

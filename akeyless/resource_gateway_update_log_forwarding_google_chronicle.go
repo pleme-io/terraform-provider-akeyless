@@ -43,6 +43,12 @@ func resourceGatewayUpdateLogForwardingGoogleChronicle() *schema.Resource {
 				Description: "Pull interval in seconds",
 				Default:     "10",
 			},
+			"json": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Set output format to JSON",
+				Default:     false,
+			},
 			"gcp_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -135,6 +141,7 @@ func resourceGatewayUpdateLogForwardingGoogleChronicleUpdate(d *schema.ResourceD
 	enable := d.Get("enable").(string)
 	outputFormat := d.Get("output_format").(string)
 	pullInterval := d.Get("pull_interval").(string)
+	json := d.Get("json").(bool)
 	gcpKey := d.Get("gcp_key").(string)
 	customerId := d.Get("customer_id").(string)
 	region := d.Get("region").(string)
@@ -146,6 +153,7 @@ func resourceGatewayUpdateLogForwardingGoogleChronicleUpdate(d *schema.ResourceD
 	common.GetAkeylessPtr(&body.Enable, enable)
 	common.GetAkeylessPtr(&body.OutputFormat, outputFormat)
 	common.GetAkeylessPtr(&body.PullInterval, pullInterval)
+	common.GetAkeylessPtr(&body.Json, json)
 	common.GetAkeylessPtr(&body.GcpKey, gcpKey)
 	common.GetAkeylessPtr(&body.CustomerId, customerId)
 	common.GetAkeylessPtr(&body.Region, region)

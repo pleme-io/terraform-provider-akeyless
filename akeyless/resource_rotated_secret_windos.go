@@ -93,6 +93,79 @@ func resourceRotatedSecretWindows() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"rotate_after_disconnect": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate the value of the secret after SRA session ends [true/false]",
+			},
+			"rotation_event_in": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "How many days before the rotation of the item would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"same_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Rotate same password for each host from the Linked Target (relevant only for Linked Target)",
+			},
+			"secure_access_allow_external_user": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Allow providing external user for a domain users",
+			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access (deprecated, use secure_access_certificate_issuer)",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_enable": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enable/Disable secure remote access [true/false]",
+			},
+			"secure_access_host": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_rdp_domain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Default domain name server (e.g., microsoft.com)",
+			},
+			"secure_access_rdp_user": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Override the RDP Domain username",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -118,6 +191,21 @@ func resourceRotatedSecretWindowsCreate(d *schema.ResourceData, m interface{}) e
 	authenticationCredentials := d.Get("authentication_credentials").(string)
 	rotatedUsername := d.Get("rotated_username").(string)
 	rotatedPassword := d.Get("rotated_password").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInList := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInList)
+	samePassword := d.Get("same_password").(string)
+	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostList := d.Get("secure_access_host").([]interface{})
+	secureAccessHost := common.ExpandStringList(secureAccessHostList)
+	secureAccessRdpDomain := d.Get("secure_access_rdp_domain").(string)
+	secureAccessRdpUser := d.Get("secure_access_rdp_user").(string)
 
 	body := akeyless_api.RotatedSecretCreateWindows{
 		Name:        name,
@@ -135,6 +223,25 @@ func resourceRotatedSecretWindowsCreate(d *schema.ResourceData, m interface{}) e
 	common.GetAkeylessPtr(&body.RotatedUsername, rotatedUsername)
 	common.GetAkeylessPtr(&body.RotatedPassword, rotatedPassword)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SamePassword, samePassword)
+	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
+	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
 
 	_, _, err := client.RotatedSecretCreateWindows(ctx).Body(body).Execute()
 	if err != nil {
@@ -303,6 +410,22 @@ func resourceRotatedSecretWindowsUpdate(d *schema.ResourceData, m interface{}) e
 	rotatedPassword := d.Get("rotated_password").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxVersions := d.Get("max_versions").(string)
+	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
+	rotationEventInList := d.Get("rotation_event_in").([]interface{})
+	rotationEventIn := common.ExpandStringList(rotationEventInList)
+	samePassword := d.Get("same_password").(string)
+	secureAccessAllowExternalUser := d.Get("secure_access_allow_external_user").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessEnable := d.Get("secure_access_enable").(string)
+	secureAccessHostList := d.Get("secure_access_host").([]interface{})
+	secureAccessHost := common.ExpandStringList(secureAccessHostList)
+	secureAccessRdpDomain := d.Get("secure_access_rdp_domain").(string)
+	secureAccessRdpUser := d.Get("secure_access_rdp_user").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.RotatedSecretUpdateWindows{
 		Name:    name,
@@ -328,6 +451,26 @@ func resourceRotatedSecretWindowsUpdate(d *schema.ResourceData, m interface{}) e
 	common.GetAkeylessPtr(&body.RotatedPassword, rotatedPassword)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
+	common.GetAkeylessPtr(&body.RotationEventIn, rotationEventIn)
+	common.GetAkeylessPtr(&body.SamePassword, samePassword)
+	common.GetAkeylessPtr(&body.SecureAccessAllowExternalUser, secureAccessAllowExternalUser)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
+	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
+	common.GetAkeylessPtr(&body.SecureAccessRdpDomain, secureAccessRdpDomain)
+	common.GetAkeylessPtr(&body.SecureAccessRdpUser, secureAccessRdpUser)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
 
 	_, _, err = client.RotatedSecretUpdateWindows(ctx).Body(body).Execute()
 	if err != nil {

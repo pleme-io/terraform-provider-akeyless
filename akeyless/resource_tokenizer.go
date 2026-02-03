@@ -93,6 +93,12 @@ func resourceTokenizer() *schema.Resource {
 				Default:     "false",
 				Description: "Protection from accidental deletion of this item, [true/false]",
 			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -117,6 +123,11 @@ func resourceTokenizerCreate(d *schema.ResourceData, m interface{}) error {
 	tagSet := d.Get("tag").(*schema.Set)
 	tag := common.ExpandStringList(tagSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := make(map[string]string)
+	for k, v := range itemCustomFieldsMap {
+		itemCustomFields[k] = v.(string)
+	}
 
 	body := akeyless_api.CreateTokenizer{
 		Name:          name,
@@ -133,6 +144,9 @@ func resourceTokenizerCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Tag, tag)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		body.ItemCustomFields = &itemCustomFields
+	}
 
 	_, _, err := client.CreateTokenizer(ctx).Body(body).Execute()
 	if err != nil {
@@ -266,6 +280,20 @@ func resourceTokenizerRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFieldsMap := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFieldsMap[*field.Name] = *field.Value
+			}
+		}
+		if len(customFieldsMap) > 0 {
+			err = d.Set("item_custom_fields", customFieldsMap)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	d.SetId(path)
 
@@ -362,6 +390,6 @@ func resourceTokenizerImport(d *schema.ResourceData, m interface{}) ([]*schema.R
 func validateTokenizerUpdateParams(d *schema.ResourceData) error {
 	paramsMustNotUpdate := []string{"tokenizer_type", "template_type",
 		"encryption_key_name", "tweak_type", "alphabet", "pattern",
-		"encoding_template", "decoding_template"}
+		"encoding_template", "decoding_template", "item_custom_fields"}
 	return common.GetErrorOnUpdateParam(d, paramsMustNotUpdate)
 }

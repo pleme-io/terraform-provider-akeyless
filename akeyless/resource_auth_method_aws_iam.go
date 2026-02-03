@@ -114,6 +114,40 @@ func resourceAuthMethodAwsIam() *schema.Resource {
 				Description: "Protection from accidental deletion of this auth method, [true/false]",
 				Default:     "false",
 			},
+			"allowed_client_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Auth Method description",
+			},
+			"expiration_event_in": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"gw_bound_ips": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "A CIDR whitelist with the GW IPs that the access is restricted to",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"product_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"unique_identifier": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A unique identifier (ID) value which is a \"sub claim\" name that contains details uniquely identifying that resource",
+			},
 			"access_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -154,6 +188,16 @@ func resourceAuthMethodAwsIamCreate(d *schema.ResourceData, m interface{}) error
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
+	uniqueIdentifier := d.Get("unique_identifier").(string)
 
 	body := akeyless_api.AuthMethodCreateAwsIam{
 		Name:              name,
@@ -173,6 +217,12 @@ func resourceAuthMethodAwsIamCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.BoundUserId, boundUserId)
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
+	common.GetAkeylessPtr(&body.ProductType, productType)
+	common.GetAkeylessPtr(&body.UniqueIdentifier, uniqueIdentifier)
 
 	rOut, _, err := client.AuthMethodCreateAwsIam(ctx).Body(body).Execute()
 	if err != nil {
@@ -324,6 +374,57 @@ func resourceAuthMethodAwsIamRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	if rOut.AccessInfo.AllowedClientType != nil {
+		err = d.Set("allowed_client_type", rOut.AccessInfo.AllowedClientType)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.Description != nil {
+		err = d.Set("description", *rOut.Description)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.GwCidrWhitelist != nil && *rOut.AccessInfo.GwCidrWhitelist != "" {
+		err = d.Set("gw_bound_ips", strings.Split(*rOut.AccessInfo.GwCidrWhitelist, ","))
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.ProductTypes != nil {
+		err = d.Set("product_type", rOut.AccessInfo.ProductTypes)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.AccessInfo.AwsIamAccessRules.UniqueIdentifier != nil {
+		err = d.Set("unique_identifier", *rOut.AccessInfo.AwsIamAccessRules.UniqueIdentifier)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ExpirationEvents != nil && len(rOut.ExpirationEvents) > 0 {
+		expirationEventIn := make([]string, 0, len(rOut.ExpirationEvents))
+		for _, event := range rOut.ExpirationEvents {
+			if event.SecondsBefore != nil {
+				days := *event.SecondsBefore / 86400
+				expirationEventIn = append(expirationEventIn, strconv.FormatInt(days, 10))
+			}
+		}
+		if len(expirationEventIn) > 0 {
+			err = d.Set("expiration_event_in", expirationEventIn)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	d.SetId(path)
 
 	return nil
@@ -360,6 +461,16 @@ func resourceAuthMethodAwsIamUpdate(d *schema.ResourceData, m interface{}) error
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
+	description := d.Get("description").(string)
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
+	gwBoundIpsSet := d.Get("gw_bound_ips").(*schema.Set)
+	gwBoundIps := common.ExpandStringList(gwBoundIpsSet.List())
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
+	uniqueIdentifier := d.Get("unique_identifier").(string)
 
 	body := akeyless_api.AuthMethodUpdateAwsIam{
 		Name:              name,
@@ -380,6 +491,12 @@ func resourceAuthMethodAwsIamUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.NewName, name)
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
+	common.GetAkeylessPtr(&body.GwBoundIps, gwBoundIps)
+	common.GetAkeylessPtr(&body.ProductType, productType)
+	common.GetAkeylessPtr(&body.UniqueIdentifier, uniqueIdentifier)
 
 	_, _, err := client.AuthMethodUpdateAwsIam(ctx).Body(body).Execute()
 	if err != nil {

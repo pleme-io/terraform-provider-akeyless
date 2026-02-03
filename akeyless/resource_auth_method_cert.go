@@ -125,6 +125,39 @@ func resourceAuthMethodCert() *schema.Resource {
 				Description: "Protection from accidental deletion of this auth method, [true/false]",
 				Default:     "false",
 			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Auth Method description",
+			},
+			"allowed_client_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"allowed_cors": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Comma separated list of allowed CORS domains to be validated as part of the authentication flow",
+			},
+			"product_type": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Choose the relevant product type for the auth method [sm, sra, pm, dp, ca]",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"expiration_event_in": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"new_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Auth Method new name",
+			},
 			"access_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -169,6 +202,14 @@ func resourceAuthMethodCertCreate(d *schema.ResourceData, m interface{}) error {
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
+	allowedCors := d.Get("allowed_cors").(string)
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
 
 	certificateData = base64.StdEncoding.EncodeToString([]byte(certificateData))
 
@@ -192,6 +233,11 @@ func resourceAuthMethodCertCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.RevokedCertIds, revokedCertIds)
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
+	common.GetAkeylessPtr(&body.AllowedCors, allowedCors)
+	common.GetAkeylessPtr(&body.ProductType, productType)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
 
 	rOut, res, err := client.AuthMethodCreateCert(ctx).Body(body).Execute()
 	if err != nil {
@@ -247,6 +293,27 @@ func resourceAuthMethodCertRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("failed to get value: %w", err)
 	}
 
+	if rOut.Description != nil {
+		err = d.Set("description", *rOut.Description)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ExpirationEvents != nil && len(rOut.ExpirationEvents) > 0 {
+		expirationEventIn := make([]string, 0)
+		for _, event := range rOut.ExpirationEvents {
+			if event.SecondsBefore != nil {
+				days := *event.SecondsBefore / 86400
+				expirationEventIn = append(expirationEventIn, strconv.FormatInt(days, 10))
+			}
+		}
+		if len(expirationEventIn) > 0 {
+			err = d.Set("expiration_event_in", expirationEventIn)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	if rOut.AccessInfo != nil {
 		accessInfo := *rOut.AccessInfo
 		if accessInfo.AccessExpires != nil {
@@ -296,6 +363,18 @@ func resourceAuthMethodCertRead(d *schema.ResourceData, m interface{}) error {
 		}
 		if rOut.DeleteProtection != nil {
 			err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
+			if err != nil {
+				return err
+			}
+		}
+		if accessInfo.AllowedClientType != nil {
+			err = d.Set("allowed_client_type", accessInfo.AllowedClientType)
+			if err != nil {
+				return err
+			}
+		}
+		if accessInfo.ProductTypes != nil {
+			err = d.Set("product_type", accessInfo.ProductTypes)
 			if err != nil {
 				return err
 			}
@@ -410,6 +489,15 @@ func resourceAuthMethodCertUpdate(d *schema.ResourceData, m interface{}) error {
 	subClaimsSet := d.Get("audit_logs_claims").(*schema.Set)
 	subClaims := common.ExpandStringList(subClaimsSet.List())
 	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	allowedClientTypeSet := d.Get("allowed_client_type").(*schema.Set)
+	allowedClientType := common.ExpandStringList(allowedClientTypeSet.List())
+	allowedCors := d.Get("allowed_cors").(string)
+	productTypeSet := d.Get("product_type").(*schema.Set)
+	productType := common.ExpandStringList(productTypeSet.List())
+	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
+	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
+	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.AuthMethodUpdateCert{
 		Name:             name,
@@ -431,6 +519,12 @@ func resourceAuthMethodCertUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.RevokedCertIds, revokedCertIds)
 	common.GetAkeylessPtr(&body.AuditLogsClaims, subClaims)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.AllowedClientType, allowedClientType)
+	common.GetAkeylessPtr(&body.AllowedCors, allowedCors)
+	common.GetAkeylessPtr(&body.ProductType, productType)
+	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
+	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.AuthMethodUpdateCert(ctx).Body(body).Execute()
 	if err != nil {

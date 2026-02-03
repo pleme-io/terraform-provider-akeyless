@@ -122,6 +122,37 @@ func resourceProducerRedshift() *schema.Resource {
 				Description: "Enable Web Secure Remote Access ",
 				Computed:    true,
 			},
+			"custom_username_template": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Customize how temporary usernames are generated using go template",
+			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Required:    false,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"password_length": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "The length of the password to be generated",
+			},
+			"ssl": {
+				Type:        schema.TypeBool,
+				Required:    false,
+				Optional:    true,
+				Description: "Enable/Disable SSL [true/false]",
+			},
 		},
 	}
 }
@@ -148,6 +179,11 @@ func resourceProducerRedshiftCreate(d *schema.ResourceData, m interface{}) error
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	passwordLength := d.Get("password_length").(string)
+	ssl := d.Get("ssl").(bool)
 
 	body := akeyless_api.GatewayCreateProducerRedshift{
 		Name:  name,
@@ -165,6 +201,17 @@ func resourceProducerRedshiftCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.Tags, tags)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, &customFieldsMap)
+	}
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.Ssl, ssl)
 
 	_, _, err := client.GatewayCreateProducerRedshift(ctx).Body(body).Execute()
 	if err != nil {
@@ -268,6 +315,46 @@ func resourceProducerRedshiftRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.PasswordLength != nil {
+		err = d.Set("password_length", fmt.Sprintf("%d", *rOut.PasswordLength))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.SslConnectionMode != nil {
+		err = d.Set("ssl", *rOut.SslConnectionMode)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		if *rOut.DeleteProtection {
+			err = d.Set("delete_protection", "true")
+		} else {
+			err = d.Set("delete_protection", "false")
+		}
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFields := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				customFields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		err = d.Set("item_custom_fields", customFields)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.UsernameTemplate != nil {
+		err = d.Set("custom_username_template", *rOut.UsernameTemplate)
+		if err != nil {
+			return err
+		}
+	}
 
 	common.GetSra(d, rOut.SecureRemoteAccessDetails, "DYNAMIC_SECERT")
 
@@ -298,6 +385,11 @@ func resourceProducerRedshiftUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
+	customUsernameTemplate := d.Get("custom_username_template").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	passwordLength := d.Get("password_length").(string)
+	ssl := d.Get("ssl").(bool)
 
 	body := akeyless_api.GatewayUpdateProducerRedshift{
 		Name:  name,
@@ -315,6 +407,17 @@ func resourceProducerRedshiftUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.Tags, tags)
+	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, &customFieldsMap)
+	}
+	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
+	common.GetAkeylessPtr(&body.Ssl, ssl)
 
 	_, _, err := client.GatewayUpdateProducerRedshift(ctx).Body(body).Execute()
 	if err != nil {

@@ -86,6 +86,22 @@ func resourceGatewayUpdateRemoteAccessRdpRecording() *schema.Resource {
 				Optional:    true,
 				Description: "Azure tenant id. For more information refer to https://learn.microsoft.com/en-us/entra/fundamentals/how-to-find-tenant",
 			},
+			"rdp_session_recording_compress": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to compress recording files before upload",
+			},
+			"rdp_session_recording_encryption_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "If provided, this key will be used to encrypt uploaded recordings",
+			},
+			"rdp_session_recording_quality": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "RDP session recording quality [low/medium/high]",
+			},
 		},
 	}
 }
@@ -191,6 +207,24 @@ func resourceGatewayUpdateRemoteAccessRdpRecordingRead(d *schema.ResourceData, m
 					}
 				}
 			}
+			if rdpRecord.Compress != nil {
+				err = d.Set("rdp_session_recording_compress", *rdpRecord.Compress)
+				if err != nil {
+					return err
+				}
+			}
+			if rdpRecord.EncryptionKey != nil {
+				err = d.Set("rdp_session_recording_encryption_key", *rdpRecord.EncryptionKey)
+				if err != nil {
+					return err
+				}
+			}
+			if rdpRecord.RecordingQuality != nil {
+				err = d.Set("rdp_session_recording_quality", *rdpRecord.RecordingQuality)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
@@ -218,6 +252,9 @@ func resourceGatewayUpdateRemoteAccessRdpRecordingUpdate(d *schema.ResourceData,
 	azureStorageClientId := d.Get("azure_storage_client_id").(string)
 	azureStorageClientSecret := d.Get("azure_storage_client_secret").(string)
 	azureStorageTenantId := d.Get("azure_storage_tenant_id").(string)
+	rdpSessionRecordingCompress := d.Get("rdp_session_recording_compress").(bool)
+	rdpSessionRecordingEncryptionKey := d.Get("rdp_session_recording_encryption_key").(string)
+	rdpSessionRecordingQuality := d.Get("rdp_session_recording_quality").(string)
 
 	body := akeyless_api.GatewayUpdateRemoteAccessRdpRecordings{
 		Token: &token,
@@ -234,6 +271,9 @@ func resourceGatewayUpdateRemoteAccessRdpRecordingUpdate(d *schema.ResourceData,
 	common.GetAkeylessPtr(&body.AzureStorageClientId, azureStorageClientId)
 	common.GetAkeylessPtr(&body.AzureStorageClientSecret, azureStorageClientSecret)
 	common.GetAkeylessPtr(&body.AzureStorageTenantId, azureStorageTenantId)
+	common.GetAkeylessPtr(&body.RdpSessionRecordingCompress, rdpSessionRecordingCompress)
+	common.GetAkeylessPtr(&body.RdpSessionRecordingEncryptionKey, rdpSessionRecordingEncryptionKey)
+	common.GetAkeylessPtr(&body.RdpSessionRecordingQuality, rdpSessionRecordingQuality)
 
 	_, _, err := client.GatewayUpdateRemoteAccessRdpRecordings(ctx).Body(body).Execute()
 	if err != nil {

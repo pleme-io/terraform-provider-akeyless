@@ -51,6 +51,11 @@ func resourceDynamicSecretK8s() *schema.Resource {
 				Sensitive:   true,
 				Description: "K8S Cluster authentication token.",
 			},
+			"k8s_cluster_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "K8S cluster name",
+			},
 			"k8s_service_account": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -83,6 +88,16 @@ func resourceDynamicSecretK8s() *schema.Resource {
 				Optional:    true,
 				Description: "Specifies the type of the pre-existing K8S role [Role, ClusterRole] (relevant only for k8s-service-account-type=dynamic).",
 			},
+			"k8s_rolebinding_yaml_data": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Content of the yaml in a Base64 format",
+			},
+			"k8s_rolebinding_yaml_def": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to yaml file that contains definitions of K8S role and role binding (relevant only for k8s-service-account-type=dynamic)",
+			},
 			"user_ttl": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -98,6 +113,22 @@ func resourceDynamicSecretK8s() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Customize how temporary usernames are generated using go template",
+			},
+			"use_gw_service_account": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use the GW's service account",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -129,6 +160,16 @@ func resourceDynamicSecretK8s() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
 			},
 			"secure_access_web_browsing": {
 				Type:        schema.TypeBool,
@@ -168,15 +209,22 @@ func resourceDynamicSecretK8sCreate(d *schema.ResourceData, m interface{}) error
 	k8sClusterEndpoint := d.Get("k8s_cluster_endpoint").(string)
 	k8sClusterCaCert := d.Get("k8s_cluster_ca_cert").(string)
 	k8sClusterToken := d.Get("k8s_cluster_token").(string)
+	k8sClusterName := d.Get("k8s_cluster_name").(string)
 	k8sServiceAccount := d.Get("k8s_service_account").(string)
 	k8sNamespace := d.Get("k8s_namespace").(string)
 	k8sServiceAccountType := d.Get("k8s_service_account_type").(string)
 	k8sAllowedNamespaces := d.Get("k8s_allowed_namespaces").(string)
 	k8sPredefinedRoleName := d.Get("k8s_predefined_role_name").(string)
 	k8sPredefinedRoleType := d.Get("k8s_predefined_role_type").(string)
+	k8sRolebindingYamlData := d.Get("k8s_rolebinding_yaml_data").(string)
+	k8sRolebindingYamlDef := d.Get("k8s_rolebinding_yaml_def").(string)
 	producerEncryptionKeyName := d.Get("encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	useGwServiceAccount := d.Get("use_gw_service_account").(bool)
+	description := d.Get("description").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -184,6 +232,8 @@ func resourceDynamicSecretK8sCreate(d *schema.ResourceData, m interface{}) error
 	secureAccessDashboardUrl := d.Get("secure_access_dashboard_url").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
@@ -197,21 +247,29 @@ func resourceDynamicSecretK8sCreate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.K8sClusterEndpoint, k8sClusterEndpoint)
 	common.GetAkeylessPtr(&body.K8sClusterCaCert, k8sClusterCaCert)
 	common.GetAkeylessPtr(&body.K8sClusterToken, k8sClusterToken)
+	common.GetAkeylessPtr(&body.K8sClusterName, k8sClusterName)
 	common.GetAkeylessPtr(&body.K8sServiceAccount, k8sServiceAccount)
 	common.GetAkeylessPtr(&body.K8sNamespace, k8sNamespace)
 	common.GetAkeylessPtr(&body.K8sServiceAccountType, k8sServiceAccountType)
 	common.GetAkeylessPtr(&body.K8sAllowedNamespaces, k8sAllowedNamespaces)
 	common.GetAkeylessPtr(&body.K8sPredefinedRoleName, k8sPredefinedRoleName)
 	common.GetAkeylessPtr(&body.K8sPredefinedRoleType, k8sPredefinedRoleType)
+	common.GetAkeylessPtr(&body.K8sRolebindingYamlData, k8sRolebindingYamlData)
+	common.GetAkeylessPtr(&body.K8sRolebindingYamlDef, k8sRolebindingYamlDef)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.UseGwServiceAccount, useGwServiceAccount)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessDashboardUrl, secureAccessDashboardUrl)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelay)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
@@ -259,6 +317,12 @@ func resourceDynamicSecretK8sRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if rOut.K8sClusterEndpoint != nil {
 		err = d.Set("k8s_cluster_endpoint", *rOut.K8sClusterEndpoint)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.K8sClusterName != nil {
+		err = d.Set("k8s_cluster_name", *rOut.K8sClusterName)
 		if err != nil {
 			return err
 		}
@@ -352,6 +416,27 @@ func resourceDynamicSecretK8sRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	if rOut.UseGwServiceAccount != nil {
+		err = d.Set("use_gw_service_account", *rOut.UseGwServiceAccount)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.ItemMetadata != nil {
+		err = d.Set("description", *rOut.ItemGeneralInfo.ItemMetadata)
+		if err != nil {
+			return err
+		}
+	}
+
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.CustomFields != nil {
+		err = d.Set("item_custom_fields", *rOut.ItemGeneralInfo.CustomFields)
+		if err != nil {
+			return err
+		}
+	}
+
 	common.GetSra(d, rOut.SecureRemoteAccessDetails, "DYNAMIC_SECERT")
 
 	d.SetId(path)
@@ -371,15 +456,22 @@ func resourceDynamicSecretK8sUpdate(d *schema.ResourceData, m interface{}) error
 	k8sClusterEndpoint := d.Get("k8s_cluster_endpoint").(string)
 	k8sClusterCaCert := d.Get("k8s_cluster_ca_cert").(string)
 	k8sClusterToken := d.Get("k8s_cluster_token").(string)
+	k8sClusterName := d.Get("k8s_cluster_name").(string)
 	k8sServiceAccount := d.Get("k8s_service_account").(string)
 	k8sNamespace := d.Get("k8s_namespace").(string)
 	k8sServiceAccountType := d.Get("k8s_service_account_type").(string)
 	k8sAllowedNamespaces := d.Get("k8s_allowed_namespaces").(string)
 	k8sPredefinedRoleName := d.Get("k8s_predefined_role_name").(string)
 	k8sPredefinedRoleType := d.Get("k8s_predefined_role_type").(string)
+	k8sRolebindingYamlData := d.Get("k8s_rolebinding_yaml_data").(string)
+	k8sRolebindingYamlDef := d.Get("k8s_rolebinding_yaml_def").(string)
 	producerEncryptionKeyName := d.Get("encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
+	useGwServiceAccount := d.Get("use_gw_service_account").(bool)
+	description := d.Get("description").(string)
+	itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+	itemCustomFields := common.ConvertMapInterfaceToMapString(itemCustomFieldsMap)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -387,6 +479,8 @@ func resourceDynamicSecretK8sUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessDashboardUrl := d.Get("secure_access_dashboard_url").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
@@ -400,21 +494,29 @@ func resourceDynamicSecretK8sUpdate(d *schema.ResourceData, m interface{}) error
 	common.GetAkeylessPtr(&body.K8sClusterEndpoint, k8sClusterEndpoint)
 	common.GetAkeylessPtr(&body.K8sClusterCaCert, k8sClusterCaCert)
 	common.GetAkeylessPtr(&body.K8sClusterToken, k8sClusterToken)
+	common.GetAkeylessPtr(&body.K8sClusterName, k8sClusterName)
 	common.GetAkeylessPtr(&body.K8sServiceAccount, k8sServiceAccount)
 	common.GetAkeylessPtr(&body.K8sNamespace, k8sNamespace)
 	common.GetAkeylessPtr(&body.K8sServiceAccountType, k8sServiceAccountType)
 	common.GetAkeylessPtr(&body.K8sAllowedNamespaces, k8sAllowedNamespaces)
 	common.GetAkeylessPtr(&body.K8sPredefinedRoleName, k8sPredefinedRoleName)
 	common.GetAkeylessPtr(&body.K8sPredefinedRoleType, k8sPredefinedRoleType)
+	common.GetAkeylessPtr(&body.K8sRolebindingYamlData, k8sRolebindingYamlData)
+	common.GetAkeylessPtr(&body.K8sRolebindingYamlDef, k8sRolebindingYamlDef)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
+	common.GetAkeylessPtr(&body.UseGwServiceAccount, useGwServiceAccount)
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.ItemCustomFields, itemCustomFields)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessDashboardUrl, secureAccessDashboardUrl)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
 	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	common.GetAkeylessPtr(&body.SecureAccessDelay, secureAccessDelay)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)

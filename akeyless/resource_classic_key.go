@@ -117,6 +117,23 @@ func resourceClassicKey() *schema.Resource {
 				Description: "The format of the returned certificate [pem/der]",
 				Default:     "pem",
 			},
+			"certificate_digest_algo": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Digest algorithm to be used for the certificate key signing",
+			},
+			"hash_algorithm": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Hash algorithm used for the encryption key's operations, available options: [SHA256, SHA384, SHA512]",
+				Default:     "SHA256",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -172,6 +189,9 @@ func resourceClassicKeyCreate(d *schema.ResourceData, m interface{}) error {
 	certificateProvince := d.Get("certificate_province").(string)
 	confFileData := d.Get("conf_file_data").(string)
 	certificateFormat := d.Get("certificate_format").(string)
+	certificateDigestAlgo := d.Get("certificate_digest_algo").(string)
+	hashAlgorithm := d.Get("hash_algorithm").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	expirationEventInSet := d.Get("expiration_event_in").(*schema.Set)
 	expirationEventIn := common.ExpandStringList(expirationEventInSet.List())
 	autoRotate := d.Get("auto_rotate").(string)
@@ -203,6 +223,15 @@ func resourceClassicKeyCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.CertificateProvince, certificateProvince)
 	common.GetAkeylessPtr(&body.ConfFileData, confFileData)
 	common.GetAkeylessPtr(&body.CertificateFormat, certificateFormat)
+	common.GetAkeylessPtr(&body.CertificateDigestAlgo, certificateDigestAlgo)
+	common.GetAkeylessPtr(&body.HashAlgorithm, hashAlgorithm)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, customFieldsMap)
+	}
 	common.GetAkeylessPtr(&body.ExpirationEventIn, expirationEventIn)
 	common.GetAkeylessPtr(&body.AutoRotate, autoRotate)
 	common.GetAkeylessPtr(&body.RotationInterval, rotationInterval)
@@ -274,6 +303,20 @@ func resourceClassicKeyRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFieldsMap := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFieldsMap[*field.Name] = *field.Value
+			}
+		}
+		if len(customFieldsMap) > 0 {
+			err = d.Set("item_custom_fields", customFieldsMap)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	if rOut.ItemGeneralInfo != nil {
 		if rOut.ItemGeneralInfo.ClassicKeyDetails != nil {
 			classicKeyDetails := *rOut.ItemGeneralInfo.ClassicKeyDetails
@@ -287,6 +330,21 @@ func resourceClassicKeyRead(d *schema.ResourceData, m interface{}) error {
 				err = d.Set("gpg_alg", gpgAlg)
 				if err != nil {
 					return err
+				}
+			}
+			if classicKeyDetails.ClassicKeyAttributes != nil {
+				attrs := *classicKeyDetails.ClassicKeyAttributes
+				if hashAlgList, ok := attrs["hash_algorithm"]; ok && len(hashAlgList) > 0 {
+					err := d.Set("hash_algorithm", hashAlgList[0])
+					if err != nil {
+						return err
+					}
+				}
+				if certDigestList, ok := attrs["certificate_digest_algo"]; ok && len(certDigestList) > 0 {
+					err := d.Set("certificate_digest_algo", certDigestList[0])
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -533,6 +591,7 @@ func validateClassicKeyUpdateParams(d *schema.ResourceData) error {
 		"generate_self_signed_certificate", "certificate_ttl",
 		"certificate_common_name", "certificate_organization",
 		"certificate_country", "certificate_locality", "certificate_province",
-		"conf_file_data", "protection_key_name", "key_data"}
+		"conf_file_data", "protection_key_name", "key_data",
+		"certificate_digest_algo", "hash_algorithm", "item_custom_fields"}
 	return common.GetErrorOnUpdateParam(d, paramsMustNotUpdate)
 }

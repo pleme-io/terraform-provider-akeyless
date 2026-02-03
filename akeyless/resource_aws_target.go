@@ -64,6 +64,31 @@ func resourceAwsTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the object",
 			},
+			"generate_external_id": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "A unique auto-generated value used in your AWS account when configuring your AWS IAM role to securely delegate access to Akeyless. Relevant only when using GW cloud ID",
+			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"role_arn": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "AWS IAM role identifier that Gateway will assume in your AWS account, relevant only when using external ID",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
+			"new_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "New target name",
+			},
 		},
 	}
 }
@@ -83,6 +108,9 @@ func resourceAwsTargetCreate(d *schema.ResourceData, m interface{}) error {
 	useGwCloudIdentity := d.Get("use_gw_cloud_identity").(bool)
 	key := d.Get("key").(string)
 	description := d.Get("description").(string)
+	generateExternalId := d.Get("generate_external_id").(bool)
+	maxVersions := d.Get("max_versions").(string)
+	roleArn := d.Get("role_arn").(string)
 
 	body := akeyless_api.TargetCreateAws{
 		Name:  name,
@@ -95,6 +123,9 @@ func resourceAwsTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.UseGwCloudIdentity, useGwCloudIdentity)
 	common.GetAkeylessPtr(&body.Key, key)
 	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.GenerateExternalId, generateExternalId)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RoleArn, roleArn)
 
 	_, _, err := client.TargetCreateAws(ctx).Body(body).Execute()
 	if err != nil {
@@ -182,6 +213,12 @@ func resourceAwsTargetRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if rOut.Value.AwsTargetDetails.GwCloudIdentityExternalIdOpt != nil && rOut.Value.AwsTargetDetails.GwCloudIdentityExternalIdOpt.RoleArn != nil {
+		err = d.Set("role_arn", *rOut.Value.AwsTargetDetails.GwCloudIdentityExternalIdOpt.RoleArn)
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -203,6 +240,11 @@ func resourceAwsTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	region := d.Get("region").(string)
 	useGwCloudIdentity := d.Get("use_gw_cloud_identity").(bool)
 	key := d.Get("key").(string)
+	generateExternalId := d.Get("generate_external_id").(bool)
+	maxVersions := d.Get("max_versions").(string)
+	roleArn := d.Get("role_arn").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
+	newName := d.Get("new_name").(string)
 
 	body := akeyless_api.TargetUpdateAws{
 		Name:  name,
@@ -215,6 +257,11 @@ func resourceAwsTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.Region, region)
 	common.GetAkeylessPtr(&body.UseGwCloudIdentity, useGwCloudIdentity)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.GenerateExternalId, generateExternalId)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.RoleArn, roleArn)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
+	common.GetAkeylessPtr(&body.NewName, newName)
 
 	_, _, err := client.TargetUpdateAws(ctx).Body(body).Execute()
 	if err != nil {

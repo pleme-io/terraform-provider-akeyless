@@ -43,6 +43,32 @@ func resourceUsc() *schema.Resource {
 				Optional:    true,
 				Description: "K8s namespace (Relevant to Kubernetes targets)",
 			},
+			"gcp_project_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "GCP Project ID (Relevant only for GCP targets)",
+			},
+			"gcp_sm_regions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "GCP Secret Manager regions to query for regional secrets (comma-separated, e.g., us-east1,us-west1). Max 12 regions. Required when listing with object-type=regional-secrets",
+			},
+			"usc_prefix": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Prefix for all secrets created in AWS Secrets Manager",
+			},
+			"use_prefix_as_filter": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to filter the USC secret list using the specified usc-prefix [true/false]",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -74,6 +100,10 @@ func resourceUscCreate(d *schema.ResourceData, m any) error {
 	targetToAssociate := d.Get("target_to_associate").(string)
 	azureKvName := d.Get("azure_kv_name").(string)
 	k8sNamespace := d.Get("k8s_namespace").(string)
+	gcpProjectId := d.Get("gcp_project_id").(string)
+	gcpSmRegions := d.Get("gcp_sm_regions").(string)
+	uscPrefix := d.Get("usc_prefix").(string)
+	usePrefixAsFilter := d.Get("use_prefix_as_filter").(string)
 	description := d.Get("description").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
@@ -86,9 +116,24 @@ func resourceUscCreate(d *schema.ResourceData, m any) error {
 	}
 	common.GetAkeylessPtr(&body.AzureKvName, azureKvName)
 	common.GetAkeylessPtr(&body.K8sNamespace, k8sNamespace)
+	common.GetAkeylessPtr(&body.GcpProjectId, gcpProjectId)
+	common.GetAkeylessPtr(&body.GcpSmRegions, gcpSmRegions)
+	common.GetAkeylessPtr(&body.UscPrefix, uscPrefix)
+	common.GetAkeylessPtr(&body.UsePrefixAsFilter, usePrefixAsFilter)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+
+	if d.Get("item_custom_fields") != nil {
+		itemCustomFieldsMap := d.Get("item_custom_fields").(map[string]interface{})
+		if len(itemCustomFieldsMap) > 0 {
+			itemCustomFields := make(map[string]string)
+			for k, v := range itemCustomFieldsMap {
+				itemCustomFields[k] = v.(string)
+			}
+			body.ItemCustomFields = &itemCustomFields
+		}
+	}
 
 	_, resp, err := client.CreateUSC(ctx).Body(body).Execute()
 	if err != nil {
@@ -163,7 +208,42 @@ func resourceUscRead(d *schema.ResourceData, m any) error {
 						return err
 					}
 				}
+				if gcpProjectId, ok := attr["gcp_project_id"]; ok {
+					err := d.Set("gcp_project_id", gcpProjectId)
+					if err != nil {
+						return err
+					}
+				}
+				if gcpSmRegions, ok := attr["gcp_sm_regions"]; ok {
+					err := d.Set("gcp_sm_regions", gcpSmRegions)
+					if err != nil {
+						return err
+					}
+				}
+				if uscPrefix, ok := attr["usc_prefix"]; ok {
+					err := d.Set("usc_prefix", uscPrefix)
+					if err != nil {
+						return err
+					}
+				}
+				if usePrefixAsFilter, ok := attr["use_prefix_as_filter"]; ok {
+					err := d.Set("use_prefix_as_filter", usePrefixAsFilter)
+					if err != nil {
+						return err
+					}
+				}
 			}
+		}
+	}
+
+	if rOut.ItemCustomFieldsDetails != nil {
+		itemCustomFields := make(map[string]string)
+		for k, v := range *rOut.ItemCustomFieldsDetails {
+			itemCustomFields[k] = v
+		}
+		err := d.Set("item_custom_fields", itemCustomFields)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -260,6 +340,11 @@ func validateUscUpdateParams(d *schema.ResourceData) error {
 		"target_to_associate",
 		"azure_kv_name",
 		"k8s_namespace",
+		"gcp_project_id",
+		"gcp_sm_regions",
+		"usc_prefix",
+		"use_prefix_as_filter",
+		"item_custom_fields",
 	}
 	return common.GetErrorOnUpdateParam(d, paramsMustNotUpdate)
 }

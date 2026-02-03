@@ -222,6 +222,38 @@ func resourcePKICertIssuer() *schema.Resource {
 				Optional:    true,
 				Description: "Protection from accidental deletion of this item, [true/false]",
 			},
+			"disable_wildcards": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "If set, generation of wildcard certificates will be disabled",
+			},
+			"create_private_ocsp": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Set this to enable an OCSP endpoint in the Gateway and include its URL in AIA",
+			},
+			"create_public_ocsp": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Set this to enable a public OCSP endpoint and include its URL in AIA (served by UAM and includes account id)",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"max_path_len": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The maximum path length for the generated certificate. -1 means unlimited",
+				Default:     -1,
+			},
+			"ocsp_ttl": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "OCSP NextUpdate window for OCSP responses (min 10m). Supports s,m,h,d suffix",
+			},
 		},
 	}
 }
@@ -272,6 +304,12 @@ func resourcePKICertIssuerCreate(d *schema.ResourceData, m interface{}) error {
 	scheduledRenew := d.Get("scheduled_renew").(int)
 	description := d.Get("description").(string)
 	deleteProtection := d.Get("delete_protection").(bool)
+	disableWildcards := d.Get("disable_wildcards").(bool)
+	createPrivateOcsp := d.Get("create_private_ocsp").(bool)
+	createPublicOcsp := d.Get("create_public_ocsp").(bool)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxPathLen := int64(d.Get("max_path_len").(int))
+	ocspTtl := d.Get("ocsp_ttl").(string)
 
 	body := akeyless_api.CreatePKICertIssuer{
 		Name:  name,
@@ -314,6 +352,18 @@ func resourcePKICertIssuerCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ScheduledRenew, scheduledRenew)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.DeleteProtection, strconv.FormatBool(deleteProtection))
+	common.GetAkeylessPtr(&body.DisableWildcards, disableWildcards)
+	common.GetAkeylessPtr(&body.CreatePrivateOcsp, createPrivateOcsp)
+	common.GetAkeylessPtr(&body.CreatePublicOcsp, createPublicOcsp)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, customFieldsMap)
+	}
+	common.GetAkeylessPtr(&body.MaxPathLen, maxPathLen)
+	common.GetAkeylessPtr(&body.OcspTtl, ocspTtl)
 
 	_, resp, err := client.CreatePKICertIssuer(ctx).Body(body).Execute()
 	if err != nil {
@@ -600,6 +650,52 @@ func resourcePKICertIssuerRead(d *schema.ResourceData, m interface{}) error {
 					return err
 				}
 			}
+			if pki.DisableWildcards != nil {
+				err := d.Set("disable_wildcards", *pki.DisableWildcards)
+				if err != nil {
+					return err
+				}
+			}
+			if pki.CreatePrivateOcsp != nil {
+				err := d.Set("create_private_ocsp", *pki.CreatePrivateOcsp)
+				if err != nil {
+					return err
+				}
+			}
+			if pki.CreatePublicOcsp != nil {
+				err := d.Set("create_public_ocsp", *pki.CreatePublicOcsp)
+				if err != nil {
+					return err
+				}
+			}
+			if pki.MaxPathLen != nil {
+				err := d.Set("max_path_len", *pki.MaxPathLen)
+				if err != nil {
+					return err
+				}
+			}
+			if pki.OcspNextUpdate != nil {
+				// Convert seconds to time string format
+				ocspTtlStr := common.SecondsToTimeString(int(*pki.OcspNextUpdate))
+				err := d.Set("ocsp_ttl", ocspTtlStr)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		customFieldsMap := make(map[string]string)
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFieldsMap[*field.Name] = *field.Value
+			}
+		}
+		if len(customFieldsMap) > 0 {
+			err := d.Set("item_custom_fields", customFieldsMap)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -706,6 +802,12 @@ func resourcePKICertIssuerUpdate(d *schema.ResourceData, m interface{}) error {
 	scheduledRenew := d.Get("scheduled_renew").(int)
 	description := d.Get("description").(string)
 	deleteProtection := d.Get("delete_protection").(bool)
+	disableWildcards := d.Get("disable_wildcards").(bool)
+	createPrivateOcsp := d.Get("create_private_ocsp").(bool)
+	createPublicOcsp := d.Get("create_public_ocsp").(bool)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	maxPathLen := int64(d.Get("max_path_len").(int))
+	ocspTtl := d.Get("ocsp_ttl").(string)
 
 	body := akeyless_api.UpdatePKICertIssuer{
 		Name:  name,
@@ -758,6 +860,18 @@ func resourcePKICertIssuerUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.ScheduledRenew, scheduledRenew)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.DeleteProtection, strconv.FormatBool(deleteProtection))
+	common.GetAkeylessPtr(&body.DisableWildcards, disableWildcards)
+	common.GetAkeylessPtr(&body.CreatePrivateOcsp, createPrivateOcsp)
+	common.GetAkeylessPtr(&body.CreatePublicOcsp, createPublicOcsp)
+	if len(itemCustomFields) > 0 {
+		customFieldsMap := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFieldsMap[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, customFieldsMap)
+	}
+	common.GetAkeylessPtr(&body.MaxPathLen, maxPathLen)
+	common.GetAkeylessPtr(&body.OcspTtl, ocspTtl)
 
 	_, resp, err := client.UpdatePKICertIssuer(ctx).Body(body).Execute()
 	if err != nil {

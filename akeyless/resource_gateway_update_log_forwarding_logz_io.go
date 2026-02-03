@@ -54,6 +54,17 @@ func resourceGatewayUpdateLogForwardingLogzIo() *schema.Resource {
 				Optional:    true,
 				Description: "Logz-io protocol [tcp/https]",
 			},
+			"json": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Set output format to JSON",
+				Default:     false,
+			},
+			"uid_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The universal identity token, Required only for universal_identity authentication",
+			},
 		},
 	}
 }
@@ -115,6 +126,8 @@ func resourceGatewayUpdateLogForwardingLogzIoUpdate(d *schema.ResourceData, m in
 	pullInterval := d.Get("pull_interval").(string)
 	logzIoToken := d.Get("logz_io_token").(string)
 	protocol := d.Get("protocol").(string)
+	json := d.Get("json").(bool)
+	uidToken := d.Get("uid_token").(string)
 
 	body := akeyless_api.GatewayUpdateLogForwardingLogzIo{
 		Token: &token,
@@ -124,6 +137,8 @@ func resourceGatewayUpdateLogForwardingLogzIoUpdate(d *schema.ResourceData, m in
 	common.GetAkeylessPtr(&body.PullInterval, pullInterval)
 	common.GetAkeylessPtr(&body.LogzIoToken, logzIoToken)
 	common.GetAkeylessPtr(&body.Protocol, protocol)
+	common.GetAkeylessPtr(&body.Json, json)
+	common.GetAkeylessPtr(&body.UidToken, uidToken)
 
 	_, _, err := client.GatewayUpdateLogForwardingLogzIo(ctx).Body(body).Execute()
 	if err != nil {

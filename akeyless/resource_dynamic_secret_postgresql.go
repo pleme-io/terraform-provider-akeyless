@@ -138,6 +138,32 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 				Computed:    true,
 				Description: "The DB Name",
 			},
+			"delete_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection from accidental deletion of this object [true/false]",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the object",
+			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"secure_access_certificate_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
+			},
+			"secure_access_delay": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
+			},
 		},
 	}
 }
@@ -171,6 +197,11 @@ func resourceDynamicSecretPostgresqlCreate(d *schema.ResourceData, m interface{}
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 
 	body := akeyless_api.DynamicSecretCreatePostgreSql{
 		Name:  name,
@@ -195,6 +226,20 @@ func resourceDynamicSecretPostgresqlCreate(d *schema.ResourceData, m interface{}
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, fields)
+	}
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay > 0 {
+		delay := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, delay)
+	}
 
 	_, _, err := client.DynamicSecretCreatePostgreSql(ctx).Body(body).Execute()
 	if err != nil {
@@ -318,7 +363,48 @@ func resourceDynamicSecretPostgresqlRead(d *schema.ResourceData, m interface{}) 
 		}
 	}
 
+	if rOut.DeleteProtection != nil {
+		err = d.Set("delete_protection", fmt.Sprintf("%t", *rOut.DeleteProtection))
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemMetadata != nil {
+		err = d.Set("description", *rOut.ItemMetadata)
+		if err != nil {
+			return err
+		}
+	}
+	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
+		fields := make(map[string]interface{})
+		for _, field := range rOut.ItemCustomFieldsDetails {
+			if field.FieldName != nil && field.FieldValue != nil {
+				fields[*field.FieldName] = *field.FieldValue
+			}
+		}
+		err = d.Set("item_custom_fields", fields)
+		if err != nil {
+			return err
+		}
+	}
+
 	common.GetSra(d, rOut.SecureRemoteAccessDetails, "DYNAMIC_SECERT")
+
+	if rOut.SecureRemoteAccessDetails != nil {
+		sra := rOut.SecureRemoteAccessDetails
+		if sra.BastionIssuer != nil {
+			err = d.Set("secure_access_certificate_issuer", *sra.BastionIssuer)
+			if err != nil {
+				return err
+			}
+		}
+		if sra.ConnectionDelaySeconds != nil {
+			err = d.Set("secure_access_delay", int(*sra.ConnectionDelaySeconds))
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	d.SetId(path)
 
@@ -354,6 +440,11 @@ func resourceDynamicSecretPostgresqlUpdate(d *schema.ResourceData, m interface{}
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessDbSchema := d.Get("secure_access_db_schema").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
+	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	secureAccessDelay := d.Get("secure_access_delay").(int)
 
 	body := akeyless_api.DynamicSecretUpdatePostgreSql{
 		Name:  name,
@@ -378,6 +469,20 @@ func resourceDynamicSecretPostgresqlUpdate(d *schema.ResourceData, m interface{}
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessDbSchema, secureAccessDbSchema)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&body.Description, description)
+	if len(itemCustomFields) > 0 {
+		fields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			fields[k] = v.(string)
+		}
+		common.GetAkeylessPtr(&body.ItemCustomFields, fields)
+	}
+	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
+	if secureAccessDelay > 0 {
+		delay := int64(secureAccessDelay)
+		common.GetAkeylessPtr(&body.SecureAccessDelay, delay)
+	}
 
 	_, _, err := client.DynamicSecretUpdatePostgreSql(ctx).Body(body).Execute()
 	if err != nil {

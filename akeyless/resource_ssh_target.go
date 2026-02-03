@@ -77,6 +77,16 @@ func resourceSSHTarget() *schema.Resource {
 				Optional:    true,
 				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
 			},
+			"max_versions": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Set the maximum number of versions, limited by the account settings defaults",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
+			},
 		},
 	}
 }
@@ -97,6 +107,7 @@ func resourceSSHTargetCreate(d *schema.ResourceData, m interface{}) error {
 	privateKey := d.Get("private_key").(string)
 	privateKeyPassword := d.Get("private_key_password").(string)
 	key := d.Get("key").(string)
+	maxVersions := d.Get("max_versions").(string)
 
 	body := akeyless_api.TargetCreateSsh{
 		Name:  name,
@@ -110,6 +121,7 @@ func resourceSSHTargetCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.PrivateKey, privateKey)
 	common.GetAkeylessPtr(&body.PrivateKeyPassword, privateKeyPassword)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
 
 	_, _, err := client.TargetCreateSsh(ctx).Body(body).Execute()
 	if err != nil {
@@ -222,6 +234,8 @@ func resourceSSHTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	privateKey := d.Get("private_key").(string)
 	privateKeyPassword := d.Get("private_key_password").(string)
 	key := d.Get("key").(string)
+	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 
 	body := akeyless_api.TargetUpdateSsh{
 		Name:  name,
@@ -235,6 +249,8 @@ func resourceSSHTargetUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.PrivateKey, privateKey)
 	common.GetAkeylessPtr(&body.PrivateKeyPassword, privateKeyPassword)
 	common.GetAkeylessPtr(&body.Key, key)
+	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 
 	_, _, err := client.TargetUpdateSsh(ctx).Body(body).Execute()
 	if err != nil {

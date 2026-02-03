@@ -102,6 +102,12 @@ func resourceDynamicSecretGitlab() *schema.Resource {
 				Description: "Protection from accidental deletion of this item, [true/false]",
 				Default:     "false",
 			},
+			"item_custom_fields": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional custom fields to associate with the item",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -128,6 +134,7 @@ func resourceDynamicSecretGitlabCreate(d *schema.ResourceData, m interface{}) er
 	tags := common.ExpandStringList(tagsSet.List())
 	description := d.Get("description").(string)
 	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.DynamicSecretCreateGitlab{
 		Name:  name,
@@ -146,6 +153,13 @@ func resourceDynamicSecretGitlabCreate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
 
 	_, _, err := client.DynamicSecretCreateGitlab(ctx).Body(body).Execute()
 	if err != nil {
@@ -266,6 +280,12 @@ func resourceDynamicSecretGitlabRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 	}
+	if rOut.ItemCustomFieldsDetails != nil && rOut.ItemCustomFieldsDetails.ItemCustomFields != nil {
+		err = d.Set("item_custom_fields", *rOut.ItemGeneralInfo.ItemCustomFields)
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -294,6 +314,7 @@ func resourceDynamicSecretGitlabUpdate(d *schema.ResourceData, m interface{}) er
 	tags := common.ExpandStringList(tagsSet.List())
 	description := d.Get("description").(string)
 	deleteProtection := d.Get("delete_protection").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.DynamicSecretUpdateGitlab{
 		Name:  name,
@@ -312,6 +333,13 @@ func resourceDynamicSecretGitlabUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.Description, description)
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+	if len(itemCustomFields) > 0 {
+		customFields := make(map[string]string)
+		for k, v := range itemCustomFields {
+			customFields[k] = v.(string)
+		}
+		body.ItemCustomFields = &customFields
+	}
 
 	_, _, err := client.DynamicSecretUpdateGitlab(ctx).Body(body).Execute()
 	if err != nil {
