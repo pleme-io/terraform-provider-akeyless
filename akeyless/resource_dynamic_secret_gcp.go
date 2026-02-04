@@ -83,13 +83,13 @@ func resourceDynamicSecretGcp() *schema.Resource {
 			"role_names": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Comma-separated list of GCP roles to assign to the user",
+				Description: "Comma-separated list of GCP roles to assign to the user (Relevant only when --access-type=external)",
 			},
 			"fixed_user_claim_keyname": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "ext_email",
-				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from",
+				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from (Relevant only when --access-type=external)",
 			},
 			"role_binding": {
 				Type:        schema.TypeString,
@@ -123,20 +123,10 @@ func resourceDynamicSecretGcp() *schema.Resource {
 				Optional:    true,
 				Description: "Protection from accidental deletion of this object [true/false]",
 			},
-			"access_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Access type",
-			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Description of the object",
-			},
-			"fixed_user_claim_keyname": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from (Relevant only when --access-type=external)",
 			},
 			"gcp_project_id": {
 				Type:        schema.TypeString,
@@ -148,11 +138,6 @@ func resourceDynamicSecretGcp() *schema.Resource {
 				Optional:    true,
 				Description: "Additional custom fields to associate with the item",
 				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"role_names": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Comma-separated list of GCP roles to assign to the user (Relevant only when --access-type=external)",
 			},
 			"secure_access_delay": {
 				Type:        schema.TypeInt,
@@ -209,12 +194,9 @@ func resourceDynamicSecretGcpCreate(d *schema.ResourceData, m interface{}) error
 	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
-	accessType := d.Get("access_type").(string)
 	description := d.Get("description").(string)
-	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
 	gcpProjectId := d.Get("gcp_project_id").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	roleNames := d.Get("role_names").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessUrl := d.Get("secure_access_url").(string)
@@ -506,12 +488,9 @@ func resourceDynamicSecretGcpUpdate(d *schema.ResourceData, m interface{}) error
 	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
 	deleteProtection := d.Get("delete_protection").(string)
 	customUsernameTemplate := d.Get("custom_username_template").(string)
-	accessType := d.Get("access_type").(string)
 	description := d.Get("description").(string)
-	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
 	gcpProjectId := d.Get("gcp_project_id").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	roleNames := d.Get("role_names").(string)
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessUrl := d.Get("secure_access_url").(string)
