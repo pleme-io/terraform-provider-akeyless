@@ -195,9 +195,12 @@ func resourceK8sTargetRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	if rOut.Value.NativeK8sTargetDetails.K8sAuthType != nil {
-		err = d.Set("k8s_auth_type", *rOut.Value.NativeK8sTargetDetails.K8sAuthType)
-		if err != nil {
-			return err
+		// Only set k8s_auth_type if it was explicitly configured by the user
+		if _, ok := d.GetOk("k8s_auth_type"); ok {
+			err = d.Set("k8s_auth_type", *rOut.Value.NativeK8sTargetDetails.K8sAuthType)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if rOut.Value.NativeK8sTargetDetails.K8sClientCertData != nil {

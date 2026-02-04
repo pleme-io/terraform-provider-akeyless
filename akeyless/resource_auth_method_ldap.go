@@ -5,12 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
-	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"net/http"
 	"strconv"
 	"strings"
+
+	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
+	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceAuthMethodLdap() *schema.Resource {
@@ -240,10 +241,13 @@ func resourceAuthMethodLdapRead(d *schema.ResourceData, m interface{}) error {
 				return err
 			}
 		}
-		if rOut.AccessInfo.AllowedClientType != nil {
-			err = d.Set("allowed_client_type", rOut.AccessInfo.AllowedClientType)
-			if err != nil {
-				return err
+		if rOut.AccessInfo.AllowedClientType != nil && len(rOut.AccessInfo.AllowedClientType) > 0 {
+			// Only set allowed_client_type if it was explicitly configured by the user
+			if _, ok := d.GetOk("allowed_client_type"); ok {
+				err = d.Set("allowed_client_type", rOut.AccessInfo.AllowedClientType)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		if rOut.AccessInfo.CidrWhitelist != nil && *rOut.AccessInfo.CidrWhitelist != "" {
