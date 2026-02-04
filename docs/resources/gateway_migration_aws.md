@@ -22,10 +22,10 @@ AWS Migration resource
 
 ### Optional
 
-- `aws_key` (String, Sensitive) AWS Secret Access Key
-- `aws_key_id` (String) AWS Access Key ID
-- `aws_region` (String) AWS region
-- `protection_key` (String) The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)
+- `aws_key` (String, Sensitive) AWS Secret Access Key (relevant only for AWS migration)
+- `aws_key_id` (String) AWS Access Key ID with sufficient permissions to get all secrets, e.g. 'arn:aws:secretsmanager:[Region]:[AccountId]:secret:[/path/to/secrets/_*]' (relevant only for AWS migration)
+- `aws_region` (String) AWS region of the required Secrets Manager (relevant only for AWS migration)
+- `protection_key` (String) The name of the key that protects the classic key value (if empty, the account default key will be used)
 
 ### Read-Only
 

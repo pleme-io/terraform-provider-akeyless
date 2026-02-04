@@ -32,46 +32,46 @@ func resourceDynamicSecretOracle() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"oracle_service_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Oracle service name",
+				Description: "Oracle DB Name",
 			},
 			"oracle_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Oracle user",
+				Description: "Oracle Username",
 			},
 			"oracle_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Oracle password",
+				Description: "Oracle Password",
 			},
 			"oracle_host": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Oracle host name",
+				Description: "Oracle Host",
 				Default:     "127.0.0.1",
 			},
 			"oracle_port": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Oracle port",
+				Description: "Oracle Port",
 				Default:     "1521",
 			},
 			"oracle_creation_statements": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     `CREATE USER {{username}} IDENTIFIED BY "{{password}}"; GRANT CONNECT TO {{username}}; GRANT CREATE SESSION TO {{username}};`,
-				Description: "Oracle Creation Statements",
+				Description: "Oracle Creation statements",
 			},
 			"oracle_revocation_statements": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     `REVOKE CONNECT FROM {{name}};REVOKE CREATE SESSION FROM {{name}};DROP USER {{name}};`,
-				Description: "Oracle Revocation Statements",
+				Description: "Oracle Revocation statements",
 			},
 			"user_ttl": {
 				Type:        schema.TypeString,
@@ -87,7 +87,7 @@ func resourceDynamicSecretOracle() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -97,18 +97,18 @@ func resourceDynamicSecretOracle() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"db_server_certificates": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "the set of root certificate authorities in base64 encoding that clients use when verifying server certificates",
+				Description: "(Optional) DB server certificates",
 			},
 			"db_server_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is given. It is also included in the client's handshake to support virtual hosting unless it is an IP address",
+				Description: "(Optional) Server name for certificate verification",
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,

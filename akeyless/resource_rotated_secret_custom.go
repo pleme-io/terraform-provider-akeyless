@@ -48,12 +48,12 @@ func resourceRotatedSecretCustom() *schema.Resource {
 			"auto_rotate": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation",
+				Description: "Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation [true/false]",
 			},
 			"rotation_interval": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The number of days to wait between every automatic rotation (1-365),custom rotator interval will be set in minutes",
+				Description: "The number of days to wait between every automatic key rotation (1-365)",
 			},
 			"rotation_hour": {
 				Type:        schema.TypeInt,
@@ -136,7 +136,7 @@ func resourceRotatedSecretCustom() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_rdp_domain": {
@@ -167,12 +167,12 @@ func resourceRotatedSecretCustom() *schema.Resource {
 			"secure_access_web_browsing": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Secure browser via Akeyless Secure Remote Access",
+				Description: "Secure browser via Akeyless's Secure Remote Access (SRA)",
 			},
 			"secure_access_web_proxy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Web-Proxy via Akeyless Secure Remote Access",
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
 			},
 			"timeout_sec": {
 				Type:        schema.TypeInt,

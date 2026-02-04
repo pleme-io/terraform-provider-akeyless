@@ -97,7 +97,7 @@ func resourceDfcKey() *schema.Resource {
 			"certificate_digest_algo": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Digest algorithm to be used for the certificate key signing",
+				Description: "Digest algorithm to be used for the certificate key signing.",
 			},
 			"hash_algorithm": {
 				Type:        schema.TypeString,
@@ -154,7 +154,7 @@ func resourceDfcKey() *schema.Resource {
 			"delete_protection": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this item, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 			},
 		},
 	}

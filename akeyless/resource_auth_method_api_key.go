@@ -46,30 +46,30 @@ func resourceAuthMethodApiKey() *schema.Resource {
 			"force_sub_claims": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "enforce role-association must include sub claims",
+				Description: "if true: enforce role-association must include sub claims",
 			},
 			"jwt_ttl": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Creds expiration time in minutes",
+				Description: "Jwt TTL",
 				Default:     0,
 			},
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this auth method, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 			"allowed_client_type": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Description: "limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"description": {
@@ -80,7 +80,7 @@ func resourceAuthMethodApiKey() *schema.Resource {
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Description: "How many days before the expiration of the auth method would you like to be notified.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gw_bound_ips": {

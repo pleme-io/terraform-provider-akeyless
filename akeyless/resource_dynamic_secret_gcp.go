@@ -35,12 +35,12 @@ func resourceDynamicSecretGcp() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"gcp_sa_email": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "GCP service account email",
+				Description: "The email of the fixed service account to generate keys or tokens for (Relevant only when --access-type=sa and --service-account-type=fixed)",
 			},
 			"gcp_cred_type": {
 				Type:        schema.TypeString,
@@ -56,34 +56,34 @@ func resourceDynamicSecretGcp() *schema.Resource {
 			"gcp_token_scopes": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Access token scopes list, e.g. scope1,scope2",
+				Description: "Access token scopes list, e.g. scope1,scope2 (Relevant only when --access-type=sa; required when --gcp-cred-type=token)",
 			},
 			"gcp_key_algo": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Service account key algorithm, e.g. KEY_ALG_RSA_1024",
+				Description: "Service account key algorithm, e.g. KEY_ALG_RSA_1024 (Relevant only when --access-type=sa and --gcp-cred-type=key)",
 			},
 			"service_account_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "fixed",
-				Description: "The type of the gcp dynamic secret. Options[fixed, dynamic]",
+				Description: "The type of the GCP service account. Options [fixed, dynamic] (Relevant only when --access-type=sa)",
 			},
 			"role_binding": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Role binding definitions in json format",
+				Description: "Role binding definitions in JSON format (Relevant only when --access-type=sa and --service-account-type=dynamic)",
 			},
 			"user_ttl": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "User TTL (<=60m for access token)",
+				Description: "User TTL",
 				Default:     "60m",
 			},
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -93,18 +93,18 @@ func resourceDynamicSecretGcp() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: --tag Tag1 --tag Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this item, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 			},
 			"access_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Access type for the GCP dynamic secret",
+				Description: "Access type",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -114,7 +114,7 @@ func resourceDynamicSecretGcp() *schema.Resource {
 			"fixed_user_claim_keyname": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from",
+				Description: "For externally provided users, denotes the key-name of IdP claim to extract the username from (Relevant only when --access-type=external)",
 			},
 			"gcp_project_id": {
 				Type:        schema.TypeString,
@@ -130,7 +130,7 @@ func resourceDynamicSecretGcp() *schema.Resource {
 			"role_names": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Comma-separated list of GCP roles to assign to the user",
+				Description: "Comma-separated list of GCP roles to assign to the user (Relevant only when --access-type=external)",
 			},
 			"secure_access_delay": {
 				Type:        schema.TypeInt,

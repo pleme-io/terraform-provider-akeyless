@@ -33,7 +33,7 @@ func resourceDynamicSecretGitlab() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of an existing target",
+				Description: "Target name",
 			},
 			"gitlab_access_type": {
 				Type:        schema.TypeString,
@@ -88,7 +88,7 @@ func resourceDynamicSecretGitlab() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A comma-separated list of tags attached to this secret",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"description": {
@@ -99,7 +99,7 @@ func resourceDynamicSecretGitlab() *schema.Resource {
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this item, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 			"item_custom_fields": {

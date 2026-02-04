@@ -68,12 +68,12 @@ func resourceDbTarget() *schema.Resource {
 			"db_server_certificates": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set of root certificate authorities in base64 encoding used by clients to verify server certificates",
+				Description: "(Optional) DB server certificates",
 			},
 			"db_server_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is provided. It is also included in the client's handshake to support virtual hosting unless it is an IP address",
+				Description: "(Optional) Server name for certificate verification",
 			},
 			"ssl": {
 				Type:        schema.TypeBool,
@@ -84,7 +84,7 @@ func resourceDbTarget() *schema.Resource {
 			"ssl_certificate": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "SSL CA certificate in base64 encoding generated from a trusted Certificate Authority (CA)",
+				Description: "SSL connection certificate",
 			},
 			"snowflake_account": {
 				Type:        schema.TypeString,
@@ -154,22 +154,22 @@ func resourceDbTarget() *schema.Resource {
 			"azure_client_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Client id (relevant for cloud-service-provider only)",
+				Description: "(Optional) Client id (relevant for \"cloud-service-provider\" only)",
 			},
 			"azure_client_secret": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Client secret (relevant for cloud-service-provider only)",
+				Description: "(Optional) Client secret (relevant for \"cloud-service-provider\" only)",
 			},
 			"azure_tenant_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Tenant id (relevant for cloud-service-provider only)",
+				Description: "(Optional) Tenant id (relevant for \"cloud-service-provider\" only)",
 			},
 			"cloud_service_provider": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Cloud service provider (currently only supports Azure)",
+				Description: "(Optional) Cloud service provider (currently only supports Azure)",
 			},
 			"cluster_mode": {
 				Type:        schema.TypeBool,
@@ -184,7 +184,7 @@ func resourceDbTarget() *schema.Resource {
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -194,7 +194,7 @@ func resourceDbTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 		},
 	}

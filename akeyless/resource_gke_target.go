@@ -39,19 +39,19 @@ func resourceGkeTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "GKE cluster endpoint, i.e., cluster URI https://<DNS/IP>.",
+				Description: "GKE cluster URL endpoint",
 			},
 			"gke_cluster_cert": {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "GKE Base-64 encoded cluster certificate",
+				Description: "GKE cluster CA certificate",
 			},
 			"gke_account_key": {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "GKE service account key",
+				Description: "GKE Service Account key file path",
 			},
 			"gke_cluster_name": {
 				Type:        schema.TypeString,
@@ -63,7 +63,7 @@ func resourceGkeTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"use_gw_cloud_identity": {
 				Type:        schema.TypeBool,
@@ -79,7 +79,7 @@ func resourceGkeTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,

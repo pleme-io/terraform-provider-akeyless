@@ -38,31 +38,31 @@ func resourceEventForwarderSlack() *schema.Resource {
 			"items_event_source_locations": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Items event sources to forward events about, for example: /abc/*",
+				Description: "Items Event sources",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"targets_event_source_locations": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Targets event sources to forward events about, for example: /abc/*",
+				Description: "Targets Event sources",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"auth_methods_event_source_locations": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Auth Methods event sources to forward events about, for example: /abc/*",
+				Description: "Auth Method Event sources",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gateways_event_source_locations": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Gateways event sources to forward events about,for example the relevant Gateways cluster urls,: http://localhost:8000.",
+				Description: "Event sources",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"event_types": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A comma-separated list of types of events to notify about",
+				Description: "List of event types to notify about [request-access, certificate-pending-expiration, certificate-expired, certificate-provisioning-success, certificate-provisioning-failure, auth-method-pending-expiration, auth-method-expired, next-automatic-rotation, rotated-secret-success, rotated-secret-failure, dynamic-secret-failure, multi-auth-failure, uid-rotation-failure, apply-justification, email-auth-method-approved, usage, rotation-usage, gateway-inactive, static-secret-updated, rate-limiting, usage-report, secret-sync]",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"key": {

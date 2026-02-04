@@ -39,6 +39,98 @@ func dataSourceGetTargetDetails() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"target_id": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Target ID",
+			},
+			"target_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Target type",
+			},
+			"target_sub_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Target sub type",
+			},
+			"comment": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Comment about the target",
+			},
+			"protection_key_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Protection key name",
+			},
+			"last_version": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Last version of the target",
+			},
+			"with_customer_fragment": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Whether the target has customer fragment",
+			},
+			"is_access_request_enabled": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Whether access request is enabled for this target",
+			},
+			"access_request_status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Access request status",
+			},
+			"access_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Access date",
+			},
+			"access_date_display": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Access date display",
+			},
+			"attributes": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: "Target attributes",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"client_permissions": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Client permissions",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"creation_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Creation date",
+			},
+			"modification_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Modification date",
+			},
+			"parent_target_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Parent target name",
+			},
+			"target_details": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Target details",
+			},
+			"target_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Target name",
+			},
 		},
 	}
 }
@@ -85,6 +177,68 @@ func dataSourceGetTargetDetailsRead(d *schema.ResourceData, m interface{}) error
 	err = setTargetDetailsByType(d, rOut.Value, targetType)
 	if err != nil {
 		return err
+	}
+
+	// Set target metadata fields
+	if rOut.Target != nil {
+		if rOut.Target.TargetId != nil {
+			d.Set("target_id", *rOut.Target.TargetId)
+		}
+		if rOut.Target.TargetType != nil {
+			d.Set("target_type", *rOut.Target.TargetType)
+		}
+		if rOut.Target.TargetSubType != nil {
+			d.Set("target_sub_type", *rOut.Target.TargetSubType)
+		}
+		if rOut.Target.Comment != nil {
+			d.Set("comment", *rOut.Target.Comment)
+		}
+		if rOut.Target.ProtectionKeyName != nil {
+			d.Set("protection_key_name", *rOut.Target.ProtectionKeyName)
+		}
+		if rOut.Target.LastVersion != nil {
+			d.Set("last_version", *rOut.Target.LastVersion)
+		}
+		if rOut.Target.WithCustomerFragment != nil {
+			d.Set("with_customer_fragment", *rOut.Target.WithCustomerFragment)
+		}
+		if rOut.Target.IsAccessRequestEnabled != nil {
+			d.Set("is_access_request_enabled", *rOut.Target.IsAccessRequestEnabled)
+		}
+		if rOut.Target.AccessRequestStatus != nil {
+			d.Set("access_request_status", *rOut.Target.AccessRequestStatus)
+		}
+		if rOut.Target.AccessDate != nil {
+			d.Set("access_date", rOut.Target.AccessDate.Format("2006-01-02T15:04:05Z07:00"))
+		}
+		if rOut.Target.AccessDateDisplay != nil {
+			d.Set("access_date_display", *rOut.Target.AccessDateDisplay)
+		}
+		if rOut.Target.Attributes != nil {
+			attributesMap := make(map[string]string)
+			for k, v := range rOut.Target.Attributes {
+				attributesMap[k] = fmt.Sprintf("%v", v)
+			}
+			d.Set("attributes", attributesMap)
+		}
+		if rOut.Target.ClientPermissions != nil {
+			d.Set("client_permissions", rOut.Target.ClientPermissions)
+		}
+		if rOut.Target.CreationDate != nil {
+			d.Set("creation_date", rOut.Target.CreationDate.Format("2006-01-02T15:04:05Z07:00"))
+		}
+		if rOut.Target.ModificationDate != nil {
+			d.Set("modification_date", rOut.Target.ModificationDate.Format("2006-01-02T15:04:05Z07:00"))
+		}
+		if rOut.Target.ParentTargetName != nil {
+			d.Set("parent_target_name", *rOut.Target.ParentTargetName)
+		}
+		if rOut.Target.TargetDetails != nil {
+			d.Set("target_details", *rOut.Target.TargetDetails)
+		}
+		if rOut.Target.TargetName != nil {
+			d.Set("target_name", *rOut.Target.TargetName)
+		}
 	}
 
 	d.SetId(name)

@@ -52,7 +52,7 @@ func resourceGatewayUpdateLogForwardingLogzIo() *schema.Resource {
 			"protocol": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Logz-io protocol [tcp/https]",
+				Description: "LogzIo protocol [tcp/https]",
 			},
 		},
 	}

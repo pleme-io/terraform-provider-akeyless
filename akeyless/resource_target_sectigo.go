@@ -41,7 +41,7 @@ func resourceSectigoTarget() *schema.Resource {
 			"external_requester": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "External requester email",
+				Description: "External Requester - a comma separated list of emails",
 			},
 			"organization_id": {
 				Type:        schema.TypeInt,

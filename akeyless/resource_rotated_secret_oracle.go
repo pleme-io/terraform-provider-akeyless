@@ -47,7 +47,7 @@ func resourceRotatedSecretOracle() *schema.Resource {
 			"authentication_credentials": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The credentials to connect with [use-self-creds/use-target-creds]",
+				Description: "The credentials to connect with use-user-creds/use-target-creds",
 				Default:     "use-self-creds",
 			},
 			"rotated_username": {
@@ -65,12 +65,12 @@ func resourceRotatedSecretOracle() *schema.Resource {
 			"auto_rotate": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation",
+				Description: "Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation [true/false]",
 			},
 			"rotation_interval": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The number of days to wait between every automatic rotation (1-365),custom rotator interval will be set in minutes",
+				Description: "The number of days to wait between every automatic key rotation (1-365)",
 			},
 			"rotation_hour": {
 				Type:        schema.TypeInt,
@@ -85,7 +85,7 @@ func resourceRotatedSecretOracle() *schema.Resource {
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"tags": {
 				Type:        schema.TypeSet,

@@ -26,7 +26,7 @@ func dataSourceGatewayGetProducerTmpCreds() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Required:    false,
-				Description: "",
+				Description: "JSON-encoded list of temporary credentials data",
 			},
 		},
 	}

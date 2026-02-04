@@ -35,7 +35,7 @@ func resourceUscSecret() *schema.Resource {
 			"version_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Version ID of the secret (if not specified, will retrieve the last version)",
+				Description: "The version id (if not specified, will retrieve the last version)",
 			},
 			"value": {
 				Type:        schema.TypeString,
@@ -47,7 +47,7 @@ func resourceUscSecret() *schema.Resource {
 			"binary_value": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Use this option if the universal secrets value is a base64 encoded binary. (relevant for aws/azure/gcp/k8s targets)",
+				Description: "Use this option if the universal secrets value is a base64 encoded binary",
 			},
 			"namespace": {
 				Type:        schema.TypeString,
@@ -57,7 +57,7 @@ func resourceUscSecret() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Description of the universal secret (relevant for aws/hashi target)",
+				Description: "Description of the universal secrets",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -75,17 +75,17 @@ func resourceUscSecret() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "The passphrase that protects the private key within the pfx certificate (Relevant only for Azure KV certificates)",
+				Description: "Optional, the passphrase that protects the private key within the pfx certificate (Relevant only for Azure KV certificates)",
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Create secret in a specific region (GCP only). If empty, a global secret will be created (provider default)",
+				Description: "Optional, create secret in a specific region (GCP only). If empty, a global secret will be created (provider default).",
 			},
 			"usc_encryption_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of the remote key that used to encrypt the secret value (if empty, the default key will be used)",
+				Description: "Optional, The name of the remote key that used to encrypt the secret value (if empty, the default key will be used)",
 			},
 			"force_delete": {
 				Type:        schema.TypeBool,

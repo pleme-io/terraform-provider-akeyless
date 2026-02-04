@@ -73,7 +73,7 @@ func dataSourceStaticSecret() *schema.Resource {
 			"format": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The format of the static secret (e.g. Text, key-value, password).",
+				Description: "StaticSecretFormat defines the format of static secret (e.g. Text)",
 			},
 			"max_versions": {
 				Type:        schema.TypeInt,

@@ -149,7 +149,7 @@ func resourceRole() *schema.Resource {
 			"usage_reports_access": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Allow this role to view Usage reports. Currently only 'none' and 'all' values are supported.",
+				Description: "Allow this role to view Usage Report. Currently only 'none' and 'all' values are supported.",
 			},
 			"event_center_access": {
 				Type:        schema.TypeString,
@@ -175,7 +175,7 @@ func resourceRole() *schema.Resource {
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this role, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 		},

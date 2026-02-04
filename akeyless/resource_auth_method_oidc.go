@@ -46,12 +46,12 @@ func resourceAuthMethodOidc() *schema.Resource {
 			"force_sub_claims": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "enforce role-association must include sub claims",
+				Description: "if true: enforce role-association must include sub claims",
 			},
 			"jwt_ttl": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Creds expiration time in minutes",
+				Description: "Jwt TTL",
 				Default:     0,
 			},
 			"issuer": {
@@ -77,36 +77,36 @@ func resourceAuthMethodOidc() *schema.Resource {
 			"allowed_redirect_uri": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Allowed redirect URIs after the authentication (default is https://console.akeyless.io/login-oidc to enable OIDC via Akeyless Console and  http://127.0.0.1:* to enable OIDC via akeyless CLI)",
+				Description: "Allowed redirect URIs after the authentication",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"required_scopes": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Required scopes that the oidc method will request from the oidc provider and the user must approve",
+				Description: "RequiredScopes is a list of required scopes that the oidc method will request from the oidc provider and the user must approve",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"required_scopes_prefix": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A prefix to add to all required-scopes when requesting them from the oidc server (for example, azure's Application ID URI)",
+				Description: "RequiredScopesPrefix is a a prefix to add to all required-scopes when requesting them from the oidc server (for example, azures' Application ID URI)",
 			},
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this auth method, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 			"allowed_client_type": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Description: "limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"audience": {
@@ -122,7 +122,7 @@ func resourceAuthMethodOidc() *schema.Resource {
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Description: "How many days before the expiration of the auth method would you like to be notified.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gw_bound_ips": {

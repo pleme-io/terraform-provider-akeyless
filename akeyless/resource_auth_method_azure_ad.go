@@ -74,7 +74,7 @@ func resourceAuthMethodAzureAd() *schema.Resource {
 			"audience": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The audience in the JWT",
+				Description: "Deprecated (Deprecated) The audience in the JWT",
 				Default:     "https://management.azure.com/",
 			},
 			"bound_spid": {
@@ -128,13 +128,13 @@ func resourceAuthMethodAzureAd() *schema.Resource {
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this auth method, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 			"description": {
@@ -145,13 +145,13 @@ func resourceAuthMethodAzureAd() *schema.Resource {
 			"allowed_client_type": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Description: "limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Description: "How many days before the expiration of the auth method would you like to be notified.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gw_bound_ips": {
@@ -169,7 +169,7 @@ func resourceAuthMethodAzureAd() *schema.Resource {
 			"unique_identifier": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A unique identifier (ID) value which is a \"sub claim\" name that contains details uniquely identifying that resource. This \"sub claim\" is used to distinguish between different identities",
+				Description: "A unique identifier (ID) value which is a \"sub claim\" name that contains details uniquely identifying that resource. This \"sub claim\" is used to distinguish between different identities.",
 			},
 			"access_id": {
 				Type:        schema.TypeString,

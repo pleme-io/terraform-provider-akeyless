@@ -36,24 +36,24 @@ func resourceEksTarget() *schema.Resource {
 			"eks_cluster_endpoint": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "EKS cluster endpoint (i.e., https://<IP> of the cluster)",
+				Description: "EKS cluster URL endpoint",
 			},
 			"eks_cluster_ca_cert": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				Description: "EKS cluster base-64 encoded certificate",
+				Description: "EKS cluster CA certificate",
 			},
 			"eks_access_key_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "EKS access key ID",
+				Description: "Access Key ID",
 			},
 			"eks_secret_access_key": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				Description: "EKS secret access key",
+				Description: "Secret Access Key",
 			},
 			"use_gw_cloud_identity": {
 				Type:        schema.TypeBool,
@@ -65,14 +65,14 @@ func resourceEksTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "EKS region",
+				Description: "Region",
 				Default:     "us-east-2",
 			},
 			"key": {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -82,7 +82,7 @@ func resourceEksTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,

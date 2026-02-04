@@ -32,18 +32,18 @@ func resourceK8sTarget() *schema.Resource {
 			"k8s_cluster_endpoint": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "K8S Cluster endpoint. https:// , <DNS / IP> of the cluster.",
+				Description: "K8S cluster URL endpoint",
 			},
 			"k8s_cluster_ca_cert": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				Description: "K8S Cluster certificate. Base 64 encoded certificate.",
+				Description: "K8S cluster CA certificate",
 			},
 			"k8s_cluster_token": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "K8S Cluster authentication token.",
+				Description: "K8S cluster Bearer token",
 			},
 			"k8s_auth_type": {
 				Type:        schema.TypeString,
@@ -76,12 +76,12 @@ func resourceK8sTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"description": {
 				Type:        schema.TypeString,

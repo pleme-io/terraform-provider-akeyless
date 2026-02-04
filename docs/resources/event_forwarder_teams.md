@@ -17,22 +17,22 @@ Event Forwarder Microsoft Teams resource
 
 ### Required
 
-- `gateway_event_source_locations` (Set of String) Gateways event sources to forward events about, for example the relevant Gateways cluster urls: http://localhost:8000
-- `name` (String) Event Forwarder name
+- `gateway_event_source_locations` (Set of String) Event sources
+- `name` (String) EventForwarder name
 - `runner_type` (String) Event Forwarder runner type [immediate/periodic]
-- `url` (String, Sensitive) Microsoft Teams Webhook URL
+- `url` (String, Sensitive) Teams Webhook URL
 
 ### Optional
 
-- `auth_methods_event_source_locations` (Set of String) Auth Methods event sources to forward events about, for example: /abc/*
+- `auth_methods_event_source_locations` (Set of String) Auth Method Event sources
 - `description` (String) Description of the object
 - `enable` (String) Enable/Disable Event Forwarder [true/false]
-- `event_types` (Set of String) List of event types to notify about
+- `event_types` (Set of String) List of event types to notify about [request-access, certificate-pending-expiration, certificate-expired, certificate-provisioning-success, certificate-provisioning-failure, auth-method-pending-expiration, auth-method-expired, next-automatic-rotation, rotated-secret-success, rotated-secret-failure, dynamic-secret-failure, multi-auth-failure, uid-rotation-failure, apply-justification, email-auth-method-approved, usage, rotation-usage, gateway-inactive, static-secret-updated, rate-limiting, usage-report, secret-sync]
 - `every` (String) Rate of periodic runner repetition in hours
-- `items_event_source_locations` (Set of String) Items event sources to forward events about, for example: /abc/*
+- `items_event_source_locations` (Set of String) Items Event sources
 - `keep_prev_version` (String) Whether to keep previous version [true/false]. If not set, use default according to account settings
-- `key` (String) Key name. The key will be used to encrypt the Event Forwarder secret value. If key name is not specified, the account default protection key is used
-- `targets_event_source_locations` (Set of String) Targets event sources to forward events about, for example: /abc/*
+- `key` (String) The name of a key that used to encrypt the EventForwarder secret value (if empty, the account default protectionKey key will be used)
+- `targets_event_source_locations` (Set of String) Targets Event sources
 
 ### Read-Only
 

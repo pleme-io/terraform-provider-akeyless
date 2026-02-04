@@ -59,17 +59,17 @@ func resourceDynamicSecretGke() *schema.Resource {
 			"gke_cluster_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "GKE cluster endpoint, i.e., cluster URI https://<DNS/IP>.",
+				Description: "GKE cluster URL endpoint",
 			},
 			"gke_cluster_cert": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "GKE Base-64 encoded cluster certificate",
+				Description: "GKE cluster CA certificate",
 			},
 			"gke_account_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "GKE service account key",
+				Description: "GKE Service Account key file path",
 			},
 			"gke_cluster_name": {
 				Type:        schema.TypeString,
@@ -85,7 +85,7 @@ func resourceDynamicSecretGke() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"tags": {
 				Type:        schema.TypeSet,

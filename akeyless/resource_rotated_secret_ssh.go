@@ -42,12 +42,12 @@ func resourceRotatedSecretSsh() *schema.Resource {
 			"rotator_type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The rotator type [target/password]",
+				Description: "The rotator type. options: [target/password/key]",
 			},
 			"authentication_credentials": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The credentials to connect with [use-self-creds/use-target-creds]",
+				Description: "The credentials to connect with use-user-creds/use-target-creds",
 				Default:     "use-self-creds",
 			},
 			"rotated_username": {
@@ -75,7 +75,7 @@ func resourceRotatedSecretSsh() *schema.Resource {
 			"rotation_interval": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The number of days to wait between every automatic rotation (1-365),custom rotator interval will be set in minutes",
+				Description: "The number of days to wait between every automatic key rotation (1-365)",
 			},
 			"rotation_hour": {
 				Type:        schema.TypeInt,
@@ -484,11 +484,13 @@ func resourceRotatedSecretSshUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessSshUser := d.Get("secure_access_ssh_user").(string)
 	secureAccessTargetType := d.Get("secure_access_target_type").(string)
 	keepPrevVersion := d.Get("keep_prev_version").(string)
+	rotatorType := d.Get("rotator_type").(string)
 
 	body := akeyless_api.RotatedSecretUpdateSsh{
-		Name:    name,
-		NewName: akeyless_api.PtrString(name),
-		Token:   &token,
+		Name:        name,
+		NewName:     akeyless_api.PtrString(name),
+		RotatorType: rotatorType,
+		Token:       &token,
 	}
 	add, remove, err := common.GetTagsForUpdate(d, name, token, tags, client)
 	if err == nil {

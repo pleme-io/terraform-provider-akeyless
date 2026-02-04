@@ -52,7 +52,7 @@ func resourceLdapTarget() *schema.Resource {
 			"server_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set LDAP server type, Options:[OpenLDAP, ActiveDirectory]. Default is OpenLDAP",
+				Description: "Set Ldap server type, Options:[OpenLDAP, ActiveDirectory]. Default is OpenLDAP",
 				Default:     "OpenLDAP",
 			},
 			"token_expiration": {
@@ -63,7 +63,7 @@ func resourceLdapTarget() *schema.Resource {
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -73,7 +73,7 @@ func resourceLdapTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,

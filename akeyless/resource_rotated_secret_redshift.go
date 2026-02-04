@@ -42,12 +42,12 @@ func resourceRotatedSecretRedshift() *schema.Resource {
 			"rotator_type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The rotator type [target/password]",
+				Description: "The rotator type. options: [target/password]",
 			},
 			"authentication_credentials": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The credentials to connect with [use-self-creds/use-target-creds]",
+				Description: "The credentials to connect with use-user-creds/use-target-creds",
 				Default:     "use-self-creds",
 			},
 			"rotated_username": {

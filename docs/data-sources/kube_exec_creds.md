@@ -33,11 +33,11 @@ Get credentials for authentication with Kubernetes cluster based on a PKI Cert I
 
 ### Read-Only
 
-- `api_version` (String)
-- `client_certificate_data` (String)
-- `client_key_data` (String)
+- `api_version` (String) The API version of the Kubernetes exec credential
+- `client_certificate_data` (String) The client certificate data for Kubernetes authentication
+- `client_key_data` (String) The client key data for Kubernetes authentication
 - `id` (String) The ID of this resource.
-- `kind` (String)
-- `parent_certificate_data` (String)
+- `kind` (String) The kind of the Kubernetes exec credential
+- `parent_certificate_data` (String) The parent certificate data for Kubernetes authentication
 
 

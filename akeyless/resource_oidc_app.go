@@ -39,7 +39,7 @@ func resourceOidcApp() *schema.Resource {
 			"audience": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Audience claim to be used as part of the authentication flow. In case set, it must match the one configured on the Identity Provider's Application",
+				Description: "A comma separated list of allowed audiences",
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
@@ -80,19 +80,19 @@ func resourceOidcApp() *schema.Resource {
 			"redirect_uris": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A list of allowed redirect uris",
+				Description: "A comma separated list of allowed redirect uris",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"scopes": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A list of OIDC scopes",
+				Description: "A comma separated list of allowed scopes",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of tags attached to this object",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 		},

@@ -32,24 +32,24 @@ func resourceDynamicSecretK8s() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"k8s_cluster_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "K8S Cluster endpoint. https:// , <DNS / IP> of the cluster.",
+				Description: "K8S cluster URL endpoint",
 			},
 			"k8s_cluster_ca_cert": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "K8S Cluster certificate. Base 64 encoded certificate.",
+				Description: "K8S cluster CA certificate",
 			},
 			"k8s_cluster_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "K8S Cluster authentication token.",
+				Description: "K8S cluster Bearer token",
 			},
 			"k8s_cluster_name": {
 				Type:        schema.TypeString,
@@ -91,7 +91,7 @@ func resourceDynamicSecretK8s() *schema.Resource {
 			"k8s_rolebinding_yaml_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Content of the yaml in a Base64 format",
+				Description: "Content of the yaml in a Base64 format.",
 			},
 			"k8s_rolebinding_yaml_def": {
 				Type:        schema.TypeString,
@@ -107,7 +107,7 @@ func resourceDynamicSecretK8s() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -133,7 +133,7 @@ func resourceDynamicSecretK8s() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: --tag Tag1 --tag Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_enable": {
@@ -144,7 +144,7 @@ func resourceDynamicSecretK8s() *schema.Resource {
 			"secure_access_cluster_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The K8s cluster endpoint",
+				Description: "The K8s cluster endpoint URL",
 			},
 			"secure_access_dashboard_url": {
 				Type:        schema.TypeString,
@@ -154,7 +154,7 @@ func resourceDynamicSecretK8s() *schema.Resource {
 			"secure_access_allow_port_forwading": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Enable Port forwarding while using CLI access.",
+				Description: "Enable Port forwarding while using CLI access",
 			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,
@@ -169,7 +169,7 @@ func resourceDynamicSecretK8s() *schema.Resource {
 			"secure_access_web_browsing": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Secure browser via Akeyless Web Access Bastion",
+				Description: "Secure browser via Akeyless's Secure Remote Access (SRA)",
 			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
@@ -181,7 +181,7 @@ func resourceDynamicSecretK8s() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     "false",
-				Description: "Web-Proxy via Akeyless Web Access Bastion",
+				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,

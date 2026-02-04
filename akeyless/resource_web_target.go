@@ -32,13 +32,13 @@ func resourceWebTarget() *schema.Resource {
 			"url": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Web target URL",
+				Description: "The url",
 			},
 			"key": {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -48,7 +48,7 @@ func resourceWebTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,

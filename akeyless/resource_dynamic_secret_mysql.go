@@ -33,7 +33,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"mysql_dbname": {
 				Type:        schema.TypeString,
@@ -43,7 +43,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"mysql_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MySQL user",
+				Description: "MySQL Username",
 			},
 			"mysql_password": {
 				Type:        schema.TypeString,
@@ -54,7 +54,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"mysql_host": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MySQL host name",
+				Description: "MySQL Host",
 				Default:     "127.0.0.1",
 			},
 			"mysql_port": {
@@ -78,12 +78,12 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"db_server_certificates": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "the set of root certificate authorities in base64 encoding that clients use when verifying server certificates",
+				Description: "(Optional) DB server certificates",
 			},
 			"db_server_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is given. It is also included in the client's handshake to support virtual hosting unless it is an IP address",
+				Description: "(Optional) Server name for certificate verification",
 			},
 			"ssl": {
 				Type:        schema.TypeBool,
@@ -94,7 +94,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"ssl_certificate": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "SSL CA certificate in base64 encoding generated from a trusted Certificate Authority (CA)",
+				Description: "SSL connection certificate",
 			},
 			"user_ttl": {
 				Type:        schema.TypeString,
@@ -110,7 +110,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -120,7 +120,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_enable": {
@@ -131,7 +131,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Target DB servers for connections., For multiple values repeat this flag.",
+				Description: "Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_web": {
@@ -144,7 +144,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "Enable Web Secure Remote Access",
+				Description: "The DB name (relevant only for DB Dynamic-Secret)",
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,

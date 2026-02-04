@@ -31,45 +31,45 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"postgresql_db_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "PostgreSQL DB name",
+				Description: "PostgreSQL DB Name",
 			},
 			"postgresql_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "PostgreSQL user",
+				Description: "PostgreSQL Username",
 			},
 			"postgresql_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "PostgreSQL password",
+				Description: "PostgreSQL Password",
 			},
 			"postgresql_host": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "PostgreSQL host name",
+				Description: "PostgreSQL Host",
 				Default:     "127.0.0.1",
 			},
 			"postgresql_port": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "PostgreSQL port",
+				Description: "PostgreSQL Port",
 				Default:     "5432",
 			},
 			"creation_statements": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "PostgreSQL Creation Statements",
+				Description: "PostgreSQL Creation statements",
 				Default:     `CREATE USER "{{name}}" WITH PASSWORD '{{password}}';GRANT SELECT ON ALL TABLES IN SCHEMA public TO "{{name}}";GRANT CONNECT ON DATABASE postgres TO "{{name}}";GRANT USAGE ON SCHEMA public TO "{{name}}";`,
 			},
 			"revocation_statements": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "PostgreSQL Revocation Statement",
+				Description: "PostgreSQL Revocation statements",
 				Default:     `REASSIGN OWNED BY "{{name}}" TO {{userHost}}; DROP OWNED BY "{{name}}"; select pg_terminate_backend(pid) from pg_stat_activity where usename = '{{name}}'; DROP USER "{{name}}";`,
 			},
 			"ssl": {
@@ -92,7 +92,7 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -102,7 +102,7 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_enable": {
@@ -113,7 +113,7 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Target DB servers for connections., For multiple values repeat this flag.",
+				Description: "Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_db_schema": {

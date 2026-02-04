@@ -31,23 +31,23 @@ func resourceArtifactoryTarget() *schema.Resource {
 			"base_url": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Artifactory REST URL, must end with artifactory postfix",
+				Description: "Base URL",
 			},
 			"artifactory_admin_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Admin name",
+				Description: "Artifactory Admin Name",
 			},
 			"artifactory_admin_pwd": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Admin API Key/Password",
+				Description: "Artifactory Admin password",
 			},
 			"key": {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of a key used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -57,7 +57,7 @@ func resourceArtifactoryTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,

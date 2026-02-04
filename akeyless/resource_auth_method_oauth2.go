@@ -46,12 +46,12 @@ func resourceAuthMethodOauth2() *schema.Resource {
 			"force_sub_claims": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "enforce role-association must include sub claims",
+				Description: "if true: enforce role-association must include sub claims",
 			},
 			"jwt_ttl": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Creds expiration time in minutes",
+				Description: "Jwt TTL",
 				Default:     0,
 			},
 			"jwks_uri": {
@@ -62,7 +62,7 @@ func resourceAuthMethodOauth2() *schema.Resource {
 			"jwks_json_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The JSON Web Key Set (JWKS) containing the public keys that should be used to verify any JSON Web Token (JWT) issued by the authorization serve, in base64 format.",
+				Description: "The JSON Web Key Set (JWKS) that containing the public keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server. base64 encoded string",
 			},
 			"unique_identifier": {
 				Type:        schema.TypeString,
@@ -88,13 +88,13 @@ func resourceAuthMethodOauth2() *schema.Resource {
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this auth method, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 			"gateway_url": {
@@ -111,12 +111,12 @@ func resourceAuthMethodOauth2() *schema.Resource {
 			"cert": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Certificate file path in PEM format",
+				Description: "CertificateFile Path to a file that contain the certificate in a PEM format.",
 			},
 			"cert_file_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Certificate file data in PEM format (base64 encoded)",
+				Description: "CertificateFileData PEM Certificate in a Base64 format.",
 			},
 			"description": {
 				Type:        schema.TypeString,

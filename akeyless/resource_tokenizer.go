@@ -39,7 +39,7 @@ func resourceTokenizer() *schema.Resource {
 			"template_type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Which template type this tokenizer is used for [SSN,CreditCard,USPhoneNumber,Custom]",
+				Description: "Which template type this tokenizer is used for [SSN,CreditCard,USPhoneNumber,Email,Regexp]",
 			},
 			"encryption_key_name": {
 				Type:        schema.TypeString,
@@ -54,22 +54,22 @@ func resourceTokenizer() *schema.Resource {
 			"alphabet": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Alphabet to use in custom vaultless tokenization, such as '0123456789' for credit cards.",
+				Description: "Alphabet to use in regexp vaultless tokenization",
 			},
 			"pattern": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Pattern to use in custom vaultless tokenization",
+				Description: "Pattern to use in regexp vaultless tokenization",
 			},
 			"encoding_template": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The Encoding output template to use in custom vaultless tokenization",
+				Description: "The Encoding output template to use in regexp vaultless tokenization",
 			},
 			"decoding_template": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The Decoding output template to use in custom vaultless tokenization",
+				Description: "The Decoding output template to use in regexp vaultless tokenization",
 			},
 			"tweak": {
 				Type:        schema.TypeString,

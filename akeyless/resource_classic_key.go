@@ -34,7 +34,7 @@ func resourceClassicKey() *schema.Resource {
 			"alg": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Key type; options: [AES128GCM, AES256GCM, AES128SIV, AES256SIV, AES128CBC, AES256CBC, RSA1024, RSA2048, RSA3072, RSA4096, EC256, EC384, GPG]",
+				Description: "Classic Key type; options: [AES128GCM, AES256GCM, AES128SIV, AES256SIV, AES128CBC, AES256CBC, RSA1024, RSA2048, RSA3072, RSA4096, EC256, EC384, GPG]",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -44,20 +44,20 @@ func resourceClassicKey() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this key",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"key_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Base64-encoded classic key value provided by user",
+				Description: "Base64-encoded classic key value",
 			},
 			"cert_file_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "PEM Certificate in a Base64 format.",
+				Description: "Certificate in a PEM format.",
 			},
 			"gpg_alg": {
 				Type:        schema.TypeString,
@@ -68,12 +68,12 @@ func resourceClassicKey() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Optional:    true,
-				Description: "The name of the key that protects the classic key value (if empty, the account default key will be used)",
+				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"generate_self_signed_certificate": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Whether to generate a self signed certificate with the key. If set, certificate_ttl must be provided.",
+				Description: "Whether to generate a self signed certificate with the key. If set, --certificate-ttl must be provided.",
 				Default:     "false",
 			},
 			"certificate_ttl": {
@@ -120,12 +120,12 @@ func resourceClassicKey() *schema.Resource {
 			"certificate_digest_algo": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Digest algorithm to be used for the certificate key signing",
+				Description: "Digest algorithm to be used for the certificate key signing.",
 			},
 			"hash_algorithm": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Hash algorithm used for the encryption key's operations, available options: [SHA256, SHA384, SHA512]",
+				Description: "Specifies the hash algorithm used for the encryption key's operations, available options: [SHA256, SHA384, SHA512]",
 				Default:     "SHA256",
 			},
 			"item_custom_fields": {
@@ -143,7 +143,7 @@ func resourceClassicKey() *schema.Resource {
 			"auto_rotate": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation [true/false]",
+				Description: "Whether to automatically rotate every rotation_interval days, or disable existing automatic rotation [true/false]",
 				Default:     "false",
 			},
 			"rotation_interval": {
@@ -155,14 +155,14 @@ func resourceClassicKey() *schema.Resource {
 			"rotation_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the rotation of the item would you like to be notified.",
+				Description: "How many days before the rotation of the item would you like to be notified",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this object, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 			},
 		},
 	}

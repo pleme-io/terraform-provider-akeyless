@@ -49,12 +49,12 @@ func resourceZerosslTarget() *schema.Resource {
 			"imap_fqdn": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "FQDN of the IMAP service",
+				Description: "FQDN or IPv4 address of the IMAP service. Must be FQDN if the IMAP is using TLS",
 			},
 			"imap_target_email": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Email to use when asking ZeroSSL to send a validation email, if empty will use username",
+				Description: "Validation email to use when asking ZeroSSL to send a validation email, if empty will use imap-username",
 			},
 			"imap_port": {
 				Type:        schema.TypeString,
@@ -65,7 +65,7 @@ func resourceZerosslTarget() *schema.Resource {
 			"timeout": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Timeout waiting for certificate validation",
+				Description: "Timeout waiting for certificate validation in Duration format (1h - 1 Hour, 20m - 20 Minutes, 33m3s - 33 Minutes and 3 Seconds), maximum 1h",
 				Default:     "5m",
 			},
 			"key": {

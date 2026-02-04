@@ -37,40 +37,40 @@ func resourceDynamicSecretMssql() *schema.Resource {
 			"mssql_dbname": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MSSQL Server DB Name",
+				Description: "MSSQL Name",
 			},
 			"mssql_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MS SQL Server user",
+				Description: "MSSQL Username",
 			},
 			"mssql_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MS SQL Server password",
+				Description: "MSSQL Password",
 			},
 			"mssql_host": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MS SQL Server host name",
+				Description: "MSSQL Host",
 				Default:     "127.0.0.1",
 			},
 			"mssql_port": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MS SQL Server port",
+				Description: "MSSQL Port",
 				Default:     "1433",
 			},
 			"mssql_create_statements": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MSSQL Server Creation Statements",
+				Description: "MSSQL Creation statements",
 				Default:     `CREATE LOGIN [{{name}}] WITH PASSWORD = '{{password}}';`,
 			},
 			"mssql_revocation_statements": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MSSQL Server Revocation Statements",
+				Description: "MSSQL Revocation statements",
 				Default:     `DROP LOGIN [{{name}}];`,
 			},
 			"mssql_allowed_db_names": {
@@ -134,7 +134,7 @@ func resourceDynamicSecretMssql() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Target DB servers for connections., For multiple values repeat this flag.",
+				Description: "Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_db_schema": {

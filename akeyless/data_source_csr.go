@@ -105,7 +105,7 @@ func dataSourceGenerateCsr() *schema.Resource {
 			"data": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "",
+				Description: "The generated CSR data",
 			},
 		},
 	}

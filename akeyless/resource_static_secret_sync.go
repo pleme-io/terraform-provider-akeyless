@@ -31,7 +31,7 @@ func resourceStaticSecretSync() *schema.Resource {
 			"usc_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Universal Secret Connector name",
+				Description: "Universal Secret Connector name, If not provided all attached USC's will be synced",
 				ForceNew:    true,
 			},
 			"remote_secret_name": {

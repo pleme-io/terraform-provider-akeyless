@@ -26,13 +26,13 @@ func resourceRotatedSecretAzure() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Secret name",
+				Description: "Rotated secret name",
 				ForceNew:    true,
 			},
 			"target_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The target name to associate",
+				Description: "Target name",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -42,12 +42,12 @@ func resourceRotatedSecretAzure() *schema.Resource {
 			"rotator_type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The rotator type [target/password/api-key/azure-storage-account]",
+				Description: "The rotator type. options: [target/password/api-key/azure-storage-account]",
 			},
 			"authentication_credentials": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The credentials to connect with [use-self-creds/use-target-creds]",
+				Description: "The credentials to connect with use-user-creds/use-target-creds",
 				Default:     "use-self-creds",
 			},
 			"app_id": {
@@ -85,7 +85,7 @@ func resourceRotatedSecretAzure() *schema.Resource {
 			"rotation_interval": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The number of days to wait between every automatic rotation (1-365),custom rotator interval will be set in minutes",
+				Description: "The number of days to wait between every automatic key rotation (1-365)",
 			},
 			"rotation_hour": {
 				Type:        schema.TypeInt,
@@ -100,7 +100,7 @@ func resourceRotatedSecretAzure() *schema.Resource {
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -121,7 +121,7 @@ func resourceRotatedSecretAzure() *schema.Resource {
 			"grace_rotation": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Create a new access key without deleting the old key from Azure for backup [true/false]",
+				Description: "Create a new access key without deleting the old key from AWS/Azure/GCP for backup (relevant only for AWS/Azure/GCP) [true/false]",
 			},
 			"grace_rotation_hour": {
 				Type:        schema.TypeInt,
@@ -142,7 +142,7 @@ func resourceRotatedSecretAzure() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"resource_group_name": {
 				Type:        schema.TypeString,

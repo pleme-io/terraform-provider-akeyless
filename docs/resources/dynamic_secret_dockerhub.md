@@ -22,10 +22,9 @@ Dockerhub dynamic secret resource
 ### Optional
 
 - `delete_protection` (String) Protection from accidental deletion of this object [true/false]
-- `description` (String) Description of the object
-- `dockerhub_password` (String, Sensitive) Dockerhub password or access token
-- `dockerhub_token_scopes` (String) Access token scopes list (comma-separated) valid options: repo:admin, repo:write, repo:read, repo:public_read
-- `dockerhub_username` (String) Dockerhub username
+- `dockerhub_password` (String, Sensitive) DockerhubPassword is either the user's password access token to manage the repository
+- `dockerhub_token_scopes` (String) Access token scopes list (comma-separated) to give the dynamic secret valid options are in "repo:admin", "repo:write", "repo:read", "repo:public_read"
+- `dockerhub_username` (String) DockerhubUsername is the name of the user in dockerhub
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `producer_encryption_key_name` (String) Dynamic producer encryption key
 - `tags` (Set of String) Add tags attached to this object

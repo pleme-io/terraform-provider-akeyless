@@ -38,18 +38,18 @@ func resourceGatewayAllowedAccess() *schema.Resource {
 			"access_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The access id to be attached to this allowed access",
+				Description: "The access id to be attached to this allowed access. Auth method with this access id should already exist.",
 			},
 			"sub_claims": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				Description: "key/val of sub claims, e.g group=admins,developers",
+				Description: "Sub claims key/val of sub claims, e.g group=admins,developers",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"permissions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Comma-seperated list of permissions for this allowed access. Available permissions: [defaults,targets,classic_keys,automatic_migration,ldap_auth,dynamic_secret,k8s_auth,log_forwarding,zero_knowledge_encryption,rotated_secret,caching,event_forwarding,admin,kmip,general]",
+				Description: "Permissions Comma-seperated list of permissions for this allowed access. Available permissions: [defaults,targets,classic_keys,automatic_migration,ldap_auth,dynamic_secret,k8s_auth,log_forwarding,zero_knowledge_encryption,rotated_secret,caching,event_forwarding,admin,kmip,general,rotate_secret_value]",
 			},
 			"case_sensitive": {
 				Type:        schema.TypeString,
@@ -384,6 +384,7 @@ const (
 	AccessPermissionAdmin                   AccessPermission = "admin"
 	AccessPermissionKmip                    AccessPermission = "kmip"
 	AccessPermissionGeneral                 AccessPermission = "general"
+	AccessPermissionRotateSecretValue       AccessPermission = "rotate_secret_value"
 )
 
 var validAccessPermission = map[AccessPermission]bool{
@@ -402,6 +403,7 @@ var validAccessPermission = map[AccessPermission]bool{
 	AccessPermissionAdmin:                   true,
 	AccessPermissionKmip:                    true,
 	AccessPermissionGeneral:                 true,
+	AccessPermissionRotateSecretValue:       true,
 }
 
 func isValidPermission(p string) bool {

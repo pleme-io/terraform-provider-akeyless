@@ -37,12 +37,12 @@ func resourceGatewayMigrationGcp() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Base64-encoded GCP Service Account private key text",
+				Description: "Base64-encoded GCP Service Account private key text with sufficient permissions to Secrets Manager, Minimum required permission is Secret Manager Secret Accessor, e.g. 'roles/secretmanager.secretAccessor' (relevant only for GCP migration)",
 			},
 			"protection_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of the key that protects the classic key value (if empty, the account default key will be used)",
 			},
 			"id": {
 				Type:        schema.TypeString,

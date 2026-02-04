@@ -22,11 +22,12 @@ Azure Key Vault Migration resource
 
 ### Optional
 
-- `azure_client_id` (String) Azure Key Vault Access client ID
-- `azure_kv_name` (String) Azure Key Vault name
-- `azure_secret` (String, Sensitive) Azure Key Vault secret
-- `azure_tenant_id` (String) Azure Key Vault Access tenant ID
-- `protection_key` (String) The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)
+- `azure_client_id` (String) Azure Key Vault Access client ID, should be Azure AD App with a service principal (relevant only for Azure Key Vault migration)
+- `azure_kv_name` (String) Azure Key Vault Name (relevant only for Azure Key Vault migration)
+- `azure_secret` (String, Sensitive) Azure Key Vault secret (relevant only for Azure Key Vault migration)
+- `azure_tenant_id` (String) Azure Key Vault Access tenant ID (relevant only for Azure Key Vault migration)
+- `expiration_event_in` (List of String) How many days before the expiration of the certificate would you like to be notified.
+- `protection_key` (String) The name of the key that protects the classic key value (if empty, the account default key will be used)
 
 ### Read-Only
 

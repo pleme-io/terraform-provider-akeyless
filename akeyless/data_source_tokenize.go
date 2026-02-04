@@ -35,7 +35,7 @@ func dataSourceTokenize() *schema.Resource {
 			"result": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "",
+				Description: "The encrypted result",
 			},
 		},
 	}

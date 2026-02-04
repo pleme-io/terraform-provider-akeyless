@@ -68,13 +68,13 @@ func resourceGlobalsignTarget() *schema.Resource {
 			"timeout": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Timeout waiting for certificate validation",
+				Description: "Timeout waiting for certificate validation in Duration format (1h - 1 Hour, 20m - 20 Minutes, 33m3s - 33 Minutes and 3 Seconds), maximum 1h.",
 				Default:     "5m",
 			},
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -84,7 +84,7 @@ func resourceGlobalsignTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,

@@ -31,7 +31,7 @@ func resourceSalesforceTarget() *schema.Resource {
 			"auth_flow": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Type of the auth flow ('jwt' / 'user-password')",
+				Description: "type of the auth flow ('jwt' / 'user-password')",
 			},
 			"client_id": {
 				Type:        schema.TypeString,
@@ -46,7 +46,7 @@ func resourceSalesforceTarget() *schema.Resource {
 			"tenant_url": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "URL of the Salesforce tenant",
+				Description: "Url of the Salesforce tenant",
 			},
 			"client_secret": {
 				Type:        schema.TypeString,
@@ -64,7 +64,7 @@ func resourceSalesforceTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "The security token of the user attached to the oauth2 app used for connecting to Salesforce (required for user-password flow)",
+				Description: "The security token of the user attached to the oauth2 app used for connecting to Salesforce  (required for user-password flow)",
 			},
 			"app_private_key_data": {
 				Type:        schema.TypeString,
@@ -80,12 +80,12 @@ func resourceSalesforceTarget() *schema.Resource {
 			"ca_cert_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of the certificate in Salesforce tenant to use when uploading new key",
+				Description: "name of the certificate in Salesforce tenant to use when uploading new key",
 			},
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -95,7 +95,7 @@ func resourceSalesforceTarget() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,

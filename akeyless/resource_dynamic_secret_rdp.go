@@ -32,38 +32,38 @@ func resourceDynamicSecretRdp() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"rdp_user_groups": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "RDP UserGroup name(s). Multiple values should be separated by comma",
+				Description: "Groups",
 			},
 			"rdp_host_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "RDP Host name",
+				Description: "Hostname",
 			},
 			"rdp_admin_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "RDP Admin name",
+				Description: "RDP Admin Name",
 			},
 			"rdp_admin_pwd": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "RDP Admin Password",
+				Description: "RDP Admin password",
 			},
 			"rdp_host_port": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "RDP Host port",
+				Description: "Port",
 				Default:     "22",
 			},
 			"fixed_user_only": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Enable fixed user only",
+				Description: "Allow access using externally (IdP) provided username [true/false]",
 				Default:     "false",
 			},
 			"fixed_user_claim_keyname": {
@@ -85,7 +85,7 @@ func resourceDynamicSecretRdp() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -142,7 +142,7 @@ func resourceDynamicSecretRdp() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Target servers for connections., For multiple values repeat this flag.",
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_allow_external_user": {

@@ -54,7 +54,7 @@ func resourceLinkedTarget() *schema.Resource {
 			"add_hosts": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A comma seperated list of new server hosts and server descriptions joined by semicolon ';' that will be added to the Linked Target hosts",
+				Description: "A comma seperated list of new server hosts and server descriptions joined by semicolon ';' that will be added to the Linked Target hosts.",
 			},
 			"keep_prev_version": {
 				Type:        schema.TypeString,
@@ -64,7 +64,7 @@ func resourceLinkedTarget() *schema.Resource {
 			"rm_hosts": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Comma separated list of existing hosts that will be removed from Linked Target hosts",
+				Description: "Comma separated list of existing hosts that will be removed from Linked Target hosts.",
 			},
 		},
 	}

@@ -33,23 +33,23 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"mongodb_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MongoDB name",
+				Description: "MongoDB Name",
 			},
 			"mongodb_roles": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MongoDB roles (e.g. MongoDB:[{role:readWrite, db: sales}], MongoDB Atlas:[{roleName : readWrite, databaseName: sales}])",
+				Description: "MongoDB Roles",
 				Default:     "[]",
 			},
 			"mongodb_server_uri": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MongoDB server URI (e.g. mongodb://user:password@my.mongo.db:27017/admin?replicaSet=mySet)",
+				Description: "MongoDB server URI",
 			},
 			"mongodb_username": {
 				Type:        schema.TypeString,
@@ -59,12 +59,12 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"mongodb_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MongoDB server password",
+				Description: "MongoDB server password. You will prompted to provide a password if it will not appear in CLI parameters",
 			},
 			"mongodb_host_port": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "host:port (e.g. my.mongo.db:27017)",
+				Description: "MongoDB server host and port",
 			},
 			"mongodb_default_auth_db": {
 				Type:        schema.TypeString,
@@ -74,7 +74,7 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"mongodb_uri_options": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "MongoDB server URI options (e.g. replicaSet=mySet&authSource=authDB)",
+				Description: "MongoDB server URI options",
 			},
 			"mongodb_atlas_project_id": {
 				Type:        schema.TypeString,
@@ -115,7 +115,7 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Encrypt producer with following key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -141,7 +141,7 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_enable": {
@@ -157,7 +157,7 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Target DB servers for connections., For multiple values repeat this flag.",
+				Description: "Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_web": {

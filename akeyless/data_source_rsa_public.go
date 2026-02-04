@@ -32,13 +32,13 @@ func dataSourceGetRSAPublic() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Required:    false,
-				Description: "",
+				Description: "Raw format of the public key",
 			},
 			"ssh": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Required:    false,
-				Description: "",
+				Description: "SSH format of the public key",
 			},
 		},
 	}

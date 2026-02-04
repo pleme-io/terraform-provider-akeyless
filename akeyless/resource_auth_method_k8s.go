@@ -57,7 +57,7 @@ func resourceAuthMethodK8s() *schema.Resource {
 			"gen_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "If this flag is set to true, there is no need to manually provide a public key for the Kubernetes Auth Method, and instead, a key pair, will be generated as part of the command and the private part of the key will be returned (the private key is required for the K8S Auth Config in the Akeyless Gateway)",
+				Description: "Automatically generate key-pair for K8S configuration. If set to false, a public key needs to be provided [true/false]",
 				Default:     "true",
 			},
 			"audience": {
@@ -92,7 +92,7 @@ func resourceAuthMethodK8s() *schema.Resource {
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"allowed_client_type": {
@@ -109,7 +109,7 @@ func resourceAuthMethodK8s() *schema.Resource {
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Description: "How many days before the expiration of the auth method would you like to be notified.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gw_bound_ips": {

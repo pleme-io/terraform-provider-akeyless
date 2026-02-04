@@ -60,22 +60,22 @@ func dataSourceGetPKICertificate() *schema.Resource {
 			"data": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "",
+				Description: "The certificate data",
 			},
 			"parent_cert": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "",
+				Description: "The parent certificate",
 			},
 			"reading_token": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "",
+				Description: "The reading token",
 			},
 			"cert_display_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "",
+				Description: "The certificate display ID",
 			},
 			"cert_item_id": {
 				Type:        schema.TypeInt,

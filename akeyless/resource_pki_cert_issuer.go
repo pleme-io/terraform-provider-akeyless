@@ -41,7 +41,7 @@ func resourcePKICertIssuer() *schema.Resource {
 			"ttl": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The maximum requested Time To Live for issued certificate by default in seconds, supported formats are s,m,h,d. In case of Public CA, this is based on the CA target's supported maximum TTLs",
+				Description: "The maximum requested Time To Live for issued certificates, in seconds. In case of Public CA, this is based on the CA target's supported maximum TTLs",
 			},
 			"allowed_domains": {
 				Type:        schema.TypeString,
@@ -56,7 +56,7 @@ func resourcePKICertIssuer() *schema.Resource {
 			"allowed_ip_sans": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A list of the allowed CIDRs for IPs that clients can request to be included in the certificate as part of the IP Subject Alternative Names (in a comma-delimited list)",
+				Description: "A list of the allowed CIDRs for ips that clients can request to be included in the certificate as part of the IP Subject Alternative Names (in a comma-delimited list)",
 			},
 			"allow_subdomains": {
 				Type:        schema.TypeBool,
@@ -159,12 +159,12 @@ func resourcePKICertIssuer() *schema.Resource {
 			"gw_cluster_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The GW cluster URL to issue the certificate from, required in Public CA mode",
+				Description: "The GW cluster URL to issue the certificate from. Required in Public CA mode, to allow CRLs on private CA, or to enable ACME",
 			},
 			"destination_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A path in Akeyless which to save generated certificates",
+				Description: "A path in which to save generated certificates",
 			},
 			"protect_certificates": {
 				Type:        schema.TypeBool,
@@ -184,13 +184,13 @@ func resourcePKICertIssuer() *schema.Resource {
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the expiration of the certificate would you like to be notified",
+				Description: "How many days before the expiration of the certificate would you like to be notified.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"allowed_extra_extensions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A json string that defines the allowed extra extensions for the pki cert issuer",
+				Description: "A json string containing the allowed extra extensions for the pki cert issuer",
 			},
 			"allow_copy_ext_from_csr": {
 				Type:        schema.TypeBool,
@@ -220,12 +220,12 @@ func resourcePKICertIssuer() *schema.Resource {
 			"delete_protection": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this item, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 			},
 			"disable_wildcards": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "If set, generation of wildcard certificates will be disabled",
+				Description: "If set, generation of wildcard certificates will be disabled.",
 			},
 			"create_private_ocsp": {
 				Type:        schema.TypeBool,
@@ -246,13 +246,13 @@ func resourcePKICertIssuer() *schema.Resource {
 			"max_path_len": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "The maximum path length for the generated certificate. -1 means unlimited",
+				Description: "The maximum path length for the generated certificate. -1, means unlimited",
 				Default:     -1,
 			},
 			"ocsp_ttl": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "OCSP NextUpdate window for OCSP responses (min 10m). Supports s,m,h,d suffix",
+				Description: "OCSP NextUpdate window for OCSP responses (min 10m). Supports s,m,h,d suffix.",
 			},
 		},
 	}

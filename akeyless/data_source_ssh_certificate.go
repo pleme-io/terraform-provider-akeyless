@@ -24,12 +24,12 @@ func dataSourceGetSSHCertificate() *schema.Resource {
 			"cert_username": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The username to sign in the SSH certificate (use a comma-separated list for more than one username)",
+				Description: "The username to sign in the SSH certificate",
 			},
 			"public_key_data": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "SSH public key file contents",
+				Description: "SSH public key file contents. If this option is used, the certificate will be printed to stdout",
 			},
 			"ttl": {
 				Type:        schema.TypeInt,

@@ -32,17 +32,17 @@ func resourceDynamicSecretCassandra() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"cassandra_hosts": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Cassandra hosts names or IP addresses, comma separated",
+				Description: "Cassandra hosts IP or addresses, comma separated",
 			},
 			"cassandra_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Cassandra superuser user name",
+				Description: "Cassandra superuser username",
 			},
 			"cassandra_password": {
 				Type:        schema.TypeString,
@@ -58,7 +58,7 @@ func resourceDynamicSecretCassandra() *schema.Resource {
 			"cassandra_creation_statements": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Cassandra Creation Statements",
+				Description: "Cassandra creation statements",
 				Default:     "CREATE ROLE '{{username}}' WITH PASSWORD = '{{password}}' AND LOGIN = true; GRANT SELECT ON ALL KEYSPACES TO '{{username}}';",
 			},
 			"ssl": {
@@ -75,7 +75,7 @@ func resourceDynamicSecretCassandra() *schema.Resource {
 			"user_ttl": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "User TTL (<=60m for access token)",
+				Description: "User TTL",
 				Default:     "60m",
 			},
 			"password_length": {
@@ -86,7 +86,7 @@ func resourceDynamicSecretCassandra() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -96,7 +96,7 @@ func resourceDynamicSecretCassandra() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {

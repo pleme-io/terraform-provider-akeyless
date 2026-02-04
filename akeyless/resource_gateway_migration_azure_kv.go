@@ -36,28 +36,34 @@ func resourceGatewayMigrationAzureKv() *schema.Resource {
 			"azure_kv_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure Key Vault name",
+				Description: "Azure Key Vault Name (relevant only for Azure Key Vault migration)",
 			},
 			"azure_client_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure Key Vault Access client ID",
+				Description: "Azure Key Vault Access client ID, should be Azure AD App with a service principal (relevant only for Azure Key Vault migration)",
 			},
 			"azure_secret": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Azure Key Vault secret",
+				Description: "Azure Key Vault secret (relevant only for Azure Key Vault migration)",
 			},
 			"azure_tenant_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure Key Vault Access tenant ID",
+				Description: "Azure Key Vault Access tenant ID (relevant only for Azure Key Vault migration)",
+			},
+			"expiration_event_in": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "How many days before the expiration of the certificate would you like to be notified.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"protection_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of the key that protects the classic key value (if empty, the account default key will be used)",
 			},
 			"id": {
 				Type:        schema.TypeString,
@@ -90,6 +96,12 @@ func resourceGatewayMigrationAzureKvCreate(d *schema.ResourceData, m interface{}
 	common.GetAkeylessPtr(&body.AzureSecret, azureSecret)
 	common.GetAkeylessPtr(&body.AzureTenantId, azureTenantId)
 	common.GetAkeylessPtr(&body.ProtectionKey, protectionKey)
+
+	expirationEventInSet := d.Get("expiration_event_in").([]interface{})
+	expirationEventIn := common.ExpandStringList(expirationEventInSet)
+	if len(expirationEventIn) > 0 {
+		body.ExpirationEventIn = expirationEventIn
+	}
 
 	_, _, err := client.GatewayCreateMigration(ctx).Body(*body).Execute()
 	if err != nil {
@@ -176,6 +188,12 @@ func resourceGatewayMigrationAzureKvUpdate(d *schema.ResourceData, m interface{}
 	common.GetAkeylessPtr(&body.AzureSecret, azureSecret)
 	common.GetAkeylessPtr(&body.AzureTenantId, azureTenantId)
 	common.GetAkeylessPtr(&body.ProtectionKey, protectionKey)
+
+	expirationEventInSet := d.Get("expiration_event_in").([]interface{})
+	expirationEventIn := common.ExpandStringList(expirationEventInSet)
+	if len(expirationEventIn) > 0 {
+		body.ExpirationEventIn = expirationEventIn
+	}
 
 	id := d.Get("id").(string)
 	if id == "" {

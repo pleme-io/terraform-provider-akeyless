@@ -31,12 +31,12 @@ func resourceDynamicSecretCustom() *schema.Resource {
 			"create_sync_url": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "URL of an endpoint that implements /sync/create method",
+				Description: "URL of an endpoint that implements /sync/create method, for example https://webhook.example.com/sync/create",
 			},
 			"revoke_sync_url": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "URL of an endpoint that implements /sync/revoke method",
+				Description: "URL of an endpoint that implements /sync/revoke method, for example https://webhook.example.com/sync/revoke",
 			},
 			"user_ttl": {
 				Type:        schema.TypeString,
@@ -47,7 +47,7 @@ func resourceDynamicSecretCustom() *schema.Resource {
 			"rotate_sync_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "URL of an endpoint that implements /sync/rotate method",
+				Description: "URL of an endpoint that implements /sync/rotate method, for example https://webhook.example.com/sync/rotate",
 			},
 			"payload": {
 				Type:        schema.TypeString,
@@ -63,23 +63,23 @@ func resourceDynamicSecretCustom() *schema.Resource {
 			"enable_admin_rotation": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Enable automatic admin credentials rotation",
+				Description: "Should admin credentials be rotated",
 				Default:     "false",
 			},
 			"admin_rotation_interval_days": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Rotation period in days",
+				Description: "Define rotation interval in days",
 			},
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic producer encryption key",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {

@@ -95,7 +95,7 @@ func resourceGatewayUpdateRemoteAccessRdpRecording() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "If provided, this key will be used to encrypt uploaded recordings",
+				Description: "If provided, this key will be used to encrypt uploaded recordings.",
 			},
 			"rdp_session_recording_quality": {
 				Type:        schema.TypeString,

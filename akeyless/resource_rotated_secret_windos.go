@@ -47,7 +47,7 @@ func resourceRotatedSecretWindows() *schema.Resource {
 			"authentication_credentials": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The credentials to connect with [use-self-creds/use-target-creds]",
+				Description: "The credentials to connect with use-user-creds/use-target-creds",
 				Default:     "use-self-creds",
 			},
 			"rotated_username": {
@@ -85,7 +85,7 @@ func resourceRotatedSecretWindows() *schema.Resource {
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -143,13 +143,13 @@ func resourceRotatedSecretWindows() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_rdp_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Default domain name server (e.g., microsoft.com)",
+				Description: "Default domain name server. i.e. microsoft.com",
 			},
 			"secure_access_rdp_user": {
 				Type:        schema.TypeString,

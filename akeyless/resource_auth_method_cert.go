@@ -35,7 +35,7 @@ func resourceAuthMethodCert() *schema.Resource {
 			"unique_identifier": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "A unique identifier (ID) value should be configured for OIDC, OAuth2, LDAP and SAML authentication method types and is usually a value such as the email, username, or upn for example. Whenever a user logs in with a token, these authentication types issue a sub claim that contains details uniquely identifying that user. This sub claim includes a key containing the ID value that you configured, and is used to distinguish between different users from within the same organization.",
+				Description: "A unique identifier (ID) value should be configured, such as common_name or organizational_unit Whenever a user logs in with a token, these authentication types issue a \"sub claim\" that contains details uniquely identifying that user. This sub claim includes a key containing the ID value that you configured, and is used to distinguish between different users from within the same organization.",
 			},
 			"access_expires": {
 				Type:        schema.TypeInt,
@@ -46,30 +46,30 @@ func resourceAuthMethodCert() *schema.Resource {
 			"bound_ips": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A comma-separated CIDR block list to allow client access",
+				Description: "A CIDR whitelist with the IPs that the access is restricted to",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gw_bound_ips": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A comma-separated CIDR block list as a trusted Gateway entity",
+				Description: "A CIDR whitelist with the GW IPs that the access is restricted to",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"force_sub_claims": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "enforce role-association must include sub claims",
+				Description: "if true: enforce role-association must include sub claims",
 			},
 			"jwt_ttl": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Creds expiration time in minutes",
+				Description: "Jwt TTL",
 				Default:     0,
 			},
 			"certificate_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The certificate data in base64, if no file was provided.",
+				Description: "The certificate data in base64, if no file was provided",
 			},
 			"bound_common_names": {
 				Type:        schema.TypeSet,
@@ -116,13 +116,13 @@ func resourceAuthMethodCert() *schema.Resource {
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this auth method, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 			"description": {
@@ -133,13 +133,13 @@ func resourceAuthMethodCert() *schema.Resource {
 			"allowed_client_type": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Description: "limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"allowed_cors": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Comma separated list of allowed CORS domains to be validated as part of the authentication flow",
+				Description: "Comma separated list of allowed CORS domains to be validated as part of the authentication flow.",
 			},
 			"product_type": {
 				Type:        schema.TypeSet,
@@ -150,7 +150,7 @@ func resourceAuthMethodCert() *schema.Resource {
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Description: "How many days before the expiration of the auth method would you like to be notified.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"access_id": {

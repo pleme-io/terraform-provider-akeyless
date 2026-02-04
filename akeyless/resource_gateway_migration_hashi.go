@@ -36,24 +36,24 @@ func resourceGatewayMigrationHashi() *schema.Resource {
 			"hashi_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "HashiCorp Vault API URL",
+				Description: "HashiCorp Vault API URL, e.g. https://vault-mgr01:8200 (relevant only for HasiCorp Vault migration)",
 			},
 			"hashi_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "HashiCorp Vault access token",
+				Description: "HashiCorp Vault access token with sufficient permissions to preform list & read operations on secrets objects (relevant only for HasiCorp Vault migration)",
 			},
 			"hashi_ns": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "HashiCorp Vault Namespaces",
+				Description: "HashiCorp Vault Namespaces is a comma-separated list of namespaces which need to be imported into Akeyless Vault. For every provided namespace, all its child namespaces are imported as well, e.g. nmsp/subnmsp1/subnmsp2,nmsp/anothernmsp. By default, import all namespaces (relevant only for HasiCorp Vault migration)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"hashi_json": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Import secret key as json value or independent secrets",
+				Description: "Import secret key as json value or independent secrets (relevant only for HasiCorp Vault migration) [true/false]",
 			},
 			"protection_key": {
 				Type:        schema.TypeString,

@@ -51,7 +51,7 @@ func resourceGatewayUpdateLogForwardingElasticsearch() *schema.Resource {
 			"server_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Elasticsearch server type [nodes/cloud]",
+				Description: "Elasticsearch server type [cloud/nodes]",
 			},
 			"nodes": {
 				Type:        schema.TypeString,

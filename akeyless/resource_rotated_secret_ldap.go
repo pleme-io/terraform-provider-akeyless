@@ -26,13 +26,13 @@ func resourceRotatedSecretLdap() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Secret name",
+				Description: "Rotated secret name",
 				ForceNew:    true,
 			},
 			"target_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The target name to associate",
+				Description: "Target name",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -42,25 +42,25 @@ func resourceRotatedSecretLdap() *schema.Resource {
 			"rotator_type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The rotator type [target/ldap]",
+				Description: "The rotator type. options: [target/ldap]",
 			},
 			"authentication_credentials": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The credentials to connect with [use-self-creds/use-target-creds]",
+				Description: "The credentials to connect with use-user-creds/use-target-creds",
 				Default:     "use-self-creds",
 			},
 			"rotated_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "username to be rotated, if selected use-self-creds at rotator-creds-type, this username will try to rotate it's own password, if use-target-creds is selected, target credentials will be use to rotate the rotated-password (relevant only for rotator-type=password)",
+				Description: "username to be rotated, if selected use-self-creds at rotator-creds-type, this username will try to rotate it's own password, if use-target-creds is selected, target credentials will be use to rotate the rotated-password (relevant only for rotator-type=ldap)",
 			},
 			"rotated_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "rotated-username password (relevant only for rotator-type=password)",
+				Description: "rotated-username password (relevant only for rotator-type=ldap)",
 			},
 			"user_dn": {
 				Type:        schema.TypeString,
@@ -72,17 +72,17 @@ func resourceRotatedSecretLdap() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "LDAP User Attribute",
+				Description: "LDAP User Attribute, Default value \"cn\"",
 			},
 			"auto_rotate": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation",
+				Description: "Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation [true/false]",
 			},
 			"rotation_interval": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The number of days to wait between every automatic rotation (1-365),custom rotator interval will be set in minutes",
+				Description: "The number of days to wait between every automatic key rotation (1-365)",
 			},
 			"rotation_hour": {
 				Type:        schema.TypeInt,
@@ -97,7 +97,7 @@ func resourceRotatedSecretLdap() *schema.Resource {
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -118,7 +118,12 @@ func resourceRotatedSecretLdap() *schema.Resource {
 			"max_versions": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Set the maximum number of versions, limited by the account settings defaults",
+				Description: "Set the maximum number of versions, limited by the account settings defaults.",
+			},
+			"keep_prev_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Whether to keep previous version [true/false]. If not set, use default according to account settings",
 			},
 			"rotate_after_disconnect": {
 				Type:        schema.TypeString,
@@ -218,6 +223,7 @@ func resourceRotatedSecretLdapCreate(d *schema.ResourceData, m interface{}) erro
 	deleteProtection := d.Get("delete_protection").(string)
 	hostProvider := d.Get("host_provider").(string)
 	maxVersions := d.Get("max_versions").(string)
+	// keepPrevVersion is not available in RotatedSecretCreateLdap, only in RotatedSecretUpdateLdap
 	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
 	rotationEventIn := d.Get("rotation_event_in").([]interface{})
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -252,6 +258,7 @@ func resourceRotatedSecretLdapCreate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	// KeepPrevVersion is not available in RotatedSecretCreateLdap, only in RotatedSecretUpdateLdap
 	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
 	common.GetAkeylessPtr(&body.RotationEventIn, common.ExpandStringList(rotationEventIn))
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
@@ -464,6 +471,7 @@ func resourceRotatedSecretLdapUpdate(d *schema.ResourceData, m interface{}) erro
 	deleteProtection := d.Get("delete_protection").(string)
 	hostProvider := d.Get("host_provider").(string)
 	maxVersions := d.Get("max_versions").(string)
+	keepPrevVersion := d.Get("keep_prev_version").(string)
 	rotateAfterDisconnect := d.Get("rotate_after_disconnect").(string)
 	rotationEventIn := d.Get("rotation_event_in").([]interface{})
 	secureAccessEnable := d.Get("secure_access_enable").(string)
@@ -506,6 +514,7 @@ func resourceRotatedSecretLdapUpdate(d *schema.ResourceData, m interface{}) erro
 	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
 	common.GetAkeylessPtr(&body.HostProvider, hostProvider)
 	common.GetAkeylessPtr(&body.MaxVersions, maxVersions)
+	common.GetAkeylessPtr(&body.KeepPrevVersion, keepPrevVersion)
 	common.GetAkeylessPtr(&body.RotateAfterDisconnect, rotateAfterDisconnect)
 	common.GetAkeylessPtr(&body.RotationEventIn, common.ExpandStringList(rotationEventIn))
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)

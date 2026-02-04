@@ -22,15 +22,15 @@ Kubernetes Migration resource
 
 ### Optional
 
-- `k8s_ca_certificate` (List of Number) K8s Cluster CA certificate (relevant only for K8s migration with Certificate Authentication method)
-- `k8s_client_certificate` (List of Number) K8s Client certificate (relevant only for K8s migration with Certificate Authentication method)
+- `k8s_ca_certificate` (List of Number) For Certificate Authentication method K8s Cluster CA certificate (relevant only for K8s migration with Certificate Authentication method)
+- `k8s_client_certificate` (List of Number) K8s Client certificate with sufficient permission to list and get secrets in the namespace(s) you selected (relevant only for K8s migration with Certificate Authentication method)
 - `k8s_client_key` (List of Number) K8s Client key (relevant only for K8s migration with Certificate Authentication method)
-- `k8s_namespace` (String) K8s namespace
+- `k8s_namespace` (String) K8s Namespace, Use this field to import secrets from a particular namespace only. By default, the secrets are imported from all namespaces (relevant only for K8s migration)
 - `k8s_password` (String, Sensitive) K8s Client password (relevant only for K8s migration with Password Authentication method)
-- `k8s_skip_system` (Boolean) K8s skip system secrets
-- `k8s_token` (String, Sensitive) K8s Bearer Token (relevant only for K8s migration with Token Authentication method)
-- `k8s_url` (String) K8s API server URL
-- `k8s_username` (String) K8s Client username (relevant only for K8s migration with Password Authentication method)
+- `k8s_skip_system` (Boolean) K8s Skip Control Plane Secrets, This option allows to avoid importing secrets from system namespaces (relevant only for K8s migration)
+- `k8s_token` (String, Sensitive) For Token Authentication method K8s Bearer Token with sufficient permission to list and get secrets in the namespace(s) you selected (relevant only for K8s migration with Token Authentication method)
+- `k8s_url` (String) K8s API Server URL, e.g. https://k8s-api.mycompany.com:6443 (relevant only for K8s migration)
+- `k8s_username` (String) For Password Authentication method K8s Client username with sufficient permission to list and get secrets in the namespace(s) you selected (relevant only for K8s migration with Password Authentication method)
 - `protection_key` (String) The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)
 
 ### Read-Only

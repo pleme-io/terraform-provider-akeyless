@@ -75,6 +75,21 @@ func dataSourceAuthMethod() *schema.Resource {
 				Computed:    true,
 				Description: "Whether the auth method is approved.",
 			},
+			"access_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The access date of the auth method.",
+			},
+			"creation_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The creation date of the auth method.",
+			},
+			"modification_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The modification date of the auth method.",
+			},
 		},
 	}
 }
@@ -130,6 +145,21 @@ func dataSourceAuthMethodRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if err := d.Set("is_approved", gsvOut.IsApproved); err != nil {
 		return err
+	}
+	if gsvOut.AccessDate != nil {
+		if err := d.Set("access_date", gsvOut.AccessDate.String()); err != nil {
+			return err
+		}
+	}
+	if gsvOut.CreationDate != nil {
+		if err := d.Set("creation_date", gsvOut.CreationDate.String()); err != nil {
+			return err
+		}
+	}
+	if gsvOut.ModificationDate != nil {
+		if err := d.Set("modification_date", gsvOut.ModificationDate.String()); err != nil {
+			return err
+		}
 	}
 
 	d.SetId(path)

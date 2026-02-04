@@ -40,7 +40,7 @@ func resourceAuthMethodGcp() *schema.Resource {
 			"allowed_client_type": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
+				Description: "limit the auth method usage for specific client types [cli,ui,gateway-admin,sdk,mobile,extension]",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"bound_ips": {
@@ -52,18 +52,18 @@ func resourceAuthMethodGcp() *schema.Resource {
 			"force_sub_claims": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "enforce role-association must include sub claims",
+				Description: "if true: enforce role-association must include sub claims",
 			},
 			"jwt_ttl": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Creds expiration time in minutes",
+				Description: "Jwt TTL",
 				Default:     0,
 			},
 			"type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The type of the GCP Auth Method (iam/gce)",
+				Description: "Type of the GCP Access Rules",
 			},
 			"audience": {
 				Type:        schema.TypeString,
@@ -74,42 +74,42 @@ func resourceAuthMethodGcp() *schema.Resource {
 			"service_account_creds_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Service Account creds data, base64 encoded",
+				Description: "ServiceAccount credentials data instead of giving a file path, base64 encoded",
 			},
 			"bound_projects": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A list of GCP project IDs. Clients must belong to any of the provided projects in order to authenticate. For multiple values repeat this flag.",
+				Description: "=== Human and Machine authentication section === Array of GCP project IDs. Only entities belonging to any of the provided projects can authenticate.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"bound_service_accounts": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A list of Service Accounts. Clients must belong to any of the provided service accounts in order to authenticate. For multiple values repeat this flag.",
+				Description: "List of service accounts the service account must be part of in order to be authenticated.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"bound_zones": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "GCE only. A list of zones. GCE instances must belong to any of the provided zones in order to authenticate. For multiple values repeat this flag.",
+				Description: "=== Machine authentication section === List of zones that a GCE instance must belong to in order to be authenticated. TODO: If bound_instance_groups is provided, it is assumed to be a zonal group and the group must belong to this zone.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"bound_regions": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "GCE only. A list of regions. GCE instances must belong to any of the provided regions in order to authenticate. For multiple values repeat this flag.",
+				Description: "List of regions that a GCE instance must belong to in order to be authenticated. TODO: If bound_instance_groups is provided, it is assumed to be a regional group and the group must belong to this region. If bound_zones are provided, this attribute is ignored.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"bound_labels": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "GCE only. A list of GCP labels formatted as key:value pairs that must be set on instances in order to authenticate. For multiple values repeat this flag.",
+				Description: "A comma-separated list of GCP labels formatted as \"key:value\" strings that must be set on authorized GCE instances. TODO: Because GCP labels are not currently ACL'd ....",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"description": {
@@ -120,7 +120,7 @@ func resourceAuthMethodGcp() *schema.Resource {
 			"expiration_event_in": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "How many days before the expiration of the auth method would you like to be notified",
+				Description: "How many days before the expiration of the auth method would you like to be notified.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gw_bound_ips": {
@@ -138,12 +138,12 @@ func resourceAuthMethodGcp() *schema.Resource {
 			"unique_identifier": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A unique identifier (ID) value which is a \"sub claim\" name that contains details uniquely identifying that resource",
+				Description: "A unique identifier (ID) value which is a \"sub claim\" name that contains details uniquely identifying that resource. This \"sub claim\" is used to distinguish between different identities.",
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this auth method, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 				Default:     "false",
 			},
 			"access_id": {

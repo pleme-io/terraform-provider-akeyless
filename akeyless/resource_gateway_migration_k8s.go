@@ -36,18 +36,18 @@ func resourceGatewayMigrationK8s() *schema.Resource {
 			"k8s_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "K8s API server URL",
+				Description: "K8s API Server URL, e.g. https://k8s-api.mycompany.com:6443 (relevant only for K8s migration)",
 			},
 			"k8s_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "K8s Bearer Token (relevant only for K8s migration with Token Authentication method)",
+				Description: "For Token Authentication method K8s Bearer Token with sufficient permission to list and get secrets in the namespace(s) you selected (relevant only for K8s migration with Token Authentication method)",
 			},
 			"k8s_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "K8s Client username (relevant only for K8s migration with Password Authentication method)",
+				Description: "For Password Authentication method K8s Client username with sufficient permission to list and get secrets in the namespace(s) you selected (relevant only for K8s migration with Password Authentication method)",
 			},
 			"k8s_password": {
 				Type:        schema.TypeString,
@@ -58,13 +58,13 @@ func resourceGatewayMigrationK8s() *schema.Resource {
 			"k8s_ca_certificate": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "K8s Cluster CA certificate (relevant only for K8s migration with Certificate Authentication method)",
+				Description: "For Certificate Authentication method K8s Cluster CA certificate (relevant only for K8s migration with Certificate Authentication method)",
 				Elem:        &schema.Schema{Type: schema.TypeInt},
 			},
 			"k8s_client_certificate": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "K8s Client certificate (relevant only for K8s migration with Certificate Authentication method)",
+				Description: "K8s Client certificate with sufficient permission to list and get secrets in the namespace(s) you selected (relevant only for K8s migration with Certificate Authentication method)",
 				Elem:        &schema.Schema{Type: schema.TypeInt},
 			},
 			"k8s_client_key": {
@@ -76,12 +76,12 @@ func resourceGatewayMigrationK8s() *schema.Resource {
 			"k8s_namespace": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "K8s namespace",
+				Description: "K8s Namespace, Use this field to import secrets from a particular namespace only. By default, the secrets are imported from all namespaces (relevant only for K8s migration)",
 			},
 			"k8s_skip_system": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "K8s skip system secrets",
+				Description: "K8s Skip Control Plane Secrets, This option allows to avoid importing secrets from system namespaces (relevant only for K8s migration)",
 			},
 			"protection_key": {
 				Type:        schema.TypeString,

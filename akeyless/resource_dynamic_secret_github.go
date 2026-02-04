@@ -47,49 +47,49 @@ func resourceDynamicSecretGithub() *schema.Resource {
 			"installation_id": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Github application installation id",
+				Description: "GitHub application installation id",
 			},
 			"installation_organization": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Instead of installation id, set a GitHub organization name",
+				Description: "Optional, mutually exclusive with installation id, GitHub organization name",
 			},
 			"installation_repository": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Instead of installation id, set a GitHub repository '<owner>/<repo-name>'",
+				Description: "Optional, mutually exclusive with installation id, GitHub repository '<owner>/<repo-name>'",
 			},
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"github_app_id": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Github application id",
+				Description: "Github app id",
 			},
 			"github_app_private_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Github application private key (base64 encoded key)",
+				Description: "App private key",
 			},
 			"github_base_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Github base url",
+				Description: "Base URL",
 				Default:     "https://api.github.com/",
 			},
 			"token_permissions": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Tokens' allowed permissions. By default use installation allowed permissions. Input format: key=value pairs or JSON strings, e.g - -p contents=read -p issues=write or -p '{content:read}'",
+				Description: "Optional - installation token's allowed permissions",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"token_repositories": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Tokens' allowed repositories. By default use installation allowed repositories. To specify multiple repositories use argument multiple times: -r RepoName1 -r RepoName2",
+				Description: "Optional - installation token's allowed repositories",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"token_ttl": {

@@ -38,7 +38,7 @@ func resourceCertificate() *schema.Resource {
 			"format": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "CertificateFormat of the certificate and private key, possible values: cer,crt,pem,pfx,p12.",
+				Description: "CertificateFormat of the certificate and private key, possible values: cer,crt,pem,pfx,p12. Required when passing inline certificate content with --certificate-data or --key-data, otherwise format is derived from the file extension.",
 				Default:     "pem",
 			},
 			"key_data": {
@@ -62,7 +62,7 @@ func resourceCertificate() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Add tags attached to this object. To specify multiple tags use argument multiple times: --tag Tag1 -t Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"description": {

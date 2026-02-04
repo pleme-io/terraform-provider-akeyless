@@ -41,42 +41,42 @@ func resourceGatewayMigrationServerInventory() *schema.Resource {
 			"si_target_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "SSH, Windows or Linked Target Name",
+				Description: "SSH, Windows or Linked Target Name. (Relevant only for Server Inventory migration)",
 			},
 			"si_users_path_template": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Path location template for migrating users as Rotated Secrets",
+				Description: "Path location template for migrating users as Rotated Secrets e.g.: .../Users/{{COMPUTER_NAME}}/{{USERNAME}} (Relevant only for Server Inventory migration)",
 			},
 			"si_auto_rotate": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Enable/Disable automatic/recurrent rotation for migrated secrets",
+				Description: "Enable/Disable automatic/recurrent rotation for migrated secrets. Default is false: only manual rotation is allowed for migrated secrets. If set to true, this command should be combined with --si-rotation-interval and --si-rotation-hour parameters (Relevant only for Server Inventory migration)",
 			},
 			"si_rotation_hour": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "The hour of the scheduled rotation in UTC",
+				Description: "The hour of the scheduled rotation in UTC (Relevant only for Server Inventory migration)",
 			},
 			"si_rotation_interval": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "The number of days to wait between every automatic rotation [1-365]",
+				Description: "The number of days to wait between every automatic rotation [1-365] (Relevant only for Server Inventory migration)",
 			},
 			"si_sra_enable_rdp": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Enable/Disable RDP Secure Remote Access for the migrated local users rotated secrets",
+				Description: "Enable/Disable RDP Secure Remote Access for the migrated local users rotated secrets. Default is false: rotated secrets will not be created with SRA (Relevant only for Server Inventory migration)",
 			},
 			"si_user_groups": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Comma-separated list of groups to migrate users from",
+				Description: "Comma-separated list of groups to migrate users from. If empty, all users from all groups will be migrated (Relevant only for Server Inventory migration)",
 			},
 			"si_users_ignore": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Comma-separated list of Local Users which should not be migrated",
+				Description: "Comma-separated list of Local Users which should not be migrated (Relevant only for Server Inventory migration)",
 			},
 			"protection_key": {
 				Type:        schema.TypeString,

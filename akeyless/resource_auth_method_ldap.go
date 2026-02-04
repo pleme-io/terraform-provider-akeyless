@@ -51,13 +51,13 @@ func resourceAuthMethodLdap() *schema.Resource {
 			"bound_ips": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A comma-separated CIDR block list to allow client access",
+				Description: "A CIDR whitelist with the IPs that the access is restricted to",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"gw_bound_ips": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A comma-separated CIDR block list as a trusted Gateway entity",
+				Description: "A CIDR whitelist with the GW IPs that the access is restricted to",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"force_sub_claims": {
@@ -80,7 +80,7 @@ func resourceAuthMethodLdap() *schema.Resource {
 			"audit_logs_claims": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Subclaims to include in audit logs",
+				Description: "Subclaims to include in audit logs, e.g \"--audit-logs-claims email --audit-logs-claims username\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"expiration_event_in": {
@@ -99,12 +99,12 @@ func resourceAuthMethodLdap() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "A public key generated for LDAP authentication method on Akeyless [RSA2048] in Base64 or PEM format",
+				Description: "A public key generated for LDAP authentication method on Akeyless in base64 or PEM format [RSA2048]",
 			},
 			"unique_identifier": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A unique identifier (ID) value should be configured for LDAP, OAuth2 and SAML authentication method types and is usually a value such as the email, username, or upn for example. Whenever a user logs in with a token, these authentication types issue a sub claim that contains details uniquely identifying that user. This sub claim includes a key containing the ID value that you configured, and is used to distinguish between different users from within the same organization.",
+				Description: "A unique identifier (ID) value should be configured for OAuth2, LDAP and SAML authentication method types and is usually a value such as the email, username, or upn for example. Whenever a user logs in with a token, these authentication types issue a \"sub claim\" that contains details uniquely identifying that user. This sub claim includes a key containing the ID value that you configured, and is used to distinguish between different users from within the same organization.",
 				Default:     "users",
 			},
 			"gen_key": {

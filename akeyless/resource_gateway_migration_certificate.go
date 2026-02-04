@@ -41,7 +41,7 @@ func resourceGatewayMigrationCertificate() *schema.Resource {
 			"port_ranges": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A comma separated list of port ranges",
+				Description: "A comma separated list of port ranges Examples: \"80,443\" or \"80,443,8080-8090\" or \"443\"",
 			},
 			"expiration_event_in": {
 				Type:        schema.TypeList,
@@ -52,7 +52,7 @@ func resourceGatewayMigrationCertificate() *schema.Resource {
 			"protection_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
+				Description: "The name of the key that protects the classic key value (if empty, the account default key will be used)",
 			},
 			"id": {
 				Type:        schema.TypeString,

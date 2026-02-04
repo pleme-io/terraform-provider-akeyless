@@ -25,7 +25,7 @@ func resourcePasskey() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Passkey name",
+				Description: "ClassicKey name",
 				ForceNew:    true,
 			},
 			"alg": {
@@ -58,7 +58,7 @@ func resourcePasskey() *schema.Resource {
 			"protection_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of a key that used to encrypt the passkey (if empty, the account default protectionKey key will be used)",
+				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"tags": {
 				Type:        schema.TypeSet,

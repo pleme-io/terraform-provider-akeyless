@@ -23,10 +23,10 @@ Google Kubernetes Engine (GKE) dynamic secret resource
 
 - `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `description` (String) Description of the object
-- `encryption_key_name` (String) Encrypt dynamic secret details with following key
-- `gke_account_key` (String) GKE service account key
-- `gke_cluster_cert` (String) GKE Base-64 encoded cluster certificate
-- `gke_cluster_endpoint` (String) GKE cluster endpoint, i.e., cluster URI https://<DNS/IP>.
+- `encryption_key_name` (String) Dynamic producer encryption key
+- `gke_account_key` (String) GKE Service Account key file path
+- `gke_cluster_cert` (String) GKE cluster CA certificate
+- `gke_cluster_endpoint` (String) GKE cluster URL endpoint
 - `gke_cluster_name` (String) GKE cluster name
 - `gke_service_account_email` (String) GKE service account email
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item

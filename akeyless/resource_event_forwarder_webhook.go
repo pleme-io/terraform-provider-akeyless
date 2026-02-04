@@ -55,14 +55,14 @@ func resourceEventForwarderWebhook() *schema.Resource {
 			"event_types": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "A comma-separated list of types of events to notify about",
+				Description: "List of event types to notify about [request-access, certificate-pending-expiration, certificate-expired, certificate-provisioning-success, certificate-provisioning-failure, auth-method-pending-expiration, auth-method-expired, next-automatic-rotation, rotated-secret-success, rotated-secret-failure, dynamic-secret-failure, multi-auth-failure, uid-rotation-failure, apply-justification, email-auth-method-approved, usage, rotation-usage, gateway-inactive, static-secret-updated, rate-limiting, usage-report, secret-sync]",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "Key name. The key will be used to encrypt the Event Forwarder secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the EventForwarder secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"runner_type": {
 				Type:        schema.TypeString,
@@ -107,7 +107,7 @@ func resourceEventForwarderWebhook() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Base64 encoded Token string relevant for token auth-type",
+				Description: "Base64 encoded Token string for authentication type Token",
 			},
 			"client_cert_data": {
 				Type:        schema.TypeString,

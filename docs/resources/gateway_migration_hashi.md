@@ -22,10 +22,10 @@ HashiCorp Vault Migration resource
 
 ### Optional
 
-- `hashi_json` (String) Import secret key as json value or independent secrets
-- `hashi_ns` (List of String) HashiCorp Vault Namespaces
-- `hashi_token` (String, Sensitive) HashiCorp Vault access token
-- `hashi_url` (String) HashiCorp Vault API URL
+- `hashi_json` (String) Import secret key as json value or independent secrets (relevant only for HasiCorp Vault migration) [true/false]
+- `hashi_ns` (List of String) HashiCorp Vault Namespaces is a comma-separated list of namespaces which need to be imported into Akeyless Vault. For every provided namespace, all its child namespaces are imported as well, e.g. nmsp/subnmsp1/subnmsp2,nmsp/anothernmsp. By default, import all namespaces (relevant only for HasiCorp Vault migration)
+- `hashi_token` (String, Sensitive) HashiCorp Vault access token with sufficient permissions to preform list & read operations on secrets objects (relevant only for HasiCorp Vault migration)
+- `hashi_url` (String) HashiCorp Vault API URL, e.g. https://vault-mgr01:8200 (relevant only for HasiCorp Vault migration)
 - `protection_key` (String) The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)
 
 ### Read-Only

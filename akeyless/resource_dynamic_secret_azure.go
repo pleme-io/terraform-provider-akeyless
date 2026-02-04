@@ -32,7 +32,7 @@ func resourceDynamicSecretAzure() *schema.Resource {
 			"target_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of existing target to use in dynamic secret creation",
+				Description: "Target name",
 			},
 			"azure_tenant_id": {
 				Type:        schema.TypeString,
@@ -42,45 +42,45 @@ func resourceDynamicSecretAzure() *schema.Resource {
 			"azure_client_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure Client ID (Application ID)",
+				Description: "Azure Client ID",
 			},
 			"azure_client_secret": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Azure AD Client Secret",
+				Description: "Azure Client Secret",
 			},
 			"user_portal_access": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Enable Azure AD user portal access",
+				Description: "Azure User portal access",
 				Default:     "false",
 			},
 			"user_programmatic_access": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Enable Azure AD user programmatic access",
+				Description: "Azure User programmatic access",
 				Default:     "true",
 			},
 			"app_obj_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure App Object ID (required if selected programmatic access)",
+				Description: "Azure App Object Id",
 			},
 			"user_principal_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure AD User Principal Name (required if selected Portal access)",
+				Description: "User Principal Name",
 			},
 			"user_group_obj_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure AD User Group Object ID (required if selected Portal access)",
+				Description: "User Group Object Id",
 			},
 			"user_role_template_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Azure AD User Role Template ID (required if selected Portal access)",
+				Description: "User Role Template Id",
 			},
 			"user_ttl": {
 				Type:        schema.TypeString,
@@ -96,7 +96,7 @@ func resourceDynamicSecretAzure() *schema.Resource {
 			"encryption_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Encrypt dynamic secret details with following key",
+				Description: "Dynamic secret encryption key",
 			},
 			"custom_username_template": {
 				Type:        schema.TypeString,
@@ -106,18 +106,18 @@ func resourceDynamicSecretAzure() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: --tag Tag1 --tag Tag2",
+				Description: "Add tags attached to this object",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_enable": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Enable/Disable secure remote access, [true/false]",
+				Description: "Enable/Disable secure remote access [true/false]",
 			},
 			"secure_access_web_browsing": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Secure browser via Akeyless Web Access Bastion",
+				Description: "Secure browser via Akeyless's Secure Remote Access (SRA)",
 			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
@@ -148,12 +148,12 @@ func resourceDynamicSecretAzure() *schema.Resource {
 			"fixed_user_claim_keyname": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Fixed user claim keyname",
+				Description: "FixedUserClaimKeyname",
 			},
 			"fixed_user_only": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Fixed user only",
+				Description: "Fixed user",
 			},
 			"item_custom_fields": {
 				Type:        schema.TypeMap,

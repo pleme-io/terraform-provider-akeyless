@@ -38,13 +38,13 @@ func resourceGithubTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "Github application private key (base64 encoded key)",
+				Description: "App private key",
 			},
 			"github_base_url": {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "Github base url",
+				Description: "Base URL",
 				Default:     "https://api.github.com/",
 			},
 			"description": {
@@ -56,7 +56,7 @@ func resourceGithubTarget() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used.",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"max_versions": {
 				Type:        schema.TypeString,

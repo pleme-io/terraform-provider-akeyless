@@ -58,7 +58,7 @@ func resourceSSHCertIssuer() *schema.Resource {
 			"extensions": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				Description: "Signed certificates with extensions (key/val), e.g permit-port-forwarding=",
+				Description: "Signed certificates with extensions, e.g permit-port-forwarding=\"\"",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"description": {
@@ -69,23 +69,23 @@ func resourceSSHCertIssuer() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of the tags attached to this key. To specify multiple tags use argument multiple times: --tag Tag1 --tag Tag2",
+				Description: "List of the tags attached to this key",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_enable": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Enable/Disable secure remote access, [true/false]",
+				Description: "Enable/Disable secure remote access [true/false]",
 			},
 			"secure_access_bastion_api": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Bastion's SSH control API endpoint. E.g. https://my.bastion:9900",
+				Description: "Deprecated. use secure-access-api",
 			},
 			"secure_access_bastion_ssh": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Bastion's SSH server. E.g. my.bastion:22",
+				Description: "Deprecated. use secure-access-ssh",
 			},
 			"secure_access_ssh_creds_user": {
 				Type:        schema.TypeString,
@@ -95,18 +95,18 @@ func resourceSSHCertIssuer() *schema.Resource {
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "Target servers for connections. (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
+				Description: "Target servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts - Relevant only for Dynamic Secrets/producers)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"secure_access_use_internal_bastion": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Use internal SSH Bastion",
+				Description: "Deprecated. Use secure-access-use-internal-ssh-access",
 			},
 			"delete_protection": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Protection from accidental deletion of this item, [true/false]",
+				Description: "Protection from accidental deletion of this object [true/false]",
 			},
 			"fixed_user_claim_keyname": {
 				Type:        schema.TypeString,

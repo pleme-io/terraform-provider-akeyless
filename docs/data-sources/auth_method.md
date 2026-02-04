@@ -27,6 +27,7 @@ data "akeyless_auth_method" "api_key" {
 
 ### Read-Only
 
+- `access_date` (String) The access date of the auth method.
 - `access_date_display` (String) The display format of the access date.
 - `access_id` (String) The access ID of the auth method.
 - `account_id` (String) The account ID associated with the auth method.
@@ -34,9 +35,11 @@ data "akeyless_auth_method" "api_key" {
 - `auth_method_id` (Number) The unique identifier of the auth method.
 - `auth_method_name` (String) The name of the auth method.
 - `client_permissions` (List of String) The list of client permissions.
+- `creation_date` (String) The creation date of the auth method.
 - `delete_protection` (Boolean) Whether delete protection is enabled.
 - `description` (String) The description of the auth method.
 - `id` (String) The ID of this resource.
 - `is_approved` (Boolean) Whether the auth method is approved.
+- `modification_date` (String) The modification date of the auth method.
 
 

@@ -17,7 +17,7 @@ Create gateway allowed access
 
 ### Required
 
-- `access_id` (String) The access id to be attached to this allowed access
+- `access_id` (String) The access id to be attached to this allowed access. Auth method with this access id should already exist.
 - `name` (String) Allowed access name
 
 ### Optional
@@ -31,8 +31,8 @@ Create gateway allowed access
 - `error` (String) Error message if any
 - `id_int` (Number) Internal ID
 - `is_valid` (Boolean) Whether the allowed access is valid
-- `permissions` (String) Comma-seperated list of permissions for this allowed access. Available permissions: [defaults,targets,classic_keys,automatic_migration,ldap_auth,dynamic_secret,k8s_auth,log_forwarding,zero_knowledge_encryption,rotated_secret,caching,event_forwarding,admin,kmip,general]
-- `sub_claims` (Map of String) key/val of sub claims, e.g group=admins,developers
+- `permissions` (String) Permissions Comma-seperated list of permissions for this allowed access. Available permissions: [defaults,targets,classic_keys,automatic_migration,ldap_auth,dynamic_secret,k8s_auth,log_forwarding,zero_knowledge_encryption,rotated_secret,caching,event_forwarding,admin,kmip,general,rotate_secret_value]
+- `sub_claims` (Map of String) Sub claims key/val of sub claims, e.g group=admins,developers
 - `sub_claims_case_insensitive` (Boolean) Treat sub claims as case-insensitive
 - `updated_at` (String) Last update timestamp
 

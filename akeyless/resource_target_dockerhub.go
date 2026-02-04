@@ -31,18 +31,18 @@ func resourceDockerhubTarget() *schema.Resource {
 			"dockerhub_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Username for Docker Hub",
+				Description: "Username for docker repository",
 			},
 			"dockerhub_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Password for Docker Hub",
+				Description: "Password for docker repository",
 			},
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Key name. The key will be used to encrypt the target secret value. If key name is not specified, the account default protection key is used",
+				Description: "The name of a key that used to encrypt the target secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"description": {
 				Type:        schema.TypeString,
