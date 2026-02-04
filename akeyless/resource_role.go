@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"reflect"
@@ -190,11 +189,15 @@ func rulesHashFunction(v interface{}) int {
 	}
 
 	normalizedPath := common.EnsureLeadingSlash(m["path"].(string))
+	ruleType := m["rule_type"].(string)
+
+	capabilities := getCapability(m["capability"])
+	sort.Strings(capabilities)
 
 	hashString := fmt.Sprintf("%s-%s-%s",
 		normalizedPath,
-		m["rule_type"].(string),
-		strings.Join(common.ExpandStringList(m["capability"].(*schema.Set).List()), ","),
+		ruleType,
+		strings.Join(capabilities, ","),
 	)
 
 	return schema.HashString(hashString)
@@ -433,7 +436,7 @@ func resourceRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		if !ok {
 			err, _ := setRoleRules(ctx, name, rulesToAdd, rulesToDelete, m)
 			if err != nil {
-				log.Fatal(fmt.Printf("fatal error, can't delete new role rules after bad update: %v", err))
+				tflog.Error(ctx, fmt.Sprintf("failed to rollback role rules after error: %v", err))
 			}
 		}
 	}()
