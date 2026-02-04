@@ -46,7 +46,7 @@ func resourceGatewayMigrationServerInventory() *schema.Resource {
 			"si_users_path_template": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Path location template for migrating users as Rotated Secrets e.g.: .../Users/{{COMPUTER_NAME}}/{{USERNAME}} (Relevant only for Server Inventory migration)",
+				Description: "Path location template for migrating users as Rotated Secrets e.g.: .../Users/{COMPUTER_NAME}/{USERNAME} (Relevant only for Server Inventory migration)",
 			},
 			"si_auto_rotate": {
 				Type:        schema.TypeString,
