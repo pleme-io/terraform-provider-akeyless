@@ -14,6 +14,8 @@ import (
 func TestAuthMethodApiKeyResourceCreate(t *testing.T) {
 	name := "test_auth_method"
 	path := testPath("path_auth_method")
+	deleteAuthMethod(path, "api_key")
+
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "%v" {
 			path = "%v"
@@ -38,6 +40,8 @@ func TestAuthMethodApiKeyResourceCreate(t *testing.T) {
 func TestAuthMethodAWSResourceCreate(t *testing.T) {
 	name := "test_auth_method_aws_iam"
 	path := testPath("path_auth_method_aws_iam")
+	deleteAuthMethod(path, "aws_iam")
+
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "%v" {
 			path = "%v"
@@ -63,6 +67,8 @@ func TestAuthMethodAWSResourceCreate(t *testing.T) {
 func TestAuthMethodSAMLResourceCreate(t *testing.T) {
 	name := "test_auth_method_saml"
 	path := testPath("path_auth_method_saml")
+	deleteAuthMethod(path, "saml")
+
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "%v" {
 			path = "%v"
@@ -89,6 +95,8 @@ func TestAuthMethodSAMLResourceCreate(t *testing.T) {
 func TestAuthMethodAzureResourceCreate(t *testing.T) {
 	name := "test_auth_method_azure_ad"
 	path := testPath("path_auth_method_azure_ad")
+	deleteAuthMethod(path, "azure_ad")
+
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "%v" {
 			path = "%v"
@@ -118,6 +126,8 @@ func TestAuthMethodGCPResourceCreate(t *testing.T) {
 
 	name := "test_auth_method_gcp"
 	path := testPath("path_auth_method_gcp")
+	deleteAuthMethod(path, "gcp")
+
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "%v" {
 			path = "%v"
