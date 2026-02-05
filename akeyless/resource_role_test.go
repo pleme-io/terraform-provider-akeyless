@@ -21,6 +21,7 @@ const RULE_PATH = "/terraform-tests/*"
 func TestRoleResourceBasic(t *testing.T) {
 	rolePath := testPath("test_role_resource")
 	deleteRole(rolePath)
+	defer deleteRole(rolePath)
 
 	config := fmt.Sprintf(`
 		resource "akeyless_role" "test_role" {
@@ -57,7 +58,9 @@ func TestRoleResourceUpdateRules(t *testing.T) {
 	rolePath := testPath("test_role_resource")
 	authMethodPath := testPath("test_am_resource")
 	deleteRole(rolePath)
+	defer deleteRole(rolePath)
 	deleteAuthMethod(authMethodPath, "api_key")
+	defer deleteAuthMethod(authMethodPath, "api_key")
 
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "test_auth_method" {
@@ -192,7 +195,9 @@ func TestRoleResourceRuleWithNoLeadingSlash(t *testing.T) {
 	rolePath := testPath("test_role_resource")
 	authMethodPath := testPath("test_am_resource")
 	deleteRole(rolePath)
+	defer deleteRole(rolePath)
 	deleteAuthMethod(authMethodPath, "api_key")
+	defer deleteAuthMethod(authMethodPath, "api_key")
 
 	rulePath := "terraform-tests/*"
 
@@ -282,7 +287,9 @@ func TestRoleResourceUpdateAssoc(t *testing.T) {
 	rolePath := testPath("test_role_resource")
 	authMethodPath := testPath("test_am_resource")
 	deleteRole(rolePath)
+	defer deleteRole(rolePath)
 	deleteAuthMethod(authMethodPath, "api_key")
+	defer deleteAuthMethod(authMethodPath, "api_key")
 
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "test_auth_method" {
@@ -426,8 +433,11 @@ func TestRoleResourceAddAssoc(t *testing.T) {
 	authMethodPath1 := testPath("test_am_resource1")
 	authMethodPath2 := testPath("test_am_resource2")
 	deleteRole(rolePath)
+	defer deleteRole(rolePath)
 	deleteAuthMethod(authMethodPath1, "api_key")
+	defer deleteAuthMethod(authMethodPath1, "api_key")
 	deleteAuthMethod(authMethodPath2, "api_key")
+	defer deleteAuthMethod(authMethodPath2, "api_key")
 
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "test_auth_method" {
@@ -512,7 +522,9 @@ func TestRoleResourceAndAssocAuthMethod(t *testing.T) {
 	rolePath := testPath("test_role_resource")
 	authMethodPath := testPath("test_am_resource")
 	deleteRole(rolePath)
+	defer deleteRole(rolePath)
 	deleteAuthMethod(authMethodPath, "api_key")
+	defer deleteAuthMethod(authMethodPath, "api_key")
 
 	config := fmt.Sprintf(`
 		resource "akeyless_auth_method" "test_auth_method" {
@@ -645,6 +657,7 @@ func TestRoleResourceWithSraRule(t *testing.T) {
 func TestRoleResourceWithFewAssocs(t *testing.T) {
 	resourceName := "test_role_few_assocs"
 	rolePath := testPath(resourceName)
+	defer deleteRole(rolePath)
 
 	amPath1 := testPath("test_am1")
 	createTestAuthMethod(amPath1)
@@ -728,6 +741,10 @@ func checkRoleExistsRemotely(t *testing.T, roleName, authMethodPath string, rule
 
 		if common.IsLocalEnv() {
 			rulesNum--
+		}
+		if rulesNum != len(rules.GetPathRules()) {
+			fmt.Println("rulesNum:", res.GetRules())
+			fmt.Println("len(rules.GetPathRules()):", rules.GetPathRules())
 		}
 
 		assert.Equal(t, rulesNum, len(rules.GetPathRules()))
