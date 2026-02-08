@@ -19,6 +19,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func DiffSuppressDuration(_, old, new string, _ *schema.ResourceData) bool {
+	// Parse both durations and compare them
+	oldDuration, oldErr := time.ParseDuration(old)
+	newDuration, newErr := time.ParseDuration(new)
+
+	// If both parse successfully, compare the durations
+	if oldErr == nil && newErr == nil {
+		return oldDuration == newDuration
+	}
+
+	// If parsing fails, fall back to string comparison
+	return old == new
+}
+
 func DiffSuppressOnLeadingSlash(_, old, new string, _ *schema.ResourceData) bool {
 	return EnsureLeadingSlash(old) == EnsureLeadingSlash(new)
 }

@@ -189,12 +189,10 @@ func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("can't get value: %v", err)
 	}
 
-	if rOut.ItemGeneralInfo != nil {
-		if rOut.ItemGeneralInfo.DisplayMetadata != nil {
-			err = d.Set("description", *rOut.ItemGeneralInfo.DisplayMetadata)
-			if err != nil {
-				return err
-			}
+	if rOut.ItemMetadata != nil {
+		err = d.Set("description", *rOut.ItemMetadata)
+		if err != nil {
+			return err
 		}
 	}
 	if rOut.ItemTags != nil {

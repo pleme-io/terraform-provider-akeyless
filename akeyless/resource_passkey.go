@@ -58,6 +58,7 @@ func resourcePasskey() *schema.Resource {
 			"protection_key_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
 			"tags": {
@@ -160,8 +161,8 @@ func resourcePasskeyRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("can't get value: %v", err)
 	}
 
-	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.DisplayMetadata != nil {
-		err = d.Set("description", *rOut.ItemGeneralInfo.DisplayMetadata)
+	if rOut.ItemMetadata != nil {
+		err = d.Set("description", *rOut.ItemMetadata)
 		if err != nil {
 			return err
 		}
@@ -211,8 +212,46 @@ func resourcePasskeyRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePasskeyUpdate(d *schema.ResourceData, m interface{}) error {
-	// Passkeys cannot be updated, only recreated
-	return resourcePasskeyRead(d, m)
+	provider := m.(*providerMeta)
+	client := *provider.client
+	token := *provider.token
+
+	ctx := context.Background()
+	name := d.Get("name").(string)
+	description := d.Get("description").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	tagsSet := d.Get("tags").(*schema.Set)
+	tagList := common.ExpandStringList(tagsSet.List())
+
+	body := akeyless_api.GatewayUpdateItem{
+		Name:  name,
+		Type:  "passkey",
+		Token: &token,
+	}
+	common.GetAkeylessPtr(&body.Description, description)
+	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
+
+	add, remove, err := common.GetTagsForUpdate(d, name, token, tagList, client)
+	if err == nil {
+		if len(add) > 0 {
+			common.GetAkeylessPtr(&body.AddTag, add)
+		}
+		if len(remove) > 0 {
+			common.GetAkeylessPtr(&body.RmTag, remove)
+		}
+	}
+
+	_, _, err = client.GatewayUpdateItem(ctx).Body(body).Execute()
+	if err != nil {
+		if errors.As(err, new(akeyless_api.GenericOpenAPIError)) {
+			return fmt.Errorf("can't update Passkey: %v", err)
+		}
+		return fmt.Errorf("can't update Passkey: %v", err)
+	}
+
+	d.SetId(name)
+
+	return nil
 }
 
 func resourcePasskeyDelete(d *schema.ResourceData, m interface{}) error {

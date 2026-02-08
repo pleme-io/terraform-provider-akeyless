@@ -568,6 +568,316 @@ func checkTargetExistsRemotelyprod(path string) resource.TestCheckFunc {
 	}
 }
 
+func TestDockerhubTargetResource(t *testing.T) {
+	targetName := "dockerhub_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_dockerhub" "%v" {
+			name 				= "%v"
+			dockerhub_username 	= "testuser"
+			dockerhub_password 	= "testpass"
+			description 		= "Test Dockerhub target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_dockerhub" "%v" {
+			name 				= "%v"
+			dockerhub_username 	= "testuser2"
+			dockerhub_password 	= "testpass2"
+			description 		= "Updated Dockerhub target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestHashivaultTargetResource(t *testing.T) {
+	t.Skip("Skipping Hashivault target resource test")
+	targetName := "hashivault_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_hashivault" "%v" {
+			name 				= "%v"
+			hashi_url 			= "https://vault.example.com"
+			vault_token 		= "test-token"
+			description 		= "Test Hashivault target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_hashivault" "%v" {
+			name 				= "%v"
+			hashi_url 			= "https://vault2.example.com"
+			vault_token 		= "test-token2"
+			description 		= "Updated Hashivault target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestLdapTargetResource(t *testing.T) {
+	targetName := "ldap_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_ldap" "%v" {
+			name 				= "%v"
+			ldap_url 			= "ldap://ldap.example.com"
+			bind_dn 			= "cn=admin,dc=example,dc=com"
+			bind_dn_password 	= "password"
+			description 		= "Test LDAP target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_ldap" "%v" {
+			name 				= "%v"
+			ldap_url 			= "ldap://ldap2.example.com"
+			bind_dn 			= "cn=admin2,dc=example,dc=com"
+			bind_dn_password 	= "password2"
+			description 		= "Updated LDAP target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestOpenAITargetResource(t *testing.T) {
+	targetName := "openai_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_openai" "%v" {
+			name 				= "%v"
+			api_key 			= "sk-test123"
+			description 		= "Test OpenAI target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_openai" "%v" {
+			name 				= "%v"
+			api_key 			= "sk-test456"
+			description 		= "Updated OpenAI target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestPingTargetResource(t *testing.T) {
+	targetName := "ping_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_ping" "%v" {
+			name 					= "%v"
+			ping_url 				= "https://ping.example.com"
+			administrative_port 	= "9999"
+			authorization_port 		= "9031"
+			privileged_user 		= "admin"
+			password 				= "password"
+			description 			= "Test Ping target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_ping" "%v" {
+			name 					= "%v"
+			ping_url 				= "https://ping2.example.com"
+			administrative_port 	= "9998"
+			authorization_port 		= "9032"
+			privileged_user 		= "admin2"
+			password 				= "password2"
+			description 			= "Updated Ping target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestSalesforceTargetResource(t *testing.T) {
+	targetName := "salesforce_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_salesforce" "%v" {
+			name 				= "%v"
+			auth_flow 			= "user-password"
+			client_id 			= "test-client-id"
+			client_secret 		= "test-client-secret"
+			email 				= "test@example.com"
+			tenant_url 			= "https://test.salesforce.com"
+			password 			= "password"
+			security_token 		= "token"
+			description 		= "Test Salesforce target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_salesforce" "%v" {
+			name 				= "%v"
+			auth_flow 			= "user-password"
+			client_id 			= "test-client-id2"
+			client_secret 		= "test-client-secret2"
+			email 				= "test2@example.com"
+			tenant_url 			= "https://test2.salesforce.com"
+			password 			= "password2"
+			security_token 		= "token2"
+			description 		= "Updated Salesforce target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestSectigoTargetResource(t *testing.T) {
+	targetName := "sectigo_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_sectigo" "%v" {
+			name 				= "%v"
+			username 			= "testuser"
+			password 			= "testpass"
+			customer_uri 		= "https://sectigo.example.com"
+			certificate_profile_id = 123
+			organization_id 	= 456
+			external_requester 	= "test@example.com"
+			description 		= "Test Sectigo target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_sectigo" "%v" {
+			name 				= "%v"
+			username 			= "testuser2"
+			password 			= "testpass2"
+			customer_uri 		= "https://sectigo2.example.com"
+			certificate_profile_id = 789
+			organization_id 	= 101112
+			external_requester 	= "test2@example.com"
+			description 		= "Updated Sectigo target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestGodaddyTargetResource(t *testing.T) {
+	targetName := "godaddy_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_godaddy" "%v" {
+			name 				= "%v"
+			api_key 			= "test-api-key"
+			secret 				= "test-api-secret"
+			imap_username 		= "imap@example.com"
+			imap_password 		= "imap-password"
+			imap_fqdn 			= "imap.example.com"
+			description 		= "Test GoDaddy target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_godaddy" "%v" {
+			name 				= "%v"
+			api_key 			= "test-api-key2"
+			secret 				= "test-api-secret2"
+			imap_username 		= "imap2@example.com"
+			imap_password 		= "imap-password2"
+			imap_fqdn 			= "imap2.example.com"
+			description 		= "Updated GoDaddy target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestGlobalSignAtlasTargetResource(t *testing.T) {
+	targetName := "globalsign_atlas_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_globalsign_atlas" "%v" {
+			name 				= "%v"
+			api_key 			= "test-api-key"
+			api_secret 			= "test-api-secret"
+			mtls_cert_data_base64 = "dGVzdA=="
+			mtls_key_data_base64 = "dGVzdA=="
+			description 		= "Test GlobalSign Atlas target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_globalsign_atlas" "%v" {
+			name 				= "%v"
+			api_key 			= "test-api-key2"
+			api_secret 			= "test-api-secret2"
+			mtls_cert_data_base64 = "dGVzdDI="
+			mtls_key_data_base64 = "dGVzdDI="
+			description 		= "Updated GlobalSign Atlas target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestGeminiTargetResource(t *testing.T) {
+	targetName := "gemini_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_gemini" "%v" {
+			name 				= "%v"
+			api_key 			= "test-api-key"
+			description 		= "Test Gemini target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_gemini" "%v" {
+			name 				= "%v"
+			api_key 			= "test-api-key2"
+			description 		= "Updated Gemini target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
+func TestRabbitmqTargetResource(t *testing.T) {
+	targetName := "rabbitmq_target"
+	targetPath := testPath(targetName)
+
+	config := fmt.Sprintf(`
+		resource "akeyless_target_rabbit" "%v" {
+			name 				= "%v"
+			rabbitmq_server_uri = "amqp://localhost:5672"
+			rabbitmq_server_user = "guest"
+			rabbitmq_server_password = "guest"
+			description 		= "Test RabbitMQ target"
+		}
+	`, targetName, targetPath)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_target_rabbit" "%v" {
+			name 				= "%v"
+			rabbitmq_server_uri = "amqp://localhost:5673"
+			rabbitmq_server_user = "admin"
+			rabbitmq_server_password = "admin"
+			description 		= "Updated RabbitMQ target"
+		}
+	`, targetName, targetPath)
+
+	tesTargetResource(t, config, configUpdate, targetPath)
+}
+
 func deleteTarget(t *testing.T, name string) {
 
 	p, err := getProviderMeta()

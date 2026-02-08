@@ -1114,6 +1114,28 @@ func deleteAuthMethod(path string, authMethodType string) error {
 					fmt.Println("error updating auth method:", updateErr)
 					return err
 				}
+			case "kerberos":
+				updateBody := akeyless_api.AuthMethodUpdateKerberos{
+					Name:             path,
+					Token:            &token,
+					DeleteProtection: akeyless_api.PtrString("false"),
+				}
+				_, _, updateErr := client.AuthMethodUpdateKerberos(context.Background()).Body(updateBody).Execute()
+				if updateErr != nil {
+					fmt.Println("error updating auth method:", updateErr)
+					return err
+				}
+			case "oci":
+				updateBody := akeyless_api.AuthMethodUpdateOCI{
+					Name:             path,
+					Token:            &token,
+					DeleteProtection: akeyless_api.PtrString("false"),
+				}
+				_, _, updateErr := client.AuthMethodUpdateOCI(context.Background()).Body(updateBody).Execute()
+				if updateErr != nil {
+					fmt.Println("error updating auth method:", updateErr)
+					return err
+				}
 			}
 
 			// Retry deletion

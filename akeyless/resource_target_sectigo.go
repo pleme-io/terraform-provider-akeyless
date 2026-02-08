@@ -80,10 +80,11 @@ func resourceSectigoTarget() *schema.Resource {
 				Description: "Set the maximum number of versions, limited by the account settings defaults",
 			},
 			"timeout": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Timeout waiting for certificate validation in Duration format (1h - 1 Hour, 20m - 20 Minutes, 33m3s - 33 Minutes and 3 Seconds), maximum 1h.",
-				Default:     "5m",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Timeout waiting for certificate validation in Duration format (1h - 1 Hour, 20m - 20 Minutes, 33m3s - 33 Minutes and 3 Seconds), maximum 1h.",
+				Default:          "5m",
+				DiffSuppressFunc: common.DiffSuppressDuration,
 			},
 		},
 	}
@@ -202,7 +203,10 @@ func resourceSectigoTargetRead(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if rOut.Value.SectigoTargetDetails.Timeout != nil {
-			err = d.Set("timeout", *rOut.Value.SectigoTargetDetails.Timeout)
+			// API returns nanoseconds as int64, convert to duration string
+			timeout := *rOut.Value.SectigoTargetDetails.Timeout
+			duration := common.ConvertNanoSecondsIntoDurationString(timeout)
+			err = d.Set("timeout", duration)
 			if err != nil {
 				return err
 			}

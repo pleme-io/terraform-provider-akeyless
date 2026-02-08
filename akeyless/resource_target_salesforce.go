@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
 	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
@@ -192,7 +193,9 @@ func resourceSalesforceTargetRead(d *schema.ResourceData, m interface{}) error {
 
 		if targetDetails.SalesforceTargetDetails != nil {
 			if targetDetails.SalesforceTargetDetails.AuthFlow != nil {
-				err := d.Set("auth_flow", *targetDetails.SalesforceTargetDetails.AuthFlow)
+				// Normalize auth_flow to lowercase
+				authFlow := strings.ToLower(*targetDetails.SalesforceTargetDetails.AuthFlow)
+				err := d.Set("auth_flow", authFlow)
 				if err != nil {
 					return err
 				}

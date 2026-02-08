@@ -175,6 +175,43 @@ func TestEventForwarderSlack(t *testing.T) {
 	testEventForwarderResource(t, eventForwarderName, config, configUpdate)
 }
 
+func TestEventForwarderTeams(t *testing.T) {
+	t.Skip("not supported on public gateway")
+	t.Parallel()
+
+	eventForwarderName := "test-event-forwarder-teams"
+
+	config := fmt.Sprintf(`
+		resource "akeyless_event_forwarder_teams" "%v" {
+			name = "%v"
+			items_event_source_locations = ["/items/*"]
+			targets_event_source_locations = ["/targets/*"]
+			auth_methods_event_source_locations = ["/auth-methods/*"]
+			gateways_event_source_locations = ["http://localhost:8000"]
+			event_types = ["secret-sync", "request-access", "gateway-inactive", "static-secret-updated", "rate-limiting", "usage-report"]
+			webhook_url = "https://example.webhook.office.com"
+			runner_type = "immediate"
+			description = "test teams event forwarder"
+		}
+	`, eventForwarderName, eventForwarderName)
+
+	configUpdate := fmt.Sprintf(`
+		resource "akeyless_event_forwarder_teams" "%v" {
+			name = "%v"
+			items_event_source_locations = ["items/*", "items2"]
+			targets_event_source_locations = ["targets/*", "targets2/*"]
+			auth_methods_event_source_locations = ["/auth/"]
+			gateways_event_source_locations = ["http://localhost:8000"]
+			event_types = ["secret-sync", "request-access", "gateway-inactive", "static-secret-updated", "usage-report"]
+			webhook_url = "https://example2.webhook.office.com"
+			runner_type = "immediate"
+			description = "test teams event forwarder update"
+		}
+	`, eventForwarderName, eventForwarderName)
+
+	testEventForwarderResource(t, eventForwarderName, config, configUpdate)
+}
+
 func testEventForwarderResource(t *testing.T, eventForwarderName string, configs ...string) {
 	steps := make([]resource.TestStep, len(configs))
 	for i, config := range configs {
