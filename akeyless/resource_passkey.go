@@ -242,7 +242,7 @@ func resourcePasskeyUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	_, _, err := client.GatewayUpdateItem(ctx).Body(body).Execute()
+	_, _, err = client.GatewayUpdateItem(ctx).Body(body).Execute()
 	if err != nil {
 		var updateApiErr akeyless_api.GenericOpenAPIError
 		if errors.As(err, &updateApiErr) {

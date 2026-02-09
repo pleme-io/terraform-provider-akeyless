@@ -19,11 +19,11 @@ Group resource
 
 - `group_alias` (String) A short group alias
 - `name` (String) Group name
+- `user_assignment` (String) A json array string defining the access permission assignment for this group. Format: [{"access_id":"p-abc123","sub_claims":{"email":["user@example.com"]}}]. The access_id is the auth method access ID, and sub_claims is a map of claim names to arrays of allowed values.
 
 ### Optional
 
 - `description` (String) Description of the object
-- `user_assignment` (String) A json string defining the access permission assignment for this client
 
 ### Read-Only
 

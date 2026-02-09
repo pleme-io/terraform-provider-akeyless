@@ -18,6 +18,7 @@ OIDC App resource
 ### Required
 
 - `name` (String) OIDC App name
+- `permission_assignment` (String) A json array string defining the access permission assignment for this OIDC app. Supports two formats: 1) Auth method: [{"assignment_type":"AUTH_METHOD","access_id":"p-abc123","sub_claims":{"email":["user@example.com"]}}] 2) Group: [{"assignment_type":"GROUP","group_id":"grp-xyz789"}]
 
 ### Optional
 
@@ -28,7 +29,6 @@ OIDC App resource
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `key` (String) The name of a key that used to encrypt the OIDC application (if empty, the account default protectionKey key will be used)
 - `metadata` (String) Deprecated - use description
-- `permission_assignment` (String) A json string defining the access permission assignment for this app
 - `public` (Boolean) Set to true if the app is public (cannot keep secrets)
 - `redirect_uris` (Set of String) A comma separated list of allowed redirect uris
 - `scopes` (Set of String) A comma separated list of allowed scopes
