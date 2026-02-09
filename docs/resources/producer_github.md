@@ -21,19 +21,14 @@ Github producer resource.
 
 ### Optional
 
-- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `github_app_id` (Number) Github application id
 - `github_app_private_key` (String) Github application private key (base64 encoded key)
 - `github_base_url` (String) Github base url
 - `installation_id` (Number) Github application installation id
-- `installation_organization` (String) Optional, mutually exclusive with installation id, GitHub organization name
 - `installation_repository` (String) Optional, instead of installation id, set a GitHub repository '<owner>/<repo-name>'
-- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
-- `tags` (Set of String) Add tags attached to this object
 - `target_name` (String) Name of existing target to use in producer creation
 - `token_permissions` (Set of String) Tokens' allowed permissions. By default use installation allowed permissions. Input format: key=value pairs or JSON strings, e.g - -p contents=read -p issues=write or -p '{content:read}'
 - `token_repositories` (Set of String) Tokens' allowed repositories. By default use installation allowed repositories. To specify multiple repositories use argument multiple times: -r RepoName1 -r RepoName2
-- `token_ttl` (String) Token TTL
 
 ### Read-Only
 

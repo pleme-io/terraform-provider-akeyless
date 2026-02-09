@@ -22,10 +22,6 @@ Redshift producer resource
 ### Optional
 
 - `creation_statements` (String) Redshift Creation Statements
-- `custom_username_template` (String) Customize how temporary usernames are generated using go template
-- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
-- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
-- `password_length` (String) The length of the password to be generated
 - `producer_encryption_key` (String) Encrypt producer with following key
 - `redshift_db_name` (String) Redshift DB name
 - `redshift_host` (String) Redshift host name
@@ -36,7 +32,6 @@ Redshift producer resource
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]
 - `secure_access_host` (Set of String) Target DB servers for connections., For multiple values repeat this flag.
 - `secure_access_web` (Boolean) Enable Web Secure Remote Access
-- `ssl` (Boolean) Enable/Disable SSL [true/false]
 - `tags` (Set of String) List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2
 - `target_name` (String) Name of existing target to use in producer creation
 - `user_ttl` (String) User TTL

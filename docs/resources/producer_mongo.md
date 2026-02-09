@@ -21,27 +21,20 @@ Mongo DB Producer resource
 
 ### Optional
 
-- `custom_username_template` (String) Customize how temporary usernames are generated using go template
-- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
-- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `mongodb_atlas_api_private_key` (String) MongoDB Atlas private key
 - `mongodb_atlas_api_public_key` (String) MongoDB Atlas public key
 - `mongodb_atlas_project_id` (String) MongoDB Atlas project ID
-- `mongodb_custom_data` (String) MongoDB custom data
 - `mongodb_default_auth_db` (String) MongoDB server default authentication database
 - `mongodb_host_port` (String) host:port (e.g. my.mongo.db:27017)
 - `mongodb_name` (String) MongoDB name
 - `mongodb_password` (String) MongoDB server password
 - `mongodb_roles` (String) MongoDB roles (e.g. MongoDB:[{role:readWrite, db: sales}], MongoDB Atlas:[{roleName : readWrite, databaseName: sales}])
-- `mongodb_scopes` (String) MongoDB Scopes (Atlas only)
 - `mongodb_server_uri` (String) MongoDB server URI (e.g. mongodb://user:password@my.mongo.db:27017/admin?replicaSet=mySet)
 - `mongodb_uri_options` (String) MongoDB server URI options (e.g. replicaSet=mySet&authSource=authDB)
 - `mongodb_username` (String) MongoDB server username
-- `password_length` (String) The length of the password to be generated
 - `producer_encryption_key_name` (String) Encrypt producer with following key
-- `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
+- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_db_name` (String) Enable Web Secure Remote Access
-- `secure_access_delay` (Number) The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]
 - `secure_access_host` (Set of String) Target DB servers for connections., For multiple values repeat this flag.
 - `secure_access_web` (Boolean) Enable Web Secure Remote Access

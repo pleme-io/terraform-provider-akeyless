@@ -36,55 +36,6 @@ func resourceProducerMongo() *schema.Resource {
 				Optional:    true,
 				Description: "Name of existing target to use in producer creation",
 			},
-			"custom_username_template": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Customize how temporary usernames are generated using go template",
-			},
-			"delete_protection": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Protection from accidental deletion of this object [true/false]",
-			},
-			"item_custom_fields": {
-				Type:        schema.TypeMap,
-				Required:    false,
-				Optional:    true,
-				Description: "Additional custom fields to associate with the item",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"mongodb_custom_data": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "MongoDB custom data",
-			},
-			"mongodb_scopes": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "MongoDB Scopes (Atlas only)",
-			},
-			"password_length": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "The length of the password to be generated",
-			},
-			"secure_access_certificate_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
-			},
-			"secure_access_delay": {
-				Type:        schema.TypeInt,
-				Required:    false,
-				Optional:    true,
-				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
-			},
 			"mongodb_name": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -178,6 +129,12 @@ func resourceProducerMongo() *schema.Resource {
 				Optional:    true,
 				Description: "Enable/Disable secure remote access, [true/false]",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+			},
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Required:    false,
@@ -212,9 +169,6 @@ func resourceProducerMongoCreate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	mongodbName := d.Get("mongodb_name").(string)
 	mongodbRoles := d.Get("mongodb_roles").(string)
 	mongodbServerUri := d.Get("mongodb_server_uri").(string)
@@ -226,16 +180,12 @@ func resourceProducerMongoCreate(d *schema.ResourceData, m interface{}) error {
 	mongodbAtlasProjectId := d.Get("mongodb_atlas_project_id").(string)
 	mongodbAtlasApiPublicKey := d.Get("mongodb_atlas_api_public_key").(string)
 	mongodbAtlasApiPrivateKey := d.Get("mongodb_atlas_api_private_key").(string)
-	mongodbCustomData := d.Get("mongodb_custom_data").(string)
-	mongodbScopes := d.Get("mongodb_scopes").(string)
-	passwordLength := d.Get("password_length").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
-	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
@@ -245,15 +195,6 @@ func resourceProducerMongoCreate(d *schema.ResourceData, m interface{}) error {
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
 	common.GetAkeylessPtr(&body.MongodbName, mongodbName)
 	common.GetAkeylessPtr(&body.MongodbRoles, mongodbRoles)
 	common.GetAkeylessPtr(&body.MongodbServerUri, mongodbServerUri)
@@ -265,18 +206,11 @@ func resourceProducerMongoCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.MongodbAtlasProjectId, mongodbAtlasProjectId)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPublicKey, mongodbAtlasApiPublicKey)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPrivateKey, mongodbAtlasApiPrivateKey)
-	common.GetAkeylessPtr(&body.MongodbCustomData, mongodbCustomData)
-	common.GetAkeylessPtr(&body.MongodbScopes, mongodbScopes)
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	if secureAccessDelay > 0 {
-		delay := int64(secureAccessDelay)
-		body.SecureAccessDelay = &delay
-	}
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
@@ -429,9 +363,6 @@ func resourceProducerMongoUpdate(d *schema.ResourceData, m interface{}) error {
 	ctx := context.Background()
 	name := d.Get("name").(string)
 	targetName := d.Get("target_name").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	mongodbName := d.Get("mongodb_name").(string)
 	mongodbRoles := d.Get("mongodb_roles").(string)
 	mongodbServerUri := d.Get("mongodb_server_uri").(string)
@@ -443,16 +374,12 @@ func resourceProducerMongoUpdate(d *schema.ResourceData, m interface{}) error {
 	mongodbAtlasProjectId := d.Get("mongodb_atlas_project_id").(string)
 	mongodbAtlasApiPublicKey := d.Get("mongodb_atlas_api_public_key").(string)
 	mongodbAtlasApiPrivateKey := d.Get("mongodb_atlas_api_private_key").(string)
-	mongodbCustomData := d.Get("mongodb_custom_data").(string)
-	mongodbScopes := d.Get("mongodb_scopes").(string)
-	passwordLength := d.Get("password_length").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
-	secureAccessDelay := d.Get("secure_access_delay").(int)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
@@ -462,15 +389,6 @@ func resourceProducerMongoUpdate(d *schema.ResourceData, m interface{}) error {
 		Token: &token,
 	}
 	common.GetAkeylessPtr(&body.TargetName, targetName)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
 	common.GetAkeylessPtr(&body.MongodbName, mongodbName)
 	common.GetAkeylessPtr(&body.MongodbRoles, mongodbRoles)
 	common.GetAkeylessPtr(&body.MongodbServerUri, mongodbServerUri)
@@ -482,18 +400,11 @@ func resourceProducerMongoUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.MongodbAtlasProjectId, mongodbAtlasProjectId)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPublicKey, mongodbAtlasApiPublicKey)
 	common.GetAkeylessPtr(&body.MongodbAtlasApiPrivateKey, mongodbAtlasApiPrivateKey)
-	common.GetAkeylessPtr(&body.MongodbCustomData, mongodbCustomData)
-	common.GetAkeylessPtr(&body.MongodbScopes, mongodbScopes)
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	if secureAccessDelay > 0 {
-		delay := int64(secureAccessDelay)
-		body.SecureAccessDelay = &delay
-	}
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 

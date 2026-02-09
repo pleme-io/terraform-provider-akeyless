@@ -139,6 +139,12 @@ func resourceProducerAws() *schema.Resource {
 				Optional:    true,
 				Description: "Secure browser via Akeyless Web Access Bastion",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Required:    false,
@@ -157,70 +163,6 @@ func resourceProducerAws() *schema.Resource {
 				Required: false,
 				Optional: true,
 				Computed: true,
-			},
-			"admin_rotation_interval_days": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "Admin credentials rotation interval (days)",
-				Default:     0,
-			},
-			"aws_external_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The AWS External ID associated with the AWS role (relevant only for assume_role mode)",
-			},
-			"custom_username_template": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Customize how temporary usernames are generated using go template",
-			},
-			"delete_protection": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Protection from accidental deletion of this object [true/false]",
-			},
-			"enable_admin_rotation": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Automatic admin credentials rotation",
-				Default:     false,
-			},
-			"item_custom_fields": {
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Description: "Additional custom fields to associate with the item",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"password_length": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The length of the password to be generated",
-			},
-			"secure_access_certificate_issuer": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
-			},
-			"secure_access_delay": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "The delay duration, in seconds, to wait after generating just-in-time credentials. Accepted range: 0-120 seconds",
-			},
-			"secure_access_web_proxy": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
-				Default:     false,
-			},
-			"session_tags": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "String of Key value session tags comma separated, relevant only for Assumed Role",
-			},
-			"transitive_tag_keys": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "String of transitive tag keys space separated, relevant only for Assumed Role",
 			},
 		},
 	}
@@ -252,19 +194,8 @@ func resourceProducerAwsCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
-	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
-	awsExternalId := d.Get("aws_external_id").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	passwordLength := d.Get("password_length").(string)
-	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
-	secureAccessDelay := d.Get("secure_access_delay").(int)
-	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
-	sessionTags := d.Get("session_tags").(string)
-	transitiveTagKeys := d.Get("transitive_tag_keys").(string)
 
 	body := akeyless_api.GatewayCreateProducerAws{
 		Name:  name,
@@ -287,25 +218,8 @@ func resourceProducerAwsCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
-	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, int64(adminRotationIntervalDays))
-	common.GetAkeylessPtr(&body.AwsExternalId, awsExternalId)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	common.GetAkeylessPtr(&body.SecureAccessDelay, int64(secureAccessDelay))
-	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
-	common.GetAkeylessPtr(&body.SessionTags, sessionTags)
-	common.GetAkeylessPtr(&body.TransitiveTagKeys, transitiveTagKeys)
 
 	_, _, err := client.GatewayCreateProducerAws(ctx).Body(body).Execute()
 	if err != nil {
@@ -431,54 +345,6 @@ func resourceProducerAwsRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.AdminRotationIntervalDays != nil {
-		err = d.Set("admin_rotation_interval_days", *rOut.AdminRotationIntervalDays)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.AwsExternalId != nil {
-		err = d.Set("aws_external_id", *rOut.AwsExternalId)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.EnableAdminRotation != nil {
-		err = d.Set("enable_admin_rotation", *rOut.EnableAdminRotation)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", *rOut.DeleteProtection)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.AwsSessionTags != nil {
-		err = d.Set("session_tags", *rOut.AwsSessionTags)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.AwsTransitiveTagKeys != nil {
-		err = d.Set("transitive_tag_keys", *rOut.AwsTransitiveTagKeys)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
-		customFields := make(map[string]interface{})
-		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.Name != nil && field.Value != nil {
-				customFields[*field.Name] = *field.Value
-			}
-		}
-		err = d.Set("item_custom_fields", customFields)
-		if err != nil {
-			return err
-		}
-	}
 
 	if rOut.ItemTargetsAssoc != nil {
 		targetName := common.GetTargetName(rOut.ItemTargetsAssoc)
@@ -520,19 +386,8 @@ func resourceProducerAwsUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessAwsAccountId := d.Get("secure_access_aws_account_id").(string)
 	secureAccessAwsNativeCli := d.Get("secure_access_aws_native_cli").(bool)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
-	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
-	awsExternalId := d.Get("aws_external_id").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	passwordLength := d.Get("password_length").(string)
-	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
-	secureAccessDelay := d.Get("secure_access_delay").(int)
-	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
-	sessionTags := d.Get("session_tags").(string)
-	transitiveTagKeys := d.Get("transitive_tag_keys").(string)
 
 	body := akeyless_api.GatewayUpdateProducerAws{
 		Name:  name,
@@ -555,25 +410,8 @@ func resourceProducerAwsUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessAwsAccountId, secureAccessAwsAccountId)
 	common.GetAkeylessPtr(&body.SecureAccessAwsNativeCli, secureAccessAwsNativeCli)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
-	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, int64(adminRotationIntervalDays))
-	common.GetAkeylessPtr(&body.AwsExternalId, awsExternalId)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	common.GetAkeylessPtr(&body.SecureAccessDelay, int64(secureAccessDelay))
-	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
-	common.GetAkeylessPtr(&body.SessionTags, sessionTags)
-	common.GetAkeylessPtr(&body.TransitiveTagKeys, transitiveTagKeys)
 
 	_, _, err := client.GatewayUpdateProducerAws(ctx).Body(body).Execute()
 	if err != nil {

@@ -137,47 +137,6 @@ func resourceProducerAzure() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"azure_administrative_unit": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Azure AD administrative unit (relevant only when azure-user-portal-access=true)",
-			},
-			"custom_username_template": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Customize how temporary usernames are generated using go template",
-			},
-			"delete_protection": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Protection from accidental deletion of this object [true/false]",
-			},
-			"fixed_user_claim_keyname": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Fixed user claim keyname",
-			},
-			"fixed_user_only": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Fixed user only",
-			},
-			"item_custom_fields": {
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Description: "Additional custom fields to associate with the item",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"password_length": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The length of the password to be generated",
-			},
-			"secure_access_web_proxy": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Web-Proxy via Akeyless's Secure Remote Access (SRA)",
-			},
 		},
 	}
 }
@@ -207,14 +166,6 @@ func resourceProducerAzureCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
-	azureAdministrativeUnit := d.Get("azure_administrative_unit").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
-	fixedUserOnly := d.Get("fixed_user_only").(bool)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	passwordLength := d.Get("password_length").(string)
-	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	body := akeyless_api.GatewayCreateProducerAzure{
 		Name:  name,
@@ -236,20 +187,6 @@ func resourceProducerAzureCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
-	common.GetAkeylessPtr(&body.AzureAdministrativeUnit, azureAdministrativeUnit)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
-	common.GetAkeylessPtr(&body.FixedUserOnly, fixedUserOnly)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		common.GetAkeylessPtr(&body.ItemCustomFields, &fields)
-	}
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
 
 	_, _, err := client.GatewayCreateProducerAzure(ctx).Body(body).Execute()
 	if err != nil {
@@ -405,14 +342,6 @@ func resourceProducerAzureUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
-	azureAdministrativeUnit := d.Get("azure_administrative_unit").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	fixedUserClaimKeyname := d.Get("fixed_user_claim_keyname").(string)
-	fixedUserOnly := d.Get("fixed_user_only").(bool)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	passwordLength := d.Get("password_length").(string)
-	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 
 	body := akeyless_api.GatewayUpdateProducerAzure{
 		Name:  name,
@@ -434,20 +363,6 @@ func resourceProducerAzureUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessWebBrowsing, secureAccessWebBrowsing)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
-	common.GetAkeylessPtr(&body.AzureAdministrativeUnit, azureAdministrativeUnit)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	common.GetAkeylessPtr(&body.FixedUserClaimKeyname, fixedUserClaimKeyname)
-	common.GetAkeylessPtr(&body.FixedUserOnly, fixedUserOnly)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		common.GetAkeylessPtr(&body.ItemCustomFields, &fields)
-	}
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessWebProxy, secureAccessWebProxy)
 
 	_, _, err := client.GatewayUpdateProducerAzure(ctx).Body(body).Execute()
 	if err != nil {

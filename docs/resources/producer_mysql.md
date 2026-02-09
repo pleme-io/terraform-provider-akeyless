@@ -30,6 +30,7 @@ MySQL producer resource
 - `mysql_screation_statements` (String) MySQL Creation Statements
 - `mysql_username` (String) MySQL user
 - `producer_encryption_key_name` (String) Encrypt producer with following key
+- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_db_name` (String) Enable Web Secure Remote Access
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]
 - `secure_access_host` (Set of String) Target DB servers for connections., For multiple values repeat this flag.

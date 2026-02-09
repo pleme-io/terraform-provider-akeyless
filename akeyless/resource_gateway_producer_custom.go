@@ -91,19 +91,6 @@ func resourceProducerCustom() *schema.Resource {
 				Optional:    true,
 				Description: "Rotation period in days",
 			},
-			"delete_protection": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Protection from accidental deletion of this object [true/false]",
-			},
-			"item_custom_fields": {
-				Type:        schema.TypeMap,
-				Required:    false,
-				Optional:    true,
-				Description: "Additional custom fields to associate with the item",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
 		},
 	}
 }
@@ -127,8 +114,6 @@ func resourceProducerCustomCreate(d *schema.ResourceData, m interface{}) error {
 	timeoutSec := d.Get("timeout_sec").(int)
 	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
 	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.GatewayCreateProducerCustom{
 		Name:          name,
@@ -144,14 +129,6 @@ func resourceProducerCustomCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.TimeoutSec, timeoutSec)
 	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
 	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, adminRotationIntervalDays)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		customFieldsMap := make(map[string]string)
-		for k, v := range itemCustomFields {
-			customFieldsMap[k] = v.(string)
-		}
-		body.ItemCustomFields = &customFieldsMap
-	}
 
 	_, _, err := client.GatewayCreateProducerCustom(ctx).Body(body).Execute()
 	if err != nil {
@@ -253,24 +230,6 @@ func resourceProducerCustomRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", *rOut.DeleteProtection)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
-		customFieldsMap := make(map[string]string)
-		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.Name != nil && field.Value != nil {
-				customFieldsMap[*field.Name] = *field.Value
-			}
-		}
-		err = d.Set("item_custom_fields", customFieldsMap)
-		if err != nil {
-			return err
-		}
-	}
 
 	d.SetId(path)
 
@@ -296,8 +255,6 @@ func resourceProducerCustomUpdate(d *schema.ResourceData, m interface{}) error {
 	timeoutSec := d.Get("timeout_sec").(int)
 	enableAdminRotation := d.Get("enable_admin_rotation").(bool)
 	adminRotationIntervalDays := d.Get("admin_rotation_interval_days").(int)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.GatewayUpdateProducerCustom{
 		Name:          name,
@@ -313,14 +270,6 @@ func resourceProducerCustomUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.TimeoutSec, timeoutSec)
 	common.GetAkeylessPtr(&body.EnableAdminRotation, enableAdminRotation)
 	common.GetAkeylessPtr(&body.AdminRotationIntervalDays, adminRotationIntervalDays)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		customFieldsMap := make(map[string]string)
-		for k, v := range itemCustomFields {
-			customFieldsMap[k] = v.(string)
-		}
-		body.ItemCustomFields = &customFieldsMap
-	}
 
 	_, _, err := client.GatewayUpdateProducerCustom(ctx).Body(body).Execute()
 	if err != nil {

@@ -84,25 +84,6 @@ func resourceProducerArtifactory() *schema.Resource {
 				Description: "List of the tags attached to this secret. To specify multiple tags use argument multiple times: -t Tag1 -t Tag2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			"custom_username_template": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Customize how temporary usernames are generated using go template",
-			},
-			"delete_protection": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Protection from accidental deletion of this object [true/false]",
-			},
-			"item_custom_fields": {
-				Type:        schema.TypeMap,
-				Required:    false,
-				Optional:    true,
-				Description: "Additional custom fields to associate with the item",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
 		},
 	}
 }
@@ -125,9 +106,6 @@ func resourceProducerArtifactoryCreate(d *schema.ResourceData, m interface{}) er
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.GatewayCreateProducerArtifactory{
 		Name:                     name,
@@ -142,15 +120,6 @@ func resourceProducerArtifactoryCreate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
 
 	_, _, err := client.GatewayCreateProducerArtifactory(ctx).Body(body).Execute()
 	if err != nil {
@@ -250,35 +219,6 @@ func resourceProducerArtifactoryRead(d *schema.ResourceData, m interface{}) erro
 		}
 	}
 
-	if rOut.UsernameTemplate != nil {
-		err = d.Set("custom_username_template", *rOut.UsernameTemplate)
-		if err != nil {
-			return err
-		}
-	}
-
-	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", *rOut.DeleteProtection)
-		if err != nil {
-			return err
-		}
-	}
-
-	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
-		customFields := make(map[string]string)
-		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.Name != nil && field.Value != nil {
-				customFields[*field.Name] = *field.Value
-			}
-		}
-		if len(customFields) > 0 {
-			err = d.Set("item_custom_fields", customFields)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
 	d.SetId(path)
 
 	return nil
@@ -302,9 +242,6 @@ func resourceProducerArtifactoryUpdate(d *schema.ResourceData, m interface{}) er
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.GatewayUpdateProducerArtifactory{
 		Name:                     name,
@@ -319,15 +256,6 @@ func resourceProducerArtifactoryUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
 
 	_, _, err := client.GatewayUpdateProducerArtifactory(ctx).Body(body).Execute()
 	if err != nil {

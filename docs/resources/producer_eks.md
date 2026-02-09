@@ -30,6 +30,7 @@ Amazon Elastic Kubernetes Service (Amazon EKS) producer
 - `eks_secret_access_key` (String, Sensitive) EKS Secret Access Key
 - `producer_encryption_key_name` (String) Encrypt producer with following key
 - `secure_access_allow_port_forwading` (Boolean) Enable Port forwarding while using CLI access.
+- `secure_access_bastion_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_cluster_endpoint` (String) The K8s cluster endpoint URL
 - `secure_access_enable` (String) Enable/Disable secure remote access, [true/false]
 - `secure_access_web` (Boolean) Enable Web Secure Remote Access

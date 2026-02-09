@@ -24,9 +24,7 @@ Custom producer resource
 ### Optional
 
 - `admin_rotation_interval_days` (Number) Rotation period in days
-- `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `enable_admin_rotation` (Boolean) Enable automatic admin credentials rotation
-- `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `payload` (String) Secret payload to be sent with each create/revoke webhook request
 - `producer_encryption_key_name` (String) Encrypt producer with following key
 - `rotate_sync_url` (String) URL of an endpoint that implements /sync/rotate method

@@ -74,12 +74,6 @@ func resourceProducerOracle() *schema.Resource {
 				Optional:    true,
 				Description: "Oracle Creation Statements",
 			},
-			"oracle_revocation_statements": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Oracle Revocation statements",
-			},
 			"producer_encryption_key_name": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -112,56 +106,6 @@ func resourceProducerOracle() *schema.Resource {
 				Optional:    true,
 				Description: "Server name is used to verify the hostname on the returned certificates unless InsecureSkipVerify is given. It is also included in the client's handshake to support virtual hosting unless it is an IP address",
 			},
-			"custom_username_template": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Customize how temporary usernames are generated using go template",
-			},
-			"delete_protection": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Protection from accidental deletion of this object [true/false]",
-			},
-			"item_custom_fields": {
-				Type:        schema.TypeMap,
-				Required:    false,
-				Optional:    true,
-				Description: "Additional custom fields to associate with the item",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"password_length": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "The length of the password to be generated",
-			},
-			"secure_access_certificate_issuer": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
-			},
-			"secure_access_enable": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Enable/Disable secure remote access [true/false]",
-			},
-			"secure_access_host": {
-				Type:        schema.TypeSet,
-				Required:    false,
-				Optional:    true,
-				Description: "Target DB servers for connections (In case of Linked Target association, host(s) will inherit Linked Target hosts)",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"secure_access_web": {
-				Type:        schema.TypeBool,
-				Required:    false,
-				Optional:    true,
-				Description: "Enable Web Secure Remote Access",
-			},
 		},
 	}
 }
@@ -181,22 +125,12 @@ func resourceProducerOracleCreate(d *schema.ResourceData, m interface{}) error {
 	oracleHost := d.Get("oracle_host").(string)
 	oraclePort := d.Get("oracle_port").(string)
 	oracleScreationStatements := d.Get("oracle_screation_statements").(string)
-	oracleRevocationStatements := d.Get("oracle_revocation_statements").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	dbServerCertificates := d.Get("db_server_certificates").(string)
 	dbServerName := d.Get("db_server_name").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	passwordLength := d.Get("password_length").(string)
-	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
-	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
-	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
-	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.GatewayCreateProducerOracleDb{
 		Name:  name,
@@ -209,26 +143,11 @@ func resourceProducerOracleCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.OracleHost, oracleHost)
 	common.GetAkeylessPtr(&body.OraclePort, oraclePort)
 	common.GetAkeylessPtr(&body.OracleScreationStatements, oracleScreationStatements)
-	common.GetAkeylessPtr(&body.OracleRevocationStatements, oracleRevocationStatements)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.DbServerCertificates, dbServerCertificates)
 	common.GetAkeylessPtr(&body.DbServerName, dbServerName)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
-	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.GatewayCreateProducerOracleDb(ctx).Body(body).Execute()
 	if err != nil {
@@ -338,53 +257,12 @@ func resourceProducerOracleRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.OracleRevocationStatements != nil {
-		err = d.Set("oracle_revocation_statements", *rOut.OracleRevocationStatements)
-		if err != nil {
-			return err
-		}
-	}
 	if rOut.DynamicSecretKey != nil {
 		err = d.Set("producer_encryption_key_name", *rOut.DynamicSecretKey)
 		if err != nil {
 			return err
 		}
 	}
-	if rOut.UsernameTemplate != nil {
-		err = d.Set("custom_username_template", *rOut.UsernameTemplate)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", *rOut.DeleteProtection)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
-		customFields := make(map[string]string)
-		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.Name != nil && field.Value != nil {
-				customFields[*field.Name] = *field.Value
-			}
-		}
-		if len(customFields) > 0 {
-			err = d.Set("item_custom_fields", customFields)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	if rOut.PasswordLength != nil {
-		err = d.Set("password_length", *rOut.PasswordLength)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Secure access fields are not available in DSProducerDetails in SDK v5
-	// These fields are managed through gateway configuration
 
 	d.SetId(path)
 
@@ -406,22 +284,12 @@ func resourceProducerOracleUpdate(d *schema.ResourceData, m interface{}) error {
 	oracleHost := d.Get("oracle_host").(string)
 	oraclePort := d.Get("oracle_port").(string)
 	oracleScreationStatements := d.Get("oracle_screation_statements").(string)
-	oracleRevocationStatements := d.Get("oracle_revocation_statements").(string)
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	userTtl := d.Get("user_ttl").(string)
 	tagsSet := d.Get("tags").(*schema.Set)
 	tags := common.ExpandStringList(tagsSet.List())
 	dbServerCertificates := d.Get("db_server_certificates").(string)
 	dbServerName := d.Get("db_server_name").(string)
-	customUsernameTemplate := d.Get("custom_username_template").(string)
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
-	passwordLength := d.Get("password_length").(string)
-	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
-	secureAccessEnable := d.Get("secure_access_enable").(string)
-	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
-	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
-	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.GatewayUpdateProducerOracleDb{
 		Name:  name,
@@ -434,26 +302,11 @@ func resourceProducerOracleUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.OracleHost, oracleHost)
 	common.GetAkeylessPtr(&body.OraclePort, oraclePort)
 	common.GetAkeylessPtr(&body.OracleScreationStatements, oracleScreationStatements)
-	common.GetAkeylessPtr(&body.OracleRevocationStatements, oracleRevocationStatements)
 	common.GetAkeylessPtr(&body.ProducerEncryptionKeyName, producerEncryptionKeyName)
 	common.GetAkeylessPtr(&body.UserTtl, userTtl)
 	common.GetAkeylessPtr(&body.Tags, tags)
 	common.GetAkeylessPtr(&body.DbServerCertificates, dbServerCertificates)
 	common.GetAkeylessPtr(&body.DbServerName, dbServerName)
-	common.GetAkeylessPtr(&body.CustomUsernameTemplate, customUsernameTemplate)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
-	common.GetAkeylessPtr(&body.PasswordLength, passwordLength)
-	common.GetAkeylessPtr(&body.SecureAccessCertificateIssuer, secureAccessCertificateIssuer)
-	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
-	common.GetAkeylessPtr(&body.SecureAccessHost, secureAccessHost)
-	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.GatewayUpdateProducerOracleDb(ctx).Body(body).Execute()
 	if err != nil {

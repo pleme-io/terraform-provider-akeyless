@@ -119,6 +119,12 @@ func resourceProducerEks() *schema.Resource {
 				Optional:    true,
 				Description: "Enable Port forwarding while using CLI access.",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Required:    false,
@@ -153,6 +159,7 @@ func resourceProducerEksCreate(d *schema.ResourceData, m interface{}) error {
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.GatewayCreateProducerEks{
@@ -173,6 +180,7 @@ func resourceProducerEksCreate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.GatewayCreateProducerEks(ctx).Body(body).Execute()
@@ -316,6 +324,7 @@ func resourceProducerEksUpdate(d *schema.ResourceData, m interface{}) error {
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessClusterEndpoint := d.Get("secure_access_cluster_endpoint").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
+	secureAccessBastionIssuer := d.Get("secure_access_bastion_issuer").(string)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
 
 	body := akeyless_api.GatewayUpdateProducerEks{
@@ -336,6 +345,7 @@ func resourceProducerEksUpdate(d *schema.ResourceData, m interface{}) error {
 	common.GetAkeylessPtr(&body.SecureAccessEnable, secureAccessEnable)
 	common.GetAkeylessPtr(&body.SecureAccessClusterEndpoint, secureAccessClusterEndpoint)
 	common.GetAkeylessPtr(&body.SecureAccessAllowPortForwading, secureAccessAllowPortForwading)
+	common.GetAkeylessPtr(&body.SecureAccessBastionIssuer, secureAccessBastionIssuer)
 	common.GetAkeylessPtr(&body.SecureAccessWeb, secureAccessWeb)
 
 	_, _, err := client.GatewayUpdateProducerEks(ctx).Body(body).Execute()

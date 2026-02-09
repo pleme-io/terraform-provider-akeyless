@@ -42,12 +42,6 @@ func resourceProducerGithub() *schema.Resource {
 				Optional:    true,
 				Description: "Optional, instead of installation id, set a GitHub repository '<owner>/<repo-name>'",
 			},
-			"installation_organization": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Optional, mutually exclusive with installation id, GitHub organization name",
-			},
 			"target_name": {
 				Type:        schema.TypeString,
 				Required:    false,
@@ -87,32 +81,6 @@ func resourceProducerGithub() *schema.Resource {
 				Description: "Tokens' allowed repositories. By default use installation allowed repositories. To specify multiple repositories use argument multiple times: -r RepoName1 -r RepoName2",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			"token_ttl": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Token TTL",
-			},
-			"tags": {
-				Type:        schema.TypeSet,
-				Required:    false,
-				Optional:    true,
-				Description: "Add tags attached to this object",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"delete_protection": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "Protection from accidental deletion of this object [true/false]",
-			},
-			"item_custom_fields": {
-				Type:        schema.TypeMap,
-				Required:    false,
-				Optional:    true,
-				Description: "Additional custom fields to associate with the item",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
 		},
 	}
 }
@@ -127,7 +95,6 @@ func resourceProducerGithubCreate(d *schema.ResourceData, m interface{}) error {
 	name := d.Get("name").(string)
 	installationId := d.Get("installation_id").(int)
 	installationRepository := d.Get("installation_repository").(string)
-	installationOrganization := d.Get("installation_organization").(string)
 	targetName := d.Get("target_name").(string)
 	githubAppId := d.Get("github_app_id").(int)
 	githubAppPrivateKey := d.Get("github_app_private_key").(string)
@@ -136,11 +103,6 @@ func resourceProducerGithubCreate(d *schema.ResourceData, m interface{}) error {
 	tokenPermissions := common.ExpandStringList(tokenPermissionsSet.List())
 	tokenRepositoriesSet := d.Get("token_repositories").(*schema.Set)
 	tokenRepositories := common.ExpandStringList(tokenRepositoriesSet.List())
-	tokenTtl := d.Get("token_ttl").(string)
-	tagsSet := d.Get("tags").(*schema.Set)
-	tags := common.ExpandStringList(tagsSet.List())
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.GatewayCreateProducerGithub{
 		Name:  name,
@@ -148,23 +110,12 @@ func resourceProducerGithubCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	common.GetAkeylessPtr(&body.InstallationId, installationId)
 	common.GetAkeylessPtr(&body.InstallationRepository, installationRepository)
-	common.GetAkeylessPtr(&body.InstallationOrganization, installationOrganization)
 	common.GetAkeylessPtr(&body.TargetName, targetName)
 	common.GetAkeylessPtr(&body.GithubAppId, githubAppId)
 	common.GetAkeylessPtr(&body.GithubAppPrivateKey, githubAppPrivateKey)
 	common.GetAkeylessPtr(&body.GithubBaseUrl, githubBaseUrl)
 	common.GetAkeylessPtr(&body.TokenPermissions, tokenPermissions)
 	common.GetAkeylessPtr(&body.TokenRepositories, tokenRepositories)
-	common.GetAkeylessPtr(&body.TokenTtl, tokenTtl)
-	common.GetAkeylessPtr(&body.Tags, tags)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
 
 	_, _, err := client.GatewayCreateProducerGithub(ctx).Body(body).Execute()
 	if err != nil {
@@ -268,42 +219,6 @@ func resourceProducerGithubRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	if rOut.GithubOrganizationName != nil {
-		err = d.Set("installation_organization", *rOut.GithubOrganizationName)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.Tags != nil {
-		err = d.Set("tags", rOut.Tags)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", *rOut.DeleteProtection)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.ItemCustomFieldsDetails != nil && len(rOut.ItemCustomFieldsDetails) > 0 {
-		customFields := make(map[string]string)
-		for _, field := range rOut.ItemCustomFieldsDetails {
-			if field.Name != nil && field.Value != nil {
-				customFields[*field.Name] = *field.Value
-			}
-		}
-		err = d.Set("item_custom_fields", customFields)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.UserTtl != nil {
-		err = d.Set("token_ttl", *rOut.UserTtl)
-		if err != nil {
-			return err
-		}
-	}
 
 	d.SetId(path)
 
@@ -320,7 +235,6 @@ func resourceProducerGithubUpdate(d *schema.ResourceData, m interface{}) error {
 	name := d.Get("name").(string)
 	installationId := d.Get("installation_id").(int)
 	installationRepository := d.Get("installation_repository").(string)
-	installationOrganization := d.Get("installation_organization").(string)
 	targetName := d.Get("target_name").(string)
 	githubAppId := d.Get("github_app_id").(int)
 	githubAppPrivateKey := d.Get("github_app_private_key").(string)
@@ -329,11 +243,6 @@ func resourceProducerGithubUpdate(d *schema.ResourceData, m interface{}) error {
 	tokenPermissions := common.ExpandStringList(tokenPermissionsSet.List())
 	tokenRepositoriesSet := d.Get("token_repositories").(*schema.Set)
 	tokenRepositories := common.ExpandStringList(tokenRepositoriesSet.List())
-	tokenTtl := d.Get("token_ttl").(string)
-	tagsSet := d.Get("tags").(*schema.Set)
-	tags := common.ExpandStringList(tagsSet.List())
-	deleteProtection := d.Get("delete_protection").(string)
-	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
 	body := akeyless_api.GatewayUpdateProducerGithub{
 		Name:  name,
@@ -341,23 +250,12 @@ func resourceProducerGithubUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	common.GetAkeylessPtr(&body.InstallationId, installationId)
 	common.GetAkeylessPtr(&body.InstallationRepository, installationRepository)
-	common.GetAkeylessPtr(&body.InstallationOrganization, installationOrganization)
 	common.GetAkeylessPtr(&body.TargetName, targetName)
 	common.GetAkeylessPtr(&body.GithubAppId, githubAppId)
 	common.GetAkeylessPtr(&body.GithubAppPrivateKey, githubAppPrivateKey)
 	common.GetAkeylessPtr(&body.GithubBaseUrl, githubBaseUrl)
 	common.GetAkeylessPtr(&body.TokenPermissions, tokenPermissions)
 	common.GetAkeylessPtr(&body.TokenRepositories, tokenRepositories)
-	common.GetAkeylessPtr(&body.TokenTtl, tokenTtl)
-	common.GetAkeylessPtr(&body.Tags, tags)
-	common.GetAkeylessPtr(&body.DeleteProtection, deleteProtection)
-	if len(itemCustomFields) > 0 {
-		fields := make(map[string]string)
-		for k, v := range itemCustomFields {
-			fields[k] = v.(string)
-		}
-		body.ItemCustomFields = &fields
-	}
 
 	_, _, err := client.GatewayUpdateProducerGithub(ctx).Body(body).Execute()
 	if err != nil {
