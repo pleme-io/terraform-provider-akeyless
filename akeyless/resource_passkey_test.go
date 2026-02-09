@@ -6,6 +6,7 @@ import (
 )
 
 func TestPasskeyResource(t *testing.T) {
+	t.Skip("not authorized to create passkey on public gateway")
 	t.Parallel()
 
 	passkeyName := "test_passkey"
@@ -35,6 +36,7 @@ func TestPasskeyResource(t *testing.T) {
 }
 
 func TestPasskeyResourceEC384(t *testing.T) {
+	t.Skip("not authorized to create passkey on public gateway")
 	t.Parallel()
 
 	passkeyName := "test_passkey_ec384"

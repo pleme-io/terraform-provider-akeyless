@@ -15,27 +15,75 @@ func TestOidcAppResource(t *testing.T) {
 
 	appName := "test_oidc_app"
 	appPath := testPath(appName)
+	authMethodName := "test_oidc_app_auth"
+	authMethodPath := testPath(authMethodName)
 
 	config := fmt.Sprintf(`
+		resource "akeyless_auth_method_api_key" "%v" {
+			name = "%v"
+		}
+
 		resource "akeyless_oidc_app" "%v" {
 			name 				= "%v"
 			description 		= "Test OIDC app"
 			redirect_uris 		= ["https://localhost/callback"]
 			delete_protection 	= "true"
+			permission_assignment = "[{\"assignment_type\":\"AUTH_METHOD\",\"access_id\":\"${akeyless_auth_method_api_key.%v.access_id}\",\"sub_claims\":{}}]"
 		}
-	`, appName, appPath)
+	`, authMethodName, authMethodPath, appName, appPath, authMethodName)
 
 	configUpdate := fmt.Sprintf(`
+		resource "akeyless_auth_method_api_key" "%v" {
+			name = "%v"
+		}
+
 		resource "akeyless_oidc_app" "%v" {
 			name 				= "%v"
 			description 		= "Updated OIDC app"
 			redirect_uris 		= ["https://localhost/callback", "https://localhost/callback2"]
 			delete_protection 	= "false"
+			permission_assignment = "[{\"assignment_type\":\"AUTH_METHOD\",\"access_id\":\"${akeyless_auth_method_api_key.%v.access_id}\",\"sub_claims\":{}}]"
 		}
-	`, appName, appPath)
+	`, authMethodName, authMethodPath, appName, appPath, authMethodName)
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: providerFactories,
+		CheckDestroy: func(s *terraform.State) error {
+			// Check that both OIDC app and auth method are destroyed
+			for _, rs := range s.RootModule().Resources {
+				if rs.Type == "akeyless_oidc_app" || rs.Type == "akeyless_auth_method_api_key" {
+					client := *testAccProvider.Meta().(*providerMeta).client
+					token := *testAccProvider.Meta().(*providerMeta).token
+
+					if rs.Type == "akeyless_oidc_app" {
+						body := akeyless_api.DescribeItem{
+							Name:  rs.Primary.ID,
+							Token: &token,
+						}
+						_, res, err := client.DescribeItem(context.Background()).Body(body).Execute()
+						if err == nil {
+							return fmt.Errorf("OIDC App %s still exists", rs.Primary.ID)
+						}
+						if res != nil && res.StatusCode != 404 {
+							return fmt.Errorf("OIDC App %s still exists with status %d", rs.Primary.ID, res.StatusCode)
+						}
+					} else if rs.Type == "akeyless_auth_method_api_key" {
+						body := akeyless_api.GetAuthMethod{
+							Name:  rs.Primary.ID,
+							Token: &token,
+						}
+						_, res, err := client.GetAuthMethod(context.Background()).Body(body).Execute()
+						if err == nil {
+							return fmt.Errorf("Auth Method %s still exists", rs.Primary.ID)
+						}
+						if res != nil && res.StatusCode != 404 {
+							return fmt.Errorf("Auth Method %s still exists with status %d", rs.Primary.ID, res.StatusCode)
+						}
+					}
+				}
+			}
+			return nil
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: config,

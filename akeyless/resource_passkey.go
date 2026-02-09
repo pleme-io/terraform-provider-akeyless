@@ -42,6 +42,7 @@ func resourcePasskey() *schema.Resource {
 			"delete_protection": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Protection from accidental deletion of this object [true/false]",
 			},
 			"description": {
@@ -241,10 +242,11 @@ func resourcePasskeyUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	_, _, err = client.GatewayUpdateItem(ctx).Body(body).Execute()
+	_, _, err := client.GatewayUpdateItem(ctx).Body(body).Execute()
 	if err != nil {
-		if errors.As(err, new(akeyless_api.GenericOpenAPIError)) {
-			return fmt.Errorf("can't update Passkey: %v", err)
+		var updateApiErr akeyless_api.GenericOpenAPIError
+		if errors.As(err, &updateApiErr) {
+			return fmt.Errorf("can't update Passkey: %v", string(updateApiErr.Body()))
 		}
 		return fmt.Errorf("can't update Passkey: %v", err)
 	}

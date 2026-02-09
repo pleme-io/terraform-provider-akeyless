@@ -30,3 +30,7 @@ and the correct field names:
 - **CreateSecret operation** - This operation is handled in the static secret resource
 
 Never use the term "Producer" - always use "Dynamic Secret" instead
+
+- **DescribeItem response** → Use `ItemMetadata`
+- **Specific Get endpoints** → Use the direct `Description` field from the response structure
+

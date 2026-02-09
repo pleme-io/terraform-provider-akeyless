@@ -2,6 +2,7 @@ package akeyless
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -40,8 +41,35 @@ func resourceGroup() *schema.Resource {
 			},
 			"user_assignment": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "A json string defining the access permission assignment for this client",
+				Required:    true,
+				Description: "A json array string defining the access permission assignment for this group. Format: [{\"access_id\":\"p-abc123\",\"sub_claims\":{\"email\":[\"user@example.com\"]}}]. The access_id is the auth method access ID, and sub_claims is a map of claim names to arrays of allowed values.",
+				StateFunc: func(v interface{}) string {
+					// Normalize JSON by parsing and re-marshaling
+					jsonStr := v.(string)
+					var data interface{}
+					if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+						return jsonStr
+					}
+					normalized, err := json.Marshal(data)
+					if err != nil {
+						return jsonStr
+					}
+					return string(normalized)
+				},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Normalize and compare JSON
+					var oldJSON, newJSON interface{}
+					if err := json.Unmarshal([]byte(old), &oldJSON); err != nil {
+						return false
+					}
+					if err := json.Unmarshal([]byte(new), &newJSON); err != nil {
+						return false
+					}
+					// Marshal back to get normalized JSON
+					oldNormalized, _ := json.Marshal(oldJSON)
+					newNormalized, _ := json.Marshal(newJSON)
+					return string(oldNormalized) == string(newNormalized)
+				},
 			},
 		},
 	}
@@ -77,7 +105,7 @@ func resourceGroupCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(name)
 
-	return nil
+	return resourceGroupRead(d, m)
 }
 
 func resourceGroupRead(d *schema.ResourceData, m interface{}) error {
@@ -122,9 +150,33 @@ func resourceGroupRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	// Note: UserAssignments is an array in the API response but user_assignment
-	// in the resource is a JSON string. This would require marshaling the array to JSON.
-	// For now, we skip reading it back to avoid complexity.
+	// Marshal UserAssignments array to JSON string
+	if rOut.UserAssignments != nil && len(rOut.UserAssignments) > 0 {
+		// Normalize the user assignments to ensure sub_claims is always present
+		var normalizedAssignments []map[string]interface{}
+		for _, ua := range rOut.UserAssignments {
+			assignment := make(map[string]interface{})
+			if ua.AccessId != nil {
+				assignment["access_id"] = *ua.AccessId
+			}
+			// Always include sub_claims, even if empty
+			if ua.SubClaims != nil {
+				assignment["sub_claims"] = ua.SubClaims
+			} else {
+				assignment["sub_claims"] = make(map[string]interface{})
+			}
+			normalizedAssignments = append(normalizedAssignments, assignment)
+		}
+
+		userAssignmentJSON, err := json.Marshal(normalizedAssignments)
+		if err != nil {
+			return fmt.Errorf("failed to marshal user_assignment: %w", err)
+		}
+		err = d.Set("user_assignment", string(userAssignmentJSON))
+		if err != nil {
+			return err
+		}
+	}
 
 	d.SetId(path)
 
@@ -161,7 +213,7 @@ func resourceGroupUpdate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(name)
 
-	return nil
+	return resourceGroupRead(d, m)
 }
 
 func resourceGroupDelete(d *schema.ResourceData, m interface{}) error {

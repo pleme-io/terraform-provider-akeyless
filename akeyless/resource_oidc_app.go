@@ -2,6 +2,7 @@ package akeyless
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -60,6 +61,7 @@ func resourceOidcApp() *schema.Resource {
 			"key": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The name of a key that used to encrypt the OIDC application (if empty, the account default protectionKey key will be used)",
 			},
 			"metadata": {
@@ -69,8 +71,35 @@ func resourceOidcApp() *schema.Resource {
 			},
 			"permission_assignment": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "A json string defining the access permission assignment for this app",
+				Required:    true,
+				Description: "A json array string defining the access permission assignment for this OIDC app. Supports two formats: 1) Auth method: [{\"assignment_type\":\"AUTH_METHOD\",\"access_id\":\"p-abc123\",\"sub_claims\":{\"email\":[\"user@example.com\"]}}] 2) Group: [{\"assignment_type\":\"GROUP\",\"group_id\":\"grp-xyz789\"}]",
+				StateFunc: func(v interface{}) string {
+					// Normalize JSON by parsing and re-marshaling
+					jsonStr := v.(string)
+					var data interface{}
+					if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+						return jsonStr
+					}
+					normalized, err := json.Marshal(data)
+					if err != nil {
+						return jsonStr
+					}
+					return string(normalized)
+				},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Normalize and compare JSON
+					var oldJSON, newJSON interface{}
+					if err := json.Unmarshal([]byte(old), &oldJSON); err != nil {
+						return false
+					}
+					if err := json.Unmarshal([]byte(new), &newJSON); err != nil {
+						return false
+					}
+					// Marshal back to get normalized JSON
+					oldNormalized, _ := json.Marshal(oldJSON)
+					newNormalized, _ := json.Marshal(newJSON)
+					return string(oldNormalized) == string(newNormalized)
+				},
 			},
 			"public": {
 				Type:        schema.TypeBool,
@@ -158,7 +187,7 @@ func resourceOidcAppCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(name)
 
-	return nil
+	return resourceOidcAppRead(d, m)
 }
 
 func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
@@ -194,6 +223,11 @@ func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		err = d.Set("description", "")
+		if err != nil {
+			return err
+		}
 	}
 	if rOut.ItemTags != nil {
 		err = d.Set("tags", rOut.ItemTags)
@@ -214,6 +248,101 @@ func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	// Read OIDC-specific fields from item_general_info
+	if rOut.ItemGeneralInfo != nil && rOut.ItemGeneralInfo.OidcClientInfo != nil {
+		oidcInfo := rOut.ItemGeneralInfo.OidcClientInfo
+
+		if oidcInfo.RedirectUris != nil && len(oidcInfo.RedirectUris) > 0 {
+			// Filter out empty strings
+			var validUris []string
+			for _, uri := range oidcInfo.RedirectUris {
+				if uri != "" {
+					validUris = append(validUris, uri)
+				}
+			}
+			if len(validUris) > 0 {
+				err = d.Set("redirect_uris", validUris)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if oidcInfo.Scopes != nil && len(oidcInfo.Scopes) > 0 {
+			// Filter out empty strings
+			var validScopes []string
+			for _, scope := range oidcInfo.Scopes {
+				if scope != "" {
+					validScopes = append(validScopes, scope)
+				}
+			}
+			if len(validScopes) > 0 {
+				err = d.Set("scopes", validScopes)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if oidcInfo.Audience != nil && len(oidcInfo.Audience) > 0 {
+			// Join audience array into comma-separated string, filter empty
+			var validAudience []string
+			for _, aud := range oidcInfo.Audience {
+				if aud != "" {
+					validAudience = append(validAudience, aud)
+				}
+			}
+			if len(validAudience) > 0 {
+				audienceStr := strings.Join(validAudience, ",")
+				err = d.Set("audience", audienceStr)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if oidcInfo.Public != nil {
+			err = d.Set("public", *oidcInfo.Public)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Read permission_assignment from access_permission_assignment
+		// Normalize to match input format (assignment_type, access_id, sub_claims)
+		if oidcInfo.AccessPermissionAssignment != nil && len(oidcInfo.AccessPermissionAssignment) > 0 {
+			var normalizedAssignments []map[string]interface{}
+			for _, pa := range oidcInfo.AccessPermissionAssignment {
+				assignment := make(map[string]interface{})
+				if pa.AssignmentType != nil {
+					assignment["assignment_type"] = *pa.AssignmentType
+				}
+				if pa.AccessId != nil {
+					assignment["access_id"] = *pa.AccessId
+				}
+				// Always include sub_claims for AUTH_METHOD assignments
+				if pa.AssignmentType != nil && *pa.AssignmentType == "AUTH_METHOD" {
+					assignment["sub_claims"] = make(map[string]interface{})
+				} else if pa.AssignmentType != nil && *pa.AssignmentType == "GROUP" {
+					// For GROUP assignments, include group_id if available
+					if pa.GroupId != nil {
+						assignment["group_id"] = *pa.GroupId
+					}
+				}
+				normalizedAssignments = append(normalizedAssignments, assignment)
+			}
+
+			permissionAssignmentJSON, err := json.Marshal(normalizedAssignments)
+			if err != nil {
+				return fmt.Errorf("failed to marshal permission_assignment: %w", err)
+			}
+			err = d.Set("permission_assignment", string(permissionAssignmentJSON))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	d.SetId(path)
 
 	return nil
@@ -227,7 +356,11 @@ func resourceOidcAppUpdate(d *schema.ResourceData, m interface{}) error {
 	var apiErr akeyless_api.GenericOpenAPIError
 	ctx := context.Background()
 	name := d.Get("name").(string)
+	accessibility := d.Get("accessibility").(string)
 	audience := d.Get("audience").(string)
+	deleteProtection := d.Get("delete_protection").(string)
+	description := d.Get("description").(string)
+	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	key := d.Get("key").(string)
 	permissionAssignment := d.Get("permission_assignment").(string)
 	public := d.Get("public").(bool)
@@ -235,7 +368,10 @@ func resourceOidcAppUpdate(d *schema.ResourceData, m interface{}) error {
 	redirectUris := common.ExpandStringList(redirectUrisSet.List())
 	scopesSet := d.Get("scopes").(*schema.Set)
 	scopes := common.ExpandStringList(scopesSet.List())
+	tagsSet := d.Get("tags").(*schema.Set)
+	tags := common.ExpandStringList(tagsSet.List())
 
+	// Update OIDC-specific properties FIRST (this clears common fields)
 	body := akeyless_api.UpdateOidcApp{
 		Name:  name,
 		Token: &token,
@@ -261,9 +397,36 @@ func resourceOidcAppUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("can't update : %v", err)
 	}
 
+	// Update common item properties LAST (to restore/set common fields after UpdateOidcApp)
+	itemBody := akeyless_api.UpdateItem{
+		Name:  name,
+		Token: &token,
+	}
+	common.GetAkeylessPtr(&itemBody.Accessibility, accessibility)
+	common.GetAkeylessPtr(&itemBody.DeleteProtection, deleteProtection)
+	common.GetAkeylessPtr(&itemBody.Description, description)
+	if len(itemCustomFields) > 0 {
+		customFieldsJSON, err := json.Marshal(itemCustomFields)
+		if err == nil {
+			customFieldsStr := string(customFieldsJSON)
+			common.GetAkeylessPtr(&itemBody.ItemCustomFields, &customFieldsStr)
+		}
+	}
+	if len(tags) > 0 {
+		itemBody.AddTag = tags
+	}
+
+	_, _, err = client.UpdateItem(ctx).Body(itemBody).Execute()
+	if err != nil {
+		if errors.As(err, &apiErr) {
+			return fmt.Errorf("can't update : %v", string(apiErr.Body()))
+		}
+		return fmt.Errorf("can't update : %v", err)
+	}
+
 	d.SetId(name)
 
-	return nil
+	return resourceOidcAppRead(d, m)
 }
 
 func resourceOidcAppDelete(d *schema.ResourceData, m interface{}) error {
