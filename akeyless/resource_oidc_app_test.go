@@ -68,11 +68,11 @@ func TestOidcAppResource(t *testing.T) {
 							return fmt.Errorf("OIDC App %s still exists with status %d", rs.Primary.ID, res.StatusCode)
 						}
 					} else if rs.Type == "akeyless_auth_method_api_key" {
-						body := akeyless_api.GetAuthMethod{
+						body := akeyless_api.AuthMethodGet{
 							Name:  rs.Primary.ID,
 							Token: &token,
 						}
-						_, res, err := client.GetAuthMethod(context.Background()).Body(body).Execute()
+						_, res, err := client.AuthMethodGet(context.Background()).Body(body).Execute()
 						if err == nil {
 							return fmt.Errorf("Auth Method %s still exists", rs.Primary.ID)
 						}

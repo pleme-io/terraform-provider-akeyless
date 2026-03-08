@@ -158,12 +158,12 @@ func checkMethodExistsRemotely(path string) resource.TestCheckFunc {
 		client := *testAccProvider.Meta().(*providerMeta).client
 		token := *testAccProvider.Meta().(*providerMeta).token
 
-		gsvBody := akeyless_api.GetAuthMethod{
+		gsvBody := akeyless_api.AuthMethodGet{
 			Name:  path,
 			Token: &token,
 		}
 
-		_, _, err := client.GetAuthMethod(context.Background()).Body(gsvBody).Execute()
+		_, _, err := client.AuthMethodGet(context.Background()).Body(gsvBody).Execute()
 		if err != nil {
 			return err
 		}

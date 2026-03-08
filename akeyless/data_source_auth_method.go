@@ -103,12 +103,12 @@ func dataSourceAuthMethodRead(d *schema.ResourceData, m interface{}) error {
 
 	var apiErr akeyless_api.GenericOpenAPIError
 	ctx := context.Background()
-	gsvBody := akeyless_api.GetAuthMethod{
+	gsvBody := akeyless_api.AuthMethodGet{
 		Name:  path,
 		Token: &token,
 	}
 
-	gsvOut, _, err := client.GetAuthMethod(ctx).Body(gsvBody).Execute()
+	gsvOut, _, err := client.AuthMethodGet(ctx).Body(gsvBody).Execute()
 	if err != nil {
 		if errors.As(err, &apiErr) {
 			return fmt.Errorf("can't get Auth Method: %v", string(apiErr.Body()))

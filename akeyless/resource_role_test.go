@@ -961,18 +961,18 @@ func deleteAuthMethod(path string, authMethodType string) error {
 	token := *p.token
 
 	// Try to delete with the exact path first
-	gsvBody := akeyless_api.DeleteAuthMethod{
+	gsvBody := akeyless_api.AuthMethodDelete{
 		Name:  path,
 		Token: &token,
 	}
 
-	_, _, err = client.DeleteAuthMethod(context.Background()).Body(gsvBody).Execute()
+	_, _, err = client.AuthMethodDelete(context.Background()).Body(gsvBody).Execute()
 	if err != nil {
 		// If 404 and path doesn't start with /, try with leading slash
 		if strings.Contains(err.Error(), "404") && !strings.HasPrefix(path, "/") {
 			pathWithSlash := "/" + path
 			gsvBody.Name = pathWithSlash
-			_, _, err2 := client.DeleteAuthMethod(context.Background()).Body(gsvBody).Execute()
+			_, _, err2 := client.AuthMethodDelete(context.Background()).Body(gsvBody).Execute()
 			if err2 == nil {
 				fmt.Println("deleted auth method:", pathWithSlash)
 				return nil
@@ -1139,7 +1139,7 @@ func deleteAuthMethod(path string, authMethodType string) error {
 			}
 
 			// Retry deletion
-			_, _, retryErr := client.DeleteAuthMethod(context.Background()).Body(gsvBody).Execute()
+			_, _, retryErr := client.AuthMethodDelete(context.Background()).Body(gsvBody).Execute()
 			if retryErr != nil {
 				fmt.Println("error delete auth method after removing protection:", retryErr)
 				return retryErr

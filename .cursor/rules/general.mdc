@@ -41,7 +41,7 @@ The old `resource_gateway_producer_*` resources are the legacy format of dynamic
 ## Deprecated / Legacy Resources
 - Resources with `DeprecationMessage` set should **not** be modified or maintained
 - **Old target format** (`resource_*_target.go`) is deprecated — new targets use `resource_target_*.go`
-- **Old auth method APIs** (`GetAuthMethod`, `DeleteAuthMethod`, etc.) are deprecated — use `AuthMethodGet`, `AuthMethodDelete`, etc.
+- **Old auth method APIs** (`GetAuthMethod`, `DeleteAuthMethod`, etc.) are deprecated — use `AuthMethodGet`, `AuthMethodDelete`, etc. The old and new structs are field-identical (safe drop-in replacement); also update test files when switching.
 - **Old migration API** (`GatewayCreateMigration`) is deprecated — use type-specific APIs (`GatewayCreateMigrationAWS`, etc.) when available in the SDK
 - Do **not** remove existing fields from resources — it breaks backward compatibility
 - Before switching to a newer API, verify the method actually exists in the current SDK version — not all documented APIs are available yet
