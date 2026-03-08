@@ -161,6 +161,12 @@ func resourceDynamicSecretK8s() *schema.Resource {
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+				Deprecated:  "use secure_access_certificate_issuer instead",
+			},
 			"secure_access_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -230,6 +236,9 @@ func resourceDynamicSecretK8sCreate(d *schema.ResourceData, m interface{}) error
 	secureAccessDashboardUrl := d.Get("secure_access_dashboard_url").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)
@@ -486,6 +495,9 @@ func resourceDynamicSecretK8sUpdate(d *schema.ResourceData, m interface{}) error
 	secureAccessDashboardUrl := d.Get("secure_access_dashboard_url").(string)
 	secureAccessAllowPortForwading := d.Get("secure_access_allow_port_forwading").(bool)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebBrowsing := d.Get("secure_access_web_browsing").(bool)
 	secureAccessWeb := d.Get("secure_access_web").(bool)

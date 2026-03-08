@@ -167,6 +167,12 @@ func resourceDynamicSecretMysql() *schema.Resource {
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+				Deprecated:  "use secure_access_certificate_issuer instead",
+			},
 			"secure_access_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -210,6 +216,9 @@ func resourceDynamicSecretMysqlCreate(d *schema.ResourceData, m interface{}) err
 	description := d.Get("description").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 
 	body := akeyless_api.DynamicSecretCreateMySql{
@@ -438,6 +447,9 @@ func resourceDynamicSecretMysqlUpdate(d *schema.ResourceData, m interface{}) err
 	description := d.Get("description").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 
 	body := akeyless_api.DynamicSecretUpdateMySql{

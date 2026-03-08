@@ -141,6 +141,12 @@ func resourceDynamicSecretAws() *schema.Resource {
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+				Deprecated:  "use secure_access_certificate_issuer instead",
+			},
 			"secure_access_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -245,6 +251,9 @@ func resourceDynamicSecretAwsCreate(d *schema.ResourceData, m interface{}) error
 		itemCustomFields[k] = v.(string)
 	}
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 	sessionTags := d.Get("session_tags").(string)
@@ -529,6 +538,9 @@ func resourceDynamicSecretAwsUpdate(d *schema.ResourceData, m interface{}) error
 		itemCustomFields[k] = v.(string)
 	}
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessDelay := d.Get("secure_access_delay").(int)
 	secureAccessWebProxy := d.Get("secure_access_web_proxy").(bool)
 	sessionTags := d.Get("session_tags").(string)

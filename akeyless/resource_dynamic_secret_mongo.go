@@ -154,6 +154,12 @@ func resourceDynamicSecretMongo() *schema.Resource {
 				Optional:    true,
 				Description: "Path to the SSH Certificate Issuer for your Akeyless Secure Access",
 			},
+			"secure_access_bastion_issuer": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to the SSH Certificate Issuer for your Akeyless Bastion",
+				Deprecated:  "use secure_access_certificate_issuer instead",
+			},
 			"secure_access_host": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -218,6 +224,9 @@ func resourceDynamicSecretMongoCreate(d *schema.ResourceData, m interface{}) err
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
@@ -481,6 +490,9 @@ func resourceDynamicSecretMongoUpdate(d *schema.ResourceData, m interface{}) err
 	tags := common.ExpandStringList(tagsSet.List())
 	secureAccessEnable := d.Get("secure_access_enable").(string)
 	secureAccessCertificateIssuer := d.Get("secure_access_certificate_issuer").(string)
+	if secureAccessCertificateIssuer == "" {
+		secureAccessCertificateIssuer = d.Get("secure_access_bastion_issuer").(string)
+	}
 	secureAccessHostSet := d.Get("secure_access_host").(*schema.Set)
 	secureAccessHost := common.ExpandStringList(secureAccessHostSet.List())
 	secureAccessWeb := d.Get("secure_access_web").(bool)
