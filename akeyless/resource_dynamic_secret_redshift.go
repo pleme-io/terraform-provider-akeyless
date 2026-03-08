@@ -71,7 +71,7 @@ func resourceDynamicSecretRedshift() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable/Disable SSL [true/false]",
-				Default:     "false",
+				Default:     false,
 			},
 			"user_ttl": {
 				Type:        schema.TypeString,

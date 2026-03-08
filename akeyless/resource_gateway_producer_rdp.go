@@ -124,7 +124,7 @@ func resourceProducerRdp() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Allow providing external user for a domain users",
-				Default:     "false",
+				Default:     false,
 			},
 			"secure_access_web": {
 				Type:        schema.TypeBool,

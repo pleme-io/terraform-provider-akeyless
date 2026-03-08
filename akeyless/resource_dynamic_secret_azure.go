@@ -54,7 +54,7 @@ func resourceDynamicSecretAzure() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Azure User portal access",
-				Default:     "false",
+				Default:     false,
 			},
 			"user_programmatic_access": {
 				Type:        schema.TypeBool,

@@ -51,6 +51,7 @@ func resourceProducerPostgresql() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "PostgreSQL password",
 			},
 			"postgresql_host": {
@@ -124,7 +125,7 @@ func resourceProducerPostgresql() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Enable Web Secure Remote Access ",
-				Default:     "false",
+				Default:     false,
 			},
 			"secure_access_db_name": {
 				Type:        schema.TypeString,

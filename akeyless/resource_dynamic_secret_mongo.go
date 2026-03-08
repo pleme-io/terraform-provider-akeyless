@@ -59,6 +59,7 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"mongodb_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "MongoDB server password. You will prompted to provide a password if it will not appear in CLI parameters",
 			},
 			"mongodb_host_port": {
@@ -89,6 +90,7 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"mongodb_atlas_api_private_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "MongoDB Atlas private key",
 			},
 			"mongodb_custom_data": {
@@ -169,7 +171,7 @@ func resourceDynamicSecretMongo() *schema.Resource {
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "false",
+				Default:     false,
 				Description: "Enable Web Secure Remote Access",
 			},
 			"secure_access_db_name": {

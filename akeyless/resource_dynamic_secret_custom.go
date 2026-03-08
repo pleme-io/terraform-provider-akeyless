@@ -64,7 +64,7 @@ func resourceDynamicSecretCustom() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Should admin credentials be rotated",
-				Default:     "false",
+				Default:     false,
 			},
 			"admin_rotation_interval_days": {
 				Type:        schema.TypeInt,

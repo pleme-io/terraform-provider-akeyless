@@ -135,13 +135,13 @@ func resourceProducerK8s() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable Web Secure Remote Access",
-				Default:     "false",
+				Default:     false,
 			},
 			"secure_access_web_proxy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Web-Proxy via Akeyless Web Access Bastion",
-				Default:     "false",
+				Default:     false,
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,

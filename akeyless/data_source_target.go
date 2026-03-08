@@ -28,7 +28,7 @@ func dataSourceGetTarget() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Include all target versions in reply",
-				Default:     "false",
+				Default:     false,
 			},
 			"target_name": {
 				Type:        schema.TypeString,

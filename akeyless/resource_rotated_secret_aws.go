@@ -405,9 +405,17 @@ func resourceRotatedSecretAwsRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	if itemOut.ItemCustomFieldsDetails != nil {
-		err := d.Set("item_custom_fields", itemOut.ItemCustomFieldsDetails)
-		if err != nil {
-			return err
+		customFields := make(map[string]string)
+		for _, field := range itemOut.ItemCustomFieldsDetails {
+			if field.Name != nil && field.Value != nil {
+				customFields[*field.Name] = *field.Value
+			}
+		}
+		if len(customFields) > 0 {
+			err := d.Set("item_custom_fields", customFields)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

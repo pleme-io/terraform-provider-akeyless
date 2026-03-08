@@ -149,7 +149,7 @@ func resourceDynamicSecretRdp() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Allow providing external user for a domain users",
-				Default:     "false",
+				Default:     false,
 			},
 			"secure_access_certificate_issuer": {
 				Type:        schema.TypeString,

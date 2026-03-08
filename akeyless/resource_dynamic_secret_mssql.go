@@ -47,6 +47,7 @@ func resourceDynamicSecretMssql() *schema.Resource {
 			"mssql_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "MSSQL Password",
 			},
 			"mssql_host": {
@@ -156,7 +157,7 @@ func resourceDynamicSecretMssql() *schema.Resource {
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "false",
+				Default:     false,
 				Description: "Enable Web Secure Remote Access",
 			},
 			"secure_access_db_name": {

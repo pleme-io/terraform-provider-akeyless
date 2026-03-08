@@ -59,7 +59,7 @@ func resourceProducerAzure() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Enable Azure AD user portal access",
-				Default:     "false",
+				Default:     false,
 			},
 			"user_programmatic_access": {
 				Type:        schema.TypeBool,

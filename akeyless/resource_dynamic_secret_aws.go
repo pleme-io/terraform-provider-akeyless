@@ -76,7 +76,7 @@ func resourceDynamicSecretAws() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable AWS User console access",
-				Default:     "false",
+				Default:     false,
 			},
 			"aws_user_programmatic_access": {
 				Type:        schema.TypeBool,

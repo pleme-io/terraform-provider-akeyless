@@ -52,6 +52,7 @@ func resourceProducerMssql() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "MS SQL Server password",
 			},
 			"mssql_host": {
@@ -132,7 +133,7 @@ func resourceProducerMssql() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Enable Web Secure Remote Access ",
-				Default:     "false",
+				Default:     false,
 			},
 			"secure_access_db_name": {
 				Type:        schema.TypeString,

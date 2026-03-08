@@ -65,6 +65,7 @@ func resourceProducerMongo() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "MongoDB server password",
 			},
 			"mongodb_host_port": {
@@ -101,6 +102,7 @@ func resourceProducerMongo() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "MongoDB Atlas private key",
 			},
 			"producer_encryption_key_name": {
@@ -147,7 +149,7 @@ func resourceProducerMongo() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Enable Web Secure Remote Access ",
-				Default:     "false",
+				Default:     false,
 			},
 			"secure_access_db_name": {
 				Type:        schema.TypeString,

@@ -116,7 +116,7 @@ func resourceProducerGke() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Enable Web Secure Remote Access ",
-				Default:     "false",
+				Default:     false,
 			},
 		},
 	}

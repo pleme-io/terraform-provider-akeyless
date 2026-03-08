@@ -132,7 +132,7 @@ func resourceProducerMysql() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Enable Web Secure Remote Access ",
-				Default:     "false",
+				Default:     false,
 			},
 			"secure_access_db_name": {
 				Type:        schema.TypeString,

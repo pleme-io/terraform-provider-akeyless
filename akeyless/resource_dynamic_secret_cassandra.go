@@ -65,7 +65,7 @@ func resourceDynamicSecretCassandra() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable/Disable SSL [true/false]",
-				Default:     "false",
+				Default:     false,
 			},
 			"ssl_certificate": {
 				Type:        schema.TypeString,

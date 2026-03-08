@@ -139,7 +139,7 @@ func resourceDynamicSecretEks() *schema.Resource {
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "false",
+				Default:     false,
 				Description: "Enable Web Secure Remote Access",
 			},
 		},

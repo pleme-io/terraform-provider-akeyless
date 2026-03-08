@@ -83,7 +83,7 @@ func resourceProducerCustom() *schema.Resource {
 				Required:    false,
 				Optional:    true,
 				Description: "Enable automatic admin credentials rotation",
-				Default:     "false",
+				Default:     false,
 			},
 			"admin_rotation_interval_days": {
 				Type:        schema.TypeInt,

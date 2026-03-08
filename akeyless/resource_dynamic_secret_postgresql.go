@@ -46,6 +46,7 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 			"postgresql_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "PostgreSQL Password",
 			},
 			"postgresql_host": {
@@ -76,7 +77,7 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable/Disable SSL [true/false]",
-				Default:     "false",
+				Default:     false,
 			},
 			"user_ttl": {
 				Type:        schema.TypeString,
@@ -124,7 +125,7 @@ func resourceDynamicSecretPostgresql() *schema.Resource {
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "false",
+				Default:     false,
 				Description: "Enable Web Secure Remote Access",
 			},
 			"secure_access_db_name": {

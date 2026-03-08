@@ -74,7 +74,7 @@ func resourceClassicKey() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Whether to generate a self signed certificate with the key. If set, --certificate-ttl must be provided.",
-				Default:     "false",
+				Default:     false,
 			},
 			"certificate_ttl": {
 				Type:        schema.TypeInt,

@@ -89,7 +89,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable/Disable SSL [true/false]",
-				Default:     "false",
+				Default:     false,
 			},
 			"ssl_certificate": {
 				Type:        schema.TypeString,
@@ -137,7 +137,7 @@ func resourceDynamicSecretMysql() *schema.Resource {
 			"secure_access_web": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "false",
+				Default:     false,
 				Description: "Enable Web Secure Remote Access",
 			},
 			"secure_access_db_name": {
