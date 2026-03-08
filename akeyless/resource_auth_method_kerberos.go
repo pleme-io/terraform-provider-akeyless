@@ -403,6 +403,70 @@ func resourceAuthMethodKerberosRead(d *schema.ResourceData, m interface{}) error
 		}
 	}
 
+	if rOut.AuthMethodAdditionalData != nil && rOut.AuthMethodAdditionalData.KerberosData != nil {
+		kd := rOut.AuthMethodAdditionalData.KerberosData
+		if kd.LdapBindDn != nil {
+			if err := d.Set("bind_dn", *kd.LdapBindDn); err != nil {
+				return err
+			}
+		}
+		if kd.LdapGroupAttr != nil {
+			if err := d.Set("group_attr", *kd.LdapGroupAttr); err != nil {
+				return err
+			}
+		}
+		if kd.LdapGroupDn != nil {
+			if err := d.Set("group_dn", *kd.LdapGroupDn); err != nil {
+				return err
+			}
+		}
+		if kd.LdapGroupFilter != nil {
+			if err := d.Set("group_filter", *kd.LdapGroupFilter); err != nil {
+				return err
+			}
+		}
+		if kd.KerberosKrb5Conf != nil {
+			if err := d.Set("krb5_conf_data", *kd.KerberosKrb5Conf); err != nil {
+				return err
+			}
+		}
+		if kd.LdapAnonymousSearch != nil {
+			if err := d.Set("ldap_anonymous_search", *kd.LdapAnonymousSearch); err != nil {
+				return err
+			}
+		}
+		if kd.LdapCertificate != nil {
+			if err := d.Set("ldap_ca_cert", *kd.LdapCertificate); err != nil {
+				return err
+			}
+		}
+		if kd.LdapUrlAddress != nil {
+			if err := d.Set("ldap_url", *kd.LdapUrlAddress); err != nil {
+				return err
+			}
+		}
+		if kd.LdapUserAttr != nil {
+			if err := d.Set("user_attribute", *kd.LdapUserAttr); err != nil {
+				return err
+			}
+		}
+		if kd.LdapUserDn != nil {
+			if err := d.Set("user_dn", *kd.LdapUserDn); err != nil {
+				return err
+			}
+		}
+		if kd.LdapBindPassword != nil {
+			if err := d.Set("bind_dn_password", *kd.LdapBindPassword); err != nil {
+				return err
+			}
+		}
+		if kd.KerberosKeytab != nil {
+			if err := d.Set("keytab_file_data", *kd.KerberosKeytab); err != nil {
+				return err
+			}
+		}
+	}
+
 	if rOut.AccessInfo.AllowedClientType != nil && len(rOut.AccessInfo.AllowedClientType) > 0 {
 		// Only set allowed_client_type if it was explicitly configured by the user
 		if _, ok := d.GetOk("allowed_client_type"); ok {
