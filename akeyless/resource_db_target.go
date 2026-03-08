@@ -14,11 +14,12 @@ import (
 
 func resourceDbTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "DB Target resource",
-		Create:      resourceDbTargetCreate,
-		Read:        resourceDbTargetRead,
-		Update:      resourceDbTargetUpdate,
-		Delete:      resourceDbTargetDelete,
+		Description:        "DB Target resource",
+		DeprecationMessage: "use akeyless_target_db resource instead",
+		Create:             resourceDbTargetCreate,
+		Read:               resourceDbTargetRead,
+		Update:             resourceDbTargetUpdate,
+		Delete:             resourceDbTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceDbTargetImport,
 		},

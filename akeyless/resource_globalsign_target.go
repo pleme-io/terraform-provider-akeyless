@@ -14,11 +14,12 @@ import (
 
 func resourceGlobalsignTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "GlobalSign Target resource",
-		Create:      resourceGlobalsignTargetCreate,
-		Read:        resourceGlobalsignTargetRead,
-		Update:      resourceGlobalsignTargetUpdate,
-		Delete:      resourceGlobalsignTargetDelete,
+		Description:        "GlobalSign Target resource",
+		DeprecationMessage: "use akeyless_target_globalsign resource instead",
+		Create:             resourceGlobalsignTargetCreate,
+		Read:               resourceGlobalsignTargetRead,
+		Update:             resourceGlobalsignTargetUpdate,
+		Delete:             resourceGlobalsignTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceGlobalsignTargetImport,
 		},

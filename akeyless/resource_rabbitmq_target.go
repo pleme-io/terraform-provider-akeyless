@@ -14,11 +14,12 @@ import (
 
 func resourceRabbitmqTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "RabbitMQT Target resource",
-		Create:      resourceRabbitmqTargetCreate,
-		Read:        resourceRabbitmqTargetRead,
-		Update:      resourceRabbitmqTargetUpdate,
-		Delete:      resourceRabbitmqTargetDelete,
+		Description:        "RabbitMQT Target resource",
+		DeprecationMessage: "use akeyless_target_rabbit resource instead",
+		Create:             resourceRabbitmqTargetCreate,
+		Read:               resourceRabbitmqTargetRead,
+		Update:             resourceRabbitmqTargetUpdate,
+		Delete:             resourceRabbitmqTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceRabbitmqTargetImport,
 		},

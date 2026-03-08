@@ -14,11 +14,12 @@ import (
 
 func resourceZerosslTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "ZeroSSL Target resource",
-		Create:      resourceZerosslTargetCreate,
-		Read:        resourceZerosslTargetRead,
-		Update:      resourceZerosslTargetUpdate,
-		Delete:      resourceZerosslTargetDelete,
+		Description:        "ZeroSSL Target resource",
+		DeprecationMessage: "use akeyless_target_zerossl resource instead",
+		Create:             resourceZerosslTargetCreate,
+		Read:               resourceZerosslTargetRead,
+		Update:             resourceZerosslTargetUpdate,
+		Delete:             resourceZerosslTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceZerosslTargetImport,
 		},

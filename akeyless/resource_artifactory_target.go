@@ -13,11 +13,12 @@ import (
 
 func resourceArtifactoryTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "Artifactory Target resource",
-		Create:      resourceArtifactoryTargetCreate,
-		Read:        resourceArtifactoryTargetRead,
-		Update:      resourceArtifactoryTargetUpdate,
-		Delete:      resourceArtifactoryTargetDelete,
+		Description:        "Artifactory Target resource",
+		DeprecationMessage: "use akeyless_target_artifactory resource instead",
+		Create:             resourceArtifactoryTargetCreate,
+		Read:               resourceArtifactoryTargetRead,
+		Update:             resourceArtifactoryTargetUpdate,
+		Delete:             resourceArtifactoryTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceArtifactoryTargetImport,
 		},

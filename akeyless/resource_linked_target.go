@@ -16,11 +16,12 @@ import (
 
 func resourceLinkedTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "Linked Target resource",
-		Create:      resourceLinkedTargetCreate,
-		Read:        resourceLinkedTargetRead,
-		Update:      resourceLinkedTargetUpdate,
-		Delete:      resourceLinkedTargetDelete,
+		Description:        "Linked Target resource",
+		DeprecationMessage: "use akeyless_target_linked resource instead",
+		Create:             resourceLinkedTargetCreate,
+		Read:               resourceLinkedTargetRead,
+		Update:             resourceLinkedTargetUpdate,
+		Delete:             resourceLinkedTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceLinkedTargetImport,
 		},

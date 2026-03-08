@@ -13,11 +13,12 @@ import (
 
 func resourceEksTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "EKS Target resource",
-		Create:      resourceEksTargetCreate,
-		Read:        resourceEksTargetRead,
-		Update:      resourceEksTargetUpdate,
-		Delete:      resourceEksTargetDelete,
+		Description:        "EKS Target resource",
+		DeprecationMessage: "use akeyless_target_eks resource instead",
+		Create:             resourceEksTargetCreate,
+		Read:               resourceEksTargetRead,
+		Update:             resourceEksTargetUpdate,
+		Delete:             resourceEksTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceEksTargetImport,
 		},

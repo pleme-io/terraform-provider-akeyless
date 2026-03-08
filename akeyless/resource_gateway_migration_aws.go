@@ -54,7 +54,7 @@ func resourceGatewayMigrationAws() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the key that protects the classic key value (if empty, the account default key will be used)",
 			},
-			"id": {
+			"migration_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Migration ID",
@@ -130,13 +130,34 @@ func resourceGatewayMigrationAwsRead(d *schema.ResourceData, m interface{}) erro
 		if rOut.Body.AwsSecretsMigrations != nil && len(rOut.Body.AwsSecretsMigrations) > 0 {
 			for _, migration := range rOut.Body.AwsSecretsMigrations {
 				if migration.General != nil && *migration.General.Name == path {
-					id := migration.General.Id
-					if id != nil {
-						err = d.Set("id", *id)
-						if err != nil {
+					if migration.General.Id != nil {
+						if err := d.Set("migration_id", *migration.General.Id); err != nil {
 							return err
 						}
 					}
+					if migration.General.ProtectionKey != nil {
+						if err := d.Set("protection_key", *migration.General.ProtectionKey); err != nil {
+							return err
+						}
+					}
+					if migration.General.Prefix != nil {
+						if err := d.Set("target_location", *migration.General.Prefix); err != nil {
+							return err
+						}
+					}
+					if migration.Payload != nil {
+						if migration.Payload.Region != nil {
+							if err := d.Set("aws_region", *migration.Payload.Region); err != nil {
+								return err
+							}
+						}
+						if migration.Payload.Key != nil {
+							if err := d.Set("aws_key_id", *migration.Payload.Key); err != nil {
+								return err
+							}
+						}
+					}
+					break
 				}
 			}
 		}
@@ -169,14 +190,14 @@ func resourceGatewayMigrationAwsUpdate(d *schema.ResourceData, m interface{}) er
 	common.GetAkeylessPtr(&body.AwsRegion, awsRegion)
 	common.GetAkeylessPtr(&body.ProtectionKey, protectionKey)
 
-	id := d.Get("id").(string)
+	id := d.Get("migration_id").(string)
 	if id == "" {
 		err := resourceGatewayMigrationAwsRead(d, m)
 		if err != nil {
 			return err
 		}
 	}
-	id = d.Get("id").(string)
+	id = d.Get("migration_id").(string)
 	body.Id = &id
 
 	_, _, err := client.GatewayUpdateMigration(ctx).Body(*body).Execute()
@@ -195,14 +216,14 @@ func resourceGatewayMigrationAwsDelete(d *schema.ResourceData, m interface{}) er
 	client := *provider.client
 	token := *provider.token
 
-	id := d.Get("id").(string)
+	id := d.Get("migration_id").(string)
 	if id == "" {
 		err := resourceGatewayMigrationAwsRead(d, m)
 		if err != nil {
 			return err
 		}
 	}
-	id = d.Get("id").(string)
+	id = d.Get("migration_id").(string)
 
 	deleteItem := akeyless_api.GatewayDeleteMigration{
 		Token: &token,

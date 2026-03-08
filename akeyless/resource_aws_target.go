@@ -13,11 +13,12 @@ import (
 
 func resourceAwsTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "AWS Target resource",
-		Create:      resourceAwsTargetCreate,
-		Read:        resourceAwsTargetRead,
-		Update:      resourceAwsTargetUpdate,
-		Delete:      resourceAwsTargetDelete,
+		Description:        "AWS Target resource",
+		DeprecationMessage: "use akeyless_target_aws resource instead",
+		Create:             resourceAwsTargetCreate,
+		Read:               resourceAwsTargetRead,
+		Update:             resourceAwsTargetUpdate,
+		Delete:             resourceAwsTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceAwsTargetImport,
 		},

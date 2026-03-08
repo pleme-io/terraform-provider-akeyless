@@ -25,7 +25,14 @@ When updating an existing command (resource or data source) to support new field
     *   Ensure the API call includes the new parameters.
 
 Ignore resources that have a `DeprecationMessage` set.
-These rules also apply when creating new resources — always ensure sensitive fields are marked, defaults match types, and read functions cover all writable params.
+These rules also apply when creating new resources — always ensure sensitive fields are marked, defaults match types, and read functions cover all writable params that the API returns.
+If the API (SDK struct) does not expose a field in its response, it cannot be read back — do not add a `d.Set()` for it.
+
+### Key lessons
+- Never remove existing schema fields from a resource — it breaks backward compatibility for existing users
+- When adding a field to Create, also add it to Update and Read (if the API supports it)
+- Check the SDK response struct to confirm which fields are actually returned before writing `d.Set()` calls
+- Use the newer type-specific APIs when available (e.g. `AuthMethodGet` over `GetAuthMethod`, `GatewayCreateMigrationAWS` over `GatewayCreateMigration`)
 
 ## 3. Update Documentation
 

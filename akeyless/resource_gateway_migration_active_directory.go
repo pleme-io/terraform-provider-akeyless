@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
 	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
@@ -149,7 +151,7 @@ func resourceGatewayMigrationActiveDirectory() *schema.Resource {
 				Optional:    true,
 				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
-			"id": {
+			"migration_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Migration ID",
@@ -268,13 +270,125 @@ func resourceGatewayMigrationActiveDirectoryRead(d *schema.ResourceData, m inter
 		if rOut.Body.ActiveDirectoryMigrations != nil && len(rOut.Body.ActiveDirectoryMigrations) > 0 {
 			for _, migration := range rOut.Body.ActiveDirectoryMigrations {
 				if migration.General != nil && *migration.General.Name == path {
-					id := migration.General.Id
-					if id != nil {
-						err = d.Set("id", *id)
-						if err != nil {
+					if migration.General.Id != nil {
+						if err := d.Set("migration_id", *migration.General.Id); err != nil {
 							return err
 						}
 					}
+					if migration.General.ProtectionKey != nil {
+						if err := d.Set("protection_key", *migration.General.ProtectionKey); err != nil {
+							return err
+						}
+					}
+					if migration.General.Prefix != nil {
+						if err := d.Set("target_location", *migration.General.Prefix); err != nil {
+							return err
+						}
+					}
+					if migration.Payload != nil {
+						p := migration.Payload
+						if p.DomainName != nil {
+							if err := d.Set("ad_domain_name", *p.DomainName); err != nil {
+								return err
+							}
+						}
+						if p.UserBaseDn != nil {
+							if err := d.Set("ad_user_base_dn", *p.UserBaseDn); err != nil {
+								return err
+							}
+						}
+						if p.ComputerBaseDn != nil {
+							if err := d.Set("ad_computer_base_dn", *p.ComputerBaseDn); err != nil {
+								return err
+							}
+						}
+						if len(p.DiscoveryTypes) > 0 {
+							if err := d.Set("ad_discovery_types", p.DiscoveryTypes); err != nil {
+								return err
+							}
+						}
+						if p.DomainUsersRotatedSecretsPathTemplate != nil {
+							if err := d.Set("ad_domain_users_path_template", *p.DomainUsersRotatedSecretsPathTemplate); err != nil {
+								return err
+							}
+						}
+						if p.LocalUsersRotatedSecretsPathTemplate != nil {
+							if err := d.Set("ad_local_users_path_template", *p.LocalUsersRotatedSecretsPathTemplate); err != nil {
+								return err
+							}
+						}
+						if p.DomainServerTargetsPathTemplate != nil {
+							if err := d.Set("ad_targets_path_template", *p.DomainServerTargetsPathTemplate); err != nil {
+								return err
+							}
+						}
+						if p.AutoRotate != nil {
+							if err := d.Set("ad_auto_rotate", strconv.FormatBool(*p.AutoRotate)); err != nil {
+								return err
+							}
+						}
+						if p.AutoRotateRotationHour != nil {
+							if err := d.Set("ad_rotation_hour", int(*p.AutoRotateRotationHour)); err != nil {
+								return err
+							}
+						}
+						if p.AutoRotateIntervalInDays != nil {
+							if err := d.Set("ad_rotation_interval", int(*p.AutoRotateIntervalInDays)); err != nil {
+								return err
+							}
+						}
+						if p.EnableRdpSra != nil {
+							if err := d.Set("ad_sra_enable_rdp", strconv.FormatBool(*p.EnableRdpSra)); err != nil {
+								return err
+							}
+						}
+						if p.SshPort != nil {
+							if err := d.Set("ad_ssh_port", *p.SshPort); err != nil {
+								return err
+							}
+						}
+						if p.WinrmPort != nil {
+							if err := d.Set("ad_winrm_port", *p.WinrmPort); err != nil {
+								return err
+							}
+						}
+						if p.WinrmOverHttp != nil {
+							if err := d.Set("ad_winrm_over_http", strconv.FormatBool(*p.WinrmOverHttp)); err != nil {
+								return err
+							}
+						}
+						if p.TargetsType != nil {
+							if err := d.Set("ad_targets_type", *p.TargetsType); err != nil {
+								return err
+							}
+						}
+						if p.TargetFormat != nil {
+							if err := d.Set("ad_target_format", *p.TargetFormat); err != nil {
+								return err
+							}
+						}
+						if len(p.UserGroups) > 0 {
+							if err := d.Set("ad_user_groups", strings.Join(p.UserGroups, ",")); err != nil {
+								return err
+							}
+						}
+						if p.OsFilter != nil {
+							if err := d.Set("ad_os_filter", *p.OsFilter); err != nil {
+								return err
+							}
+						}
+						if p.DiscoverIisApps != nil {
+							if err := d.Set("ad_discover_iis_app", strconv.FormatBool(*p.DiscoverIisApps)); err != nil {
+								return err
+							}
+						}
+						if p.DiscoverServices != nil {
+							if err := d.Set("ad_discover_services", strconv.FormatBool(*p.DiscoverServices)); err != nil {
+								return err
+							}
+						}
+					}
+					break
 				}
 			}
 		}
@@ -351,14 +465,14 @@ func resourceGatewayMigrationActiveDirectoryUpdate(d *schema.ResourceData, m int
 	common.GetAkeylessPtr(&body.AdDiscoverServices, adDiscoverServices)
 	common.GetAkeylessPtr(&body.ProtectionKey, protectionKey)
 
-	id := d.Get("id").(string)
+	id := d.Get("migration_id").(string)
 	if id == "" {
 		err := resourceGatewayMigrationActiveDirectoryRead(d, m)
 		if err != nil {
 			return err
 		}
 	}
-	id = d.Get("id").(string)
+	id = d.Get("migration_id").(string)
 	body.Id = &id
 
 	_, _, err := client.GatewayUpdateMigration(ctx).Body(*body).Execute()
@@ -377,14 +491,14 @@ func resourceGatewayMigrationActiveDirectoryDelete(d *schema.ResourceData, m int
 	client := *provider.client
 	token := *provider.token
 
-	id := d.Get("id").(string)
+	id := d.Get("migration_id").(string)
 	if id == "" {
 		err := resourceGatewayMigrationActiveDirectoryRead(d, m)
 		if err != nil {
 			return err
 		}
 	}
-	id = d.Get("id").(string)
+	id = d.Get("migration_id").(string)
 
 	deleteItem := akeyless_api.GatewayDeleteMigration{
 		Token: &token,

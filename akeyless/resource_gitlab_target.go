@@ -13,11 +13,12 @@ import (
 
 func resourceGitlabTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "Gitlab Target resource",
-		Create:      resourceGitlabTargetCreate,
-		Read:        resourceGitlabTargetRead,
-		Update:      resourceGitlabTargetUpdate,
-		Delete:      resourceGitlabTargetDelete,
+		Description:        "Gitlab Target resource",
+		DeprecationMessage: "use akeyless_target_gitlab resource instead",
+		Create:             resourceGitlabTargetCreate,
+		Read:               resourceGitlabTargetRead,
+		Update:             resourceGitlabTargetUpdate,
+		Delete:             resourceGitlabTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceGitlabTargetImport,
 		},

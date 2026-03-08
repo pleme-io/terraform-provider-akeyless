@@ -14,11 +14,12 @@ import (
 
 func resourceAzureTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "Azure Target resource",
-		Create:      resourceAzureTargetCreate,
-		Read:        resourceAzureTargetRead,
-		Update:      resourceAzureTargetUpdate,
-		Delete:      resourceAzureTargetDelete,
+		Description:        "Azure Target resource",
+		DeprecationMessage: "use akeyless_target_azure resource instead",
+		Create:             resourceAzureTargetCreate,
+		Read:               resourceAzureTargetRead,
+		Update:             resourceAzureTargetUpdate,
+		Delete:             resourceAzureTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceAzureTargetImport,
 		},

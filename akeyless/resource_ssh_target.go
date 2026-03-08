@@ -14,11 +14,12 @@ import (
 
 func resourceSSHTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "SSH Target resource",
-		Create:      resourceSSHTargetCreate,
-		Read:        resourceSSHTargetRead,
-		Update:      resourceSSHTargetUpdate,
-		Delete:      resourceSSHTargetDelete,
+		Description:        "SSH Target resource",
+		DeprecationMessage: "use akeyless_target_ssh resource instead",
+		Create:             resourceSSHTargetCreate,
+		Read:               resourceSSHTargetRead,
+		Update:             resourceSSHTargetUpdate,
+		Delete:             resourceSSHTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceSSHTargetImport,
 		},

@@ -60,7 +60,7 @@ func resourceGatewayMigrationHashi() *schema.Resource {
 				Optional:    true,
 				Description: "The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)",
 			},
-			"id": {
+			"migration_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Migration ID",
@@ -139,13 +139,34 @@ func resourceGatewayMigrationHashiRead(d *schema.ResourceData, m interface{}) er
 		if rOut.Body.HashiMigrations != nil && len(rOut.Body.HashiMigrations) > 0 {
 			for _, migration := range rOut.Body.HashiMigrations {
 				if migration.General != nil && *migration.General.Name == path {
-					id := migration.General.Id
-					if id != nil {
-						err = d.Set("id", *id)
-						if err != nil {
+					if migration.General.Id != nil {
+						if err := d.Set("migration_id", *migration.General.Id); err != nil {
 							return err
 						}
 					}
+					if migration.General.ProtectionKey != nil {
+						if err := d.Set("protection_key", *migration.General.ProtectionKey); err != nil {
+							return err
+						}
+					}
+					if migration.General.Prefix != nil {
+						if err := d.Set("target_location", *migration.General.Prefix); err != nil {
+							return err
+						}
+					}
+					if migration.Payload != nil {
+						if migration.Payload.Url != nil {
+							if err := d.Set("hashi_url", *migration.Payload.Url); err != nil {
+								return err
+							}
+						}
+						if migration.Payload.ImportAsJson != nil {
+							if err := d.Set("hashi_json", fmt.Sprintf("%v", *migration.Payload.ImportAsJson)); err != nil {
+								return err
+							}
+						}
+					}
+					break
 				}
 			}
 		}
@@ -182,14 +203,14 @@ func resourceGatewayMigrationHashiUpdate(d *schema.ResourceData, m interface{}) 
 	common.GetAkeylessPtr(&body.HashiJson, hashiJson)
 	common.GetAkeylessPtr(&body.ProtectionKey, protectionKey)
 
-	id := d.Get("id").(string)
+	id := d.Get("migration_id").(string)
 	if id == "" {
 		err := resourceGatewayMigrationHashiRead(d, m)
 		if err != nil {
 			return err
 		}
 	}
-	id = d.Get("id").(string)
+	id = d.Get("migration_id").(string)
 	body.Id = &id
 
 	_, _, err := client.GatewayUpdateMigration(ctx).Body(*body).Execute()
@@ -208,14 +229,14 @@ func resourceGatewayMigrationHashiDelete(d *schema.ResourceData, m interface{}) 
 	client := *provider.client
 	token := *provider.token
 
-	id := d.Get("id").(string)
+	id := d.Get("migration_id").(string)
 	if id == "" {
 		err := resourceGatewayMigrationHashiRead(d, m)
 		if err != nil {
 			return err
 		}
 	}
-	id = d.Get("id").(string)
+	id = d.Get("migration_id").(string)
 
 	deleteItem := akeyless_api.GatewayDeleteMigration{
 		Token: &token,

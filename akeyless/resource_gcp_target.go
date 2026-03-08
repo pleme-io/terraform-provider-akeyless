@@ -14,11 +14,12 @@ import (
 
 func resourceGcpTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "GCP Target resource",
-		Create:      resourceGcpTargetCreate,
-		Read:        resourceGcpTargetRead,
-		Update:      resourceGcpTargetUpdate,
-		Delete:      resourceGcpTargetDelete,
+		Description:        "GCP Target resource",
+		DeprecationMessage: "use akeyless_target_gcp resource instead",
+		Create:             resourceGcpTargetCreate,
+		Read:               resourceGcpTargetRead,
+		Update:             resourceGcpTargetUpdate,
+		Delete:             resourceGcpTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceGcpTargetImport,
 		},

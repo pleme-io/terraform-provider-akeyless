@@ -14,11 +14,12 @@ import (
 
 func resourceGkeTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "GKE Target resource",
-		Create:      resourceGkeTargetCreate,
-		Read:        resourceGkeTargetRead,
-		Update:      resourceGkeTargetUpdate,
-		Delete:      resourceGkeTargetDelete,
+		Description:        "GKE Target resource",
+		DeprecationMessage: "use akeyless_target_gke resource instead",
+		Create:             resourceGkeTargetCreate,
+		Read:               resourceGkeTargetRead,
+		Update:             resourceGkeTargetUpdate,
+		Delete:             resourceGkeTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceGkeTargetImport,
 		},

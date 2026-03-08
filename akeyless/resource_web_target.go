@@ -14,11 +14,12 @@ import (
 
 func resourceWebTarget() *schema.Resource {
 	return &schema.Resource{
-		Description: "Web Target resource",
-		Create:      resourceWebTargetCreate,
-		Read:        resourceWebTargetRead,
-		Update:      resourceWebTargetUpdate,
-		Delete:      resourceWebTargetDelete,
+		Description:        "Web Target resource",
+		DeprecationMessage: "use akeyless_target_web resource instead",
+		Create:             resourceWebTargetCreate,
+		Read:               resourceWebTargetRead,
+		Update:             resourceWebTargetUpdate,
+		Delete:             resourceWebTargetDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceWebTargetImport,
 		},
