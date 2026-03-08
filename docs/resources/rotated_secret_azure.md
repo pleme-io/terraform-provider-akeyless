@@ -26,7 +26,7 @@ Azure rotated secret resource
 - `api_id` (String) API ID to rotate (relevant only for rotator-type=api-key)
 - `api_key` (String) API key to rotate (relevant only for rotator-type=api-key)
 - `app_id` (String) Id of the azure app that hold the serect to be rotated (relevant only for rotator-type=api-key & authentication-credentials=use-target-creds)
-- `authentication_credentials` (String) The credentials to connect with use-user-creds/use-target-creds
+- `authentication_credentials` (String) The credentials to connect with use-self-creds/use-target-creds
 - `auto_rotate` (String) Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation
 - `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `description` (String) Description of the object
@@ -36,7 +36,7 @@ Azure rotated secret resource
 - `grace_rotation_interval` (String) The number of days to wait before deleting the old key (must be bigger than rotation-interval)
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `keep_prev_version` (String) Whether to keep previous version [true/false]. If not set, use default according to account settings
-- `key` (String) The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)
+- `key` (String) The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)
 - `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults.
 - `password_length` (String) The length of the password to be generated
 - `resource_group_name` (String) The resource group name (only relevant when explicitly-set-sa=true)

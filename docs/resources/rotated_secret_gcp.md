@@ -23,7 +23,7 @@ Gcp rotated secret resource
 
 ### Optional
 
-- `authentication_credentials` (String) The credentials to connect with use-user-creds/use-target-creds
+- `authentication_credentials` (String) The credentials to connect with use-self-creds/use-target-creds
 - `auto_rotate` (String) Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation [true/false]
 - `delete_protection` (String) Protection from accidental deletion of this object [true/false]
 - `description` (String) Description of the object
@@ -35,7 +35,7 @@ Gcp rotated secret resource
 - `grace_rotation_interval` (String) The number of days to wait before deleting the old key (must be bigger than rotation-interval)
 - `item_custom_fields` (Map of String) Additional custom fields to associate with the item
 - `keep_prev_version` (String) Whether to keep previous version [true/false]. If not set, use default according to account settings
-- `key` (String) The name of a key that used to encrypt the secret value (if empty, the account default protectionKey key will be used)
+- `key` (String) The name of a key that is used to encrypt the secret value (if empty, the account default protectionKey key will be used)
 - `max_versions` (String) Set the maximum number of versions, limited by the account settings defaults.
 - `password_length` (String) The length of the password to be generated
 - `rotation_event_in` (List of String) How many days before the rotation of the item would you like to be notified

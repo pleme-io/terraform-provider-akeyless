@@ -17,7 +17,7 @@ GoDaddy Target resource
 
 ### Required
 
-- `api_key` (String) Key of the api credentials to the Godaddy account
+- `api_key` (String, Sensitive) Key of the api credentials to the Godaddy account
 - `imap_fqdn` (String) ImapFQDN of the IMAP service, FQDN or IPv4 address. Must be FQDN if the IMAP is using TLS
 - `imap_password` (String, Sensitive) ImapPassword to access the IMAP service
 - `imap_username` (String) ImapUsername to access the IMAP service

@@ -39,6 +39,7 @@ Native Kubernetes Service dynamic secret resource
 - `k8s_service_account` (String) K8S ServiceAccount to extract token from.
 - `k8s_service_account_type` (String) K8S ServiceAccount type [fixed, dynamic].
 - `secure_access_allow_port_forwading` (Boolean) Enable Port forwarding while using CLI access
+- `secure_access_bastion_issuer` (String, Deprecated) Path to the SSH Certificate Issuer for your Akeyless Bastion
 - `secure_access_certificate_issuer` (String) Path to the SSH Certificate Issuer for your Akeyless Secure Access
 - `secure_access_cluster_endpoint` (String) The K8s cluster endpoint URL
 - `secure_access_dashboard_url` (String) The K8s dashboard url

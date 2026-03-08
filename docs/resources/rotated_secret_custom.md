@@ -22,7 +22,7 @@ Custom rotated secret resource
 
 ### Optional
 
-- `authentication_credentials` (String) The credentials to connect with use-user-creds/use-target-creds
+- `authentication_credentials` (String) The credentials to connect with use-self-creds/use-target-creds
 - `auto_rotate` (String) Whether to automatically rotate every --rotation-interval days, or disable existing automatic rotation [true/false]
 - `custom_payload` (String) Secret payload to be sent with rotation request
 - `delete_protection` (String) Protection from accidental deletion of this object [true/false]

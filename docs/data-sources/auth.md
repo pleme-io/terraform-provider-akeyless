@@ -29,7 +29,6 @@ Authenticate to Akeyless and returns a token to be used by the provider
 ### Read-Only
 
 - `complete_auth_link` (String) Complete authentication link
-- `creds` (List of Object) System access credentials (see [below for nested schema](#nestedatt--creds))
 - `expiration` (String) Token expiration time
 - `id` (String) The ID of this resource.
 - `token` (String, Sensitive) The token
@@ -114,20 +113,5 @@ Required:
 Optional:
 
 - `access_id` (String)
-
-
-<a id="nestedatt--creds"></a>
-### Nested Schema for `creds`
-
-Read-Only:
-
-- `access_id` (String)
-- `auth_creds` (String)
-- `expiry` (Number)
-- `kfm_creds` (String)
-- `need_mfa_app_first_config` (Boolean)
-- `required_mfa` (String)
-- `token` (String)
-- `uam_creds` (String)
 
 
