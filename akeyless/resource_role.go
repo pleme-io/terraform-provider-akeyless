@@ -377,6 +377,28 @@ func resourceRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		}
 	}
 
+	if role.Rules != nil && role.Rules.PathRules != nil {
+		var eventForwarderNames []string
+		for _, rule := range role.Rules.PathRules {
+			if rule.Type == nil || rule.Path == nil {
+				continue
+			}
+			switch *rule.Type {
+			case "reverse-rbac-rule":
+				if err := d.Set("reverse_rbac_access", strings.TrimPrefix(*rule.Path, "/")); err != nil {
+					return diag.FromErr(err)
+				}
+			case "event-forwarder-rule":
+				eventForwarderNames = append(eventForwarderNames, *rule.Path)
+			}
+		}
+		if len(eventForwarderNames) > 0 {
+			if err := d.Set("event_forwarders_name", eventForwarderNames); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
 	return nil
 }
 

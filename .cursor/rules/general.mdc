@@ -54,11 +54,20 @@ The old `resource_gateway_producer_*` resources are the legacy format of dynamic
 - All `d.Set()` calls in read functions **must** check for errors
 - When updating tags, use `common.GetTagsForUpdate` to handle both add and remove
 - Read functions must read back **all writable params** that are available from the API response
-- Sensitive fields are typically not returned by the API — do not add `d.Set()` for them in read
+- Sensitive fields **should** be read back and set with `d.Set()` — Terraform handles them via `Sensitive: true` in the schema
 - Descriptions in schema fields must be consistent with their `Default` values
 - Never duplicate a `d.Set()` call for the same field in a read function
 - File header comment should be `// generated file` (watch for typos like `fule` or `ffile`)
 
 ## SDK Import Convention
 Always import as `akeyless_api "github.com/akeylesslabs/akeyless-go/v5"` — the version mapping is in `go.mod`. Never change imports to `v6`, `v7`, etc.
+
+## Role Resource — PathRules
+The `GetRole` response contains `Rules.PathRules` — a slice of `PathRule` with `Path`, `Type`, and `Capabilities`.
+- `Type == "event-forwarder-rule"` → `Path` is the event forwarder name → collect into `event_forwarders_name` (TypeSet)
+- `Type == "reverse-rbac-rule"` → `Path` is the access scope (e.g. `/scoped`) → strip leading `/` and set as `reverse_rbac_access`
+- Other access rule types (`search-rule`, `reports-rule`, etc.) are handled by `setAccessRuleField` using `convertPathName`
+
+## Auth Method Additional Data
+Auth method responses include `AuthMethodAdditionalData` with type-specific nested structs (e.g. `KerberosData` of type `KerberosAuthMethodInfo`). Use these to read back LDAP/Kerberos fields like `bind_dn`, `ldap_url`, `krb5_conf_data`, etc. — including sensitive ones like `bind_dn_password` and `keytab_file_data`.
 
