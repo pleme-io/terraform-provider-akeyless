@@ -1,4 +1,4 @@
-// generated ffile
+// generated file
 package akeyless
 
 import (
@@ -41,7 +41,7 @@ func resourceAuthMethodKerberos() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Access expiration date in Unix timestamp (select 0 for access without expiry date)",
-				Default:     "0",
+				Default:     0,
 			},
 			"allowed_client_type": {
 				Type:        schema.TypeSet,

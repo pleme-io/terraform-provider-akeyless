@@ -2,6 +2,9 @@
 alwaysApply: true
 ---
 
+## Sensitive Fields
+Mark all password, key, secret, and credential fields as **`Sensitive: true`** in the Terraform schema definition.
+
 ## Fields to Ignore in SDK
 When working with SDK files, **exclude** the following fields:
 1. **`new_name`** - Name changes are not permitted in the provider
@@ -29,8 +32,16 @@ and the correct field names:
 - **ESM terminology** - ESM was renamed to USC; use USC in all implementations
 - **CreateSecret operation** - This operation is handled in the static secret resource
 
-Never use the term "Producer" - always use "Dynamic Secret" instead
+Never use the term "Producer" - always use "Dynamic Secret" instead.
+The old `resource_gateway_producer_*` resources are the legacy format of dynamic secrets — do not add new ones.
 
 - **DescribeItem response** → Use `ItemMetadata`
 - **Specific Get endpoints** → Use the direct `Description` field from the response structure
+
+## Schema Field Conventions
+- **`Sensitive: true`** — secrets, passwords, private keys, API keys, tokens, client secrets
+- **`Default` type must match `Type`** — e.g. `Default: 0` for `TypeInt`, `Default: false` for `TypeBool` (never use string `"0"` or `"false"`)
+- **`ForceNew: true`** — for the item's identifier field (e.g. `name`)
+- All `d.Set()` calls in read functions **must** check for errors
+- When updating tags, use `common.GetTagsForUpdate` to handle both add and remove
 

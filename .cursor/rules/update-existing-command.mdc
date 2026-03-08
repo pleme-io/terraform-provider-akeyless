@@ -24,7 +24,8 @@ When updating an existing command (resource or data source) to support new field
     *   Map the new schema fields to the SDK struct fields.
     *   Ensure the API call includes the new parameters.
 
-ignore resorces that has DeprecationMessage
+Ignore resources that have a `DeprecationMessage` set.
+These rules also apply when creating new resources — always ensure sensitive fields are marked, defaults match types, and read functions cover all writable params.
 
 ## 3. Update Documentation
 

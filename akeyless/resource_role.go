@@ -370,6 +370,13 @@ func resourceRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		}
 	}
 
+	if role.Comment != nil {
+		err = d.Set("description", *role.Comment)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return nil
 }
 

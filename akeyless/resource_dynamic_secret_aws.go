@@ -1,4 +1,4 @@
-// generated fule
+// generated file
 package akeyless
 
 import (
@@ -420,12 +420,6 @@ func resourceDynamicSecretAwsRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if rOut.AwsUserProgrammaticAccess != nil {
 		err = d.Set("aws_user_programmatic_access", *rOut.AwsUserProgrammaticAccess)
-		if err != nil {
-			return err
-		}
-	}
-	if rOut.AwsUserConsoleAccess != nil {
-		err = d.Set("aws_user_console_access", *rOut.AwsUserConsoleAccess)
 		if err != nil {
 			return err
 		}

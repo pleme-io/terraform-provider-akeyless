@@ -487,8 +487,9 @@ func GetSra(d *schema.ResourceData, sra *akeyless_api.SecureRemoteAccess, itemTy
 			return err
 		}
 	}
-	if s, ok := sra.GetRegionOk(); ok {
-		err = d.Set("secure_access_aws_region", s)
+
+	if s, ok := sra.GetBastionIssuerOk(); ok {
+		err = d.Set("secure_access_certificate_issuer", s)
 		if err != nil {
 			return err
 		}

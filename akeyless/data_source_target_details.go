@@ -32,7 +32,7 @@ func dataSourceGetTargetDetails() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Include all target versions in reply",
-				Default:     "false",
+				Default:     false,
 			},
 			"value": {
 				Type:     schema.TypeMap,
@@ -179,65 +179,100 @@ func dataSourceGetTargetDetailsRead(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	// Set target metadata fields
 	if rOut.Target != nil {
 		if rOut.Target.TargetId != nil {
-			d.Set("target_id", *rOut.Target.TargetId)
+			if err := d.Set("target_id", *rOut.Target.TargetId); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.TargetType != nil {
-			d.Set("target_type", *rOut.Target.TargetType)
+			if err := d.Set("target_type", *rOut.Target.TargetType); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.TargetSubType != nil {
-			d.Set("target_sub_type", *rOut.Target.TargetSubType)
+			if err := d.Set("target_sub_type", *rOut.Target.TargetSubType); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.Comment != nil {
-			d.Set("comment", *rOut.Target.Comment)
+			if err := d.Set("comment", *rOut.Target.Comment); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.ProtectionKeyName != nil {
-			d.Set("protection_key_name", *rOut.Target.ProtectionKeyName)
+			if err := d.Set("protection_key_name", *rOut.Target.ProtectionKeyName); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.LastVersion != nil {
-			d.Set("last_version", *rOut.Target.LastVersion)
+			if err := d.Set("last_version", *rOut.Target.LastVersion); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.WithCustomerFragment != nil {
-			d.Set("with_customer_fragment", *rOut.Target.WithCustomerFragment)
+			if err := d.Set("with_customer_fragment", *rOut.Target.WithCustomerFragment); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.IsAccessRequestEnabled != nil {
-			d.Set("is_access_request_enabled", *rOut.Target.IsAccessRequestEnabled)
+			if err := d.Set("is_access_request_enabled", *rOut.Target.IsAccessRequestEnabled); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.AccessRequestStatus != nil {
-			d.Set("access_request_status", *rOut.Target.AccessRequestStatus)
+			if err := d.Set("access_request_status", *rOut.Target.AccessRequestStatus); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.AccessDate != nil {
-			d.Set("access_date", rOut.Target.AccessDate.Format("2006-01-02T15:04:05Z07:00"))
+			if err := d.Set("access_date", rOut.Target.AccessDate.Format("2006-01-02T15:04:05Z07:00")); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.AccessDateDisplay != nil {
-			d.Set("access_date_display", *rOut.Target.AccessDateDisplay)
+			if err := d.Set("access_date_display", *rOut.Target.AccessDateDisplay); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.Attributes != nil {
 			attributesMap := make(map[string]string)
 			for k, v := range rOut.Target.Attributes {
 				attributesMap[k] = fmt.Sprintf("%v", v)
 			}
-			d.Set("attributes", attributesMap)
+			if err := d.Set("attributes", attributesMap); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.ClientPermissions != nil {
-			d.Set("client_permissions", rOut.Target.ClientPermissions)
+			if err := d.Set("client_permissions", rOut.Target.ClientPermissions); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.CreationDate != nil {
-			d.Set("creation_date", rOut.Target.CreationDate.Format("2006-01-02T15:04:05Z07:00"))
+			if err := d.Set("creation_date", rOut.Target.CreationDate.Format("2006-01-02T15:04:05Z07:00")); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.ModificationDate != nil {
-			d.Set("modification_date", rOut.Target.ModificationDate.Format("2006-01-02T15:04:05Z07:00"))
+			if err := d.Set("modification_date", rOut.Target.ModificationDate.Format("2006-01-02T15:04:05Z07:00")); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.ParentTargetName != nil {
-			d.Set("parent_target_name", *rOut.Target.ParentTargetName)
+			if err := d.Set("parent_target_name", *rOut.Target.ParentTargetName); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.TargetDetails != nil {
-			d.Set("target_details", *rOut.Target.TargetDetails)
+			if err := d.Set("target_details", *rOut.Target.TargetDetails); err != nil {
+				return err
+			}
 		}
 		if rOut.Target.TargetName != nil {
-			d.Set("target_name", *rOut.Target.TargetName)
+			if err := d.Set("target_name", *rOut.Target.TargetName); err != nil {
+				return err
+			}
 		}
 	}
 

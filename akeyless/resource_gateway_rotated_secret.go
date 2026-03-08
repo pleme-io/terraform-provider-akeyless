@@ -81,7 +81,7 @@ func resourceRotatedSecret() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    false,
 				Optional:    true,
-				Description: "The credentials to connect with use-user-creds/use-target-creds",
+				Description: "The credentials to connect with use-self-creds/use-target-creds",
 				Default:     "use-user-creds",
 			},
 			"rotator_custom_cmd": {

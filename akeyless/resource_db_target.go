@@ -1,4 +1,4 @@
-// generated fule
+// generated file
 package akeyless
 
 import (
@@ -53,6 +53,7 @@ func resourceDbTarget() *schema.Resource {
 			"pwd": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "Database password",
 			},
 			"port": {
@@ -94,11 +95,13 @@ func resourceDbTarget() *schema.Resource {
 			"snowflake_api_private_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "RSA Private key (base64 encoded)",
 			},
 			"snowflake_api_private_key_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "The Private key passphrase",
 			},
 			"mongodb_atlas": {
@@ -129,6 +132,7 @@ func resourceDbTarget() *schema.Resource {
 			"mongodb_atlas_api_private_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "MongoDB Atlas private key",
 			},
 			"oracle_service_name": {
@@ -144,6 +148,7 @@ func resourceDbTarget() *schema.Resource {
 			"oracle_wallet_p12_file_data": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "Oracle wallet p12 file data in base64",
 			},
 			"oracle_wallet_sso_file_data": {
@@ -159,6 +164,7 @@ func resourceDbTarget() *schema.Resource {
 			"azure_client_secret": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: "(Optional) Client secret (relevant for \"cloud-service-provider\" only)",
 			},
 			"azure_tenant_id": {

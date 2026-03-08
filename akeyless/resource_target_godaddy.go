@@ -31,6 +31,7 @@ func resourceGodaddyTarget() *schema.Resource {
 			"api_key": {
 				Type:        schema.TypeString,
 				Required:    true,
+				Sensitive:   true,
 				Description: "Key of the api credentials to the Godaddy account",
 			},
 			"secret": {

@@ -50,6 +50,16 @@ func resourceMyNewFeatureCreate(ctx context.Context, d *schema.ResourceData, m i
 // Implement Read, Update, Delete functions...
 ```
 
+### Schema Field Rules
+
+When defining schema fields, follow these conventions:
+- **`Sensitive: true`** — for secrets, passwords, private keys, API keys, tokens, and client secrets
+- **`Computed: true`** — when the field has server-side defaults (e.g. protection keys)
+- **`Default`** — must match the field's `Type` (e.g. `Default: 0` for `TypeInt`, `Default: false` for `TypeBool`; never use string `"0"` or `"false"`)
+- **`Required` / `Optional`** — according to the SDK command requirements
+- **`ForceNew: true`** — for identifier fields of the item (e.g. `name`)
+- All `d.Set()` calls in read functions **must** check for errors
+
 ## 3. Register the New Command
 
 1.  Open `akeyless/provider.go`.
@@ -67,7 +77,7 @@ Documentation is auto-generated.
 
 ## 5. Testing
 
-1.  Create a test file `akeyless/resource_<name>_test.go`.
+1.  Add tests to an existing or new test file (not required to create a separate file per resource).
 2.  Implement acceptance tests using `resource.TestCase`.
 3.  Run tests: `make testacc TEST=./akeyless/resource_<name>_test.go` (or similar).
 

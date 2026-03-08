@@ -1,4 +1,4 @@
-// generated fule
+// generated file
 package akeyless
 
 import (

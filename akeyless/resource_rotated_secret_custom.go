@@ -80,7 +80,7 @@ func resourceRotatedSecretCustom() *schema.Resource {
 			"authentication_credentials": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The credentials to connect with use-user-creds/use-target-creds",
+				Description: "The credentials to connect with use-self-creds/use-target-creds",
 			},
 			"delete_protection": {
 				Type:        schema.TypeString,

@@ -320,9 +320,14 @@ func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
 				if pa.AccessId != nil {
 					assignment["access_id"] = *pa.AccessId
 				}
-				// Always include sub_claims for AUTH_METHOD assignments
 				if pa.AssignmentType != nil && *pa.AssignmentType == "AUTH_METHOD" {
-					assignment["sub_claims"] = make(map[string]interface{})
+					if pa.SubClaims != nil {
+						subClaims := make(map[string]interface{})
+						for k, v := range *pa.SubClaims {
+							subClaims[k] = v
+						}
+						assignment["sub_claims"] = subClaims
+					}
 				} else if pa.AssignmentType != nil && *pa.AssignmentType == "GROUP" {
 					// For GROUP assignments, include group_id if available
 					if pa.GroupId != nil {
@@ -412,8 +417,14 @@ func resourceOidcAppUpdate(d *schema.ResourceData, m interface{}) error {
 			common.GetAkeylessPtr(&itemBody.ItemCustomFields, &customFieldsStr)
 		}
 	}
-	if len(tags) > 0 {
-		itemBody.AddTag = tags
+	add, remove, err := common.GetTagsForUpdate(d, name, token, tags, client)
+	if err == nil {
+		if len(add) > 0 {
+			itemBody.AddTag = add
+		}
+		if len(remove) > 0 {
+			itemBody.RmTag = remove
+		}
 	}
 
 	_, _, err = client.UpdateItem(ctx).Body(itemBody).Execute()
