@@ -110,25 +110,25 @@ func resourceGatewayUpdateLogForwardingSyslogRead(d *schema.ResourceData, m inte
 
 	config := rOut.SyslogConfig
 	if config != nil {
-		if config.SyslogNetwork != nil && d.Get("network") != "" {
+		if config.SyslogNetwork != nil {
 			err := d.Set("network", *config.SyslogNetwork)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SyslogHost != nil && d.Get("host") != "" {
+		if config.SyslogHost != nil {
 			err := d.Set("host", *config.SyslogHost)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SyslogTargetTag != nil && d.Get("target_tag").(string) != common.UseExisting {
+		if config.SyslogTargetTag != nil {
 			err := d.Set("target_tag", *config.SyslogTargetTag)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SyslogFormatter != nil && d.Get("formatter") != "" {
+		if config.SyslogFormatter != nil {
 			err := d.Set("formatter", *config.SyslogFormatter)
 			if err != nil {
 				return err
@@ -140,7 +140,7 @@ func resourceGatewayUpdateLogForwardingSyslogRead(d *schema.ResourceData, m inte
 				return err
 			}
 		}
-		if config.SyslogTlsCertificate != nil && d.Get("tls_certificate").(string) != common.UseExisting {
+		if config.SyslogTlsCertificate != nil {
 			err := d.Set("tls_certificate", common.Base64Encode(*config.SyslogTlsCertificate))
 			if err != nil {
 				return err

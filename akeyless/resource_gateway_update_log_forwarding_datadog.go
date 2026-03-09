@@ -104,31 +104,31 @@ func resourceGatewayUpdateLogForwardingDatadogRead(d *schema.ResourceData, m int
 
 	config := rOut.DatadogConfig
 	if config != nil {
-		if config.DatadogHost != nil && d.Get("host") != "" {
+		if config.DatadogHost != nil {
 			err := d.Set("host", *config.DatadogHost)
 			if err != nil {
 				return err
 			}
 		}
-		if config.DatadogApiKey != nil && d.Get("api_key") != "" {
+		if config.DatadogApiKey != nil {
 			err := d.Set("api_key", *config.DatadogApiKey)
 			if err != nil {
 				return err
 			}
 		}
-		if config.DatadogLogSource != nil && d.Get("log_source").(string) != common.UseExisting {
+		if config.DatadogLogSource != nil {
 			err := d.Set("log_source", *config.DatadogLogSource)
 			if err != nil {
 				return err
 			}
 		}
-		if config.DatadogLogTags != nil && d.Get("log_tags").(string) != common.UseExisting {
+		if config.DatadogLogTags != nil {
 			err := d.Set("log_tags", *config.DatadogLogTags)
 			if err != nil {
 				return err
 			}
 		}
-		if config.DatadogLogService != nil && d.Get("log_service").(string) != common.UseExisting {
+		if config.DatadogLogService != nil {
 			err := d.Set("log_service", *config.DatadogLogService)
 			if err != nil {
 				return err

@@ -92,19 +92,19 @@ func resourceGatewayUpdateLogForwardingAzureAnalyticsRead(d *schema.ResourceData
 
 	config := rOut.AzureAnalyticsConfig
 	if config != nil {
-		if config.AzureEnableBatch != nil && d.Get("enable_batch") != "" {
+		if config.AzureEnableBatch != nil {
 			err := d.Set("enable_batch", *config.AzureEnableBatch)
 			if err != nil {
 				return err
 			}
 		}
-		if config.AzureWorkspaceId != nil && d.Get("workspace_id") != "" {
+		if config.AzureWorkspaceId != nil {
 			err := d.Set("workspace_id", *config.AzureWorkspaceId)
 			if err != nil {
 				return err
 			}
 		}
-		if config.AzureWorkspaceKey != nil && d.Get("workspace_key") != "" {
+		if config.AzureWorkspaceKey != nil {
 			err := d.Set("workspace_key", *config.AzureWorkspaceKey)
 			if err != nil {
 				return err

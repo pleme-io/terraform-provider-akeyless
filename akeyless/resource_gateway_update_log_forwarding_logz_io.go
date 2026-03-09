@@ -86,13 +86,13 @@ func resourceGatewayUpdateLogForwardingLogzIoRead(d *schema.ResourceData, m inte
 
 	config := rOut.LogzIoConfig
 	if config != nil {
-		if config.TargetLogzIoToken != nil && d.Get("logz_io_token").(string) != "" {
+		if config.TargetLogzIoToken != nil {
 			err := d.Set("logz_io_token", *config.TargetLogzIoToken)
 			if err != nil {
 				return err
 			}
 		}
-		if config.TargetLogzIoProtocol != nil && d.Get("protocol").(string) != "" {
+		if config.TargetLogzIoProtocol != nil {
 			err := d.Set("protocol", *config.TargetLogzIoProtocol)
 			if err != nil {
 				return err

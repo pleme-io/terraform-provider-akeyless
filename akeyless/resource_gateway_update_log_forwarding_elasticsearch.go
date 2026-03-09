@@ -129,49 +129,49 @@ func resourceGatewayUpdateLogForwardingElasticsearchRead(d *schema.ResourceData,
 
 	config := rOut.ElasticsearchConfig
 	if config != nil {
-		if config.ElasticsearchIndex != nil && d.Get("index").(string) != "" {
+		if config.ElasticsearchIndex != nil {
 			err := d.Set("index", *config.ElasticsearchIndex)
 			if err != nil {
 				return err
 			}
 		}
-		if config.ElasticsearchServerType != nil && d.Get("server_type").(string) != "" {
+		if config.ElasticsearchServerType != nil {
 			err := d.Set("server_type", adjustElasticsearchServerType(*config.ElasticsearchServerType))
 			if err != nil {
 				return err
 			}
 		}
-		if config.ElasticsearchNodes != nil && d.Get("nodes").(string) != "" {
+		if config.ElasticsearchNodes != nil {
 			err := d.Set("nodes", *config.ElasticsearchNodes)
 			if err != nil {
 				return err
 			}
 		}
-		if config.ElasticsearchCloudId != nil && d.Get("cloud_id").(string) != "" {
+		if config.ElasticsearchCloudId != nil {
 			err := d.Set("cloud_id", *config.ElasticsearchCloudId)
 			if err != nil {
 				return err
 			}
 		}
-		if config.ElasticsearchAuthType != nil && d.Get("auth_type").(string) != "" {
+		if config.ElasticsearchAuthType != nil {
 			err := d.Set("auth_type", adjustElasticsearchAuthType(*config.ElasticsearchAuthType))
 			if err != nil {
 				return err
 			}
 		}
-		if config.ElasticsearchApiKey != nil && d.Get("api_key").(string) != "" {
+		if config.ElasticsearchApiKey != nil {
 			err := d.Set("api_key", *config.ElasticsearchApiKey)
 			if err != nil {
 				return err
 			}
 		}
-		if config.ElasticsearchUserName != nil && d.Get("user_name").(string) != "" {
+		if config.ElasticsearchUserName != nil {
 			err := d.Set("user_name", *config.ElasticsearchUserName)
 			if err != nil {
 				return err
 			}
 		}
-		if config.ElasticsearchPassword != nil && d.Get("password").(string) != "" {
+		if config.ElasticsearchPassword != nil {
 			err := d.Set("password", *config.ElasticsearchPassword)
 			if err != nil {
 				return err
@@ -183,7 +183,7 @@ func resourceGatewayUpdateLogForwardingElasticsearchRead(d *schema.ResourceData,
 				return err
 			}
 		}
-		if config.ElasticsearchTlsCertificate != nil && d.Get("tls_certificate").(string) != common.UseExisting {
+		if config.ElasticsearchTlsCertificate != nil {
 			err := d.Set("tls_certificate", common.Base64Encode(*config.ElasticsearchTlsCertificate))
 			if err != nil {
 				return err

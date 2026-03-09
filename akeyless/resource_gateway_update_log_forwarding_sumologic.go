@@ -93,19 +93,19 @@ func resourceGatewayUpdateLogForwardingSumologicRead(d *schema.ResourceData, m i
 
 	config := rOut.SumoLogicConfig
 	if config != nil {
-		if config.SumoLogicEndpoint != nil && d.Get("endpoint").(string) != "" {
+		if config.SumoLogicEndpoint != nil {
 			err := d.Set("endpoint", *config.SumoLogicEndpoint)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SumoLogicTags != nil && d.Get("sumologic_tags").(string) != common.UseExisting {
+		if config.SumoLogicTags != nil {
 			err := d.Set("sumologic_tags", *config.SumoLogicTags)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SumoLogicHost != nil && d.Get("host").(string) != common.UseExisting {
+		if config.SumoLogicHost != nil {
 			err := d.Set("host", *config.SumoLogicHost)
 			if err != nil {
 				return err

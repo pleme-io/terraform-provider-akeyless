@@ -121,37 +121,37 @@ func resourceGatewayUpdateLogForwardingSplunkRead(d *schema.ResourceData, m inte
 
 	config := rOut.SplunkConfig
 	if config != nil {
-		if config.SplunkUrl != nil && d.Get("splunk_url").(string) != "" {
+		if config.SplunkUrl != nil {
 			err := d.Set("splunk_url", *config.SplunkUrl)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SplunkToken != nil && d.Get("splunk_token").(string) != "" {
+		if config.SplunkToken != nil {
 			err := d.Set("splunk_token", *config.SplunkToken)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SplunkSource != nil && d.Get("source").(string) != common.UseExisting {
+		if config.SplunkSource != nil {
 			err := d.Set("source", *config.SplunkSource)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SplunkSourcetype != nil && d.Get("source_type").(string) != common.UseExisting {
+		if config.SplunkSourcetype != nil {
 			err := d.Set("source_type", *config.SplunkSourcetype)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SplunkIndex != nil && d.Get("index").(string) != "" {
+		if config.SplunkIndex != nil {
 			err := d.Set("index", *config.SplunkIndex)
 			if err != nil {
 				return err
 			}
 		}
-		if config.SplunkEnableBatch != nil && d.Get("enable_batch").(string) != "" {
+		if config.SplunkEnableBatch != nil {
 			err := d.Set("enable_batch", *config.SplunkEnableBatch)
 			if err != nil {
 				return err
@@ -163,7 +163,7 @@ func resourceGatewayUpdateLogForwardingSplunkRead(d *schema.ResourceData, m inte
 				return err
 			}
 		}
-		if config.SplunkTlsCertificate != nil && d.Get("tls_certificate").(string) != common.UseExisting {
+		if config.SplunkTlsCertificate != nil {
 			err := d.Set("tls_certificate", common.Base64Encode(*config.SplunkTlsCertificate))
 			if err != nil {
 				return err

@@ -112,44 +112,44 @@ func resourceGatewayUpdateLogForwardingAwsS3Read(d *schema.ResourceData, m inter
 
 	config := rOut.AwsS3Config
 	if config != nil {
-		if config.LogFolder != nil && d.Get("log_folder").(string) != common.UseExisting {
+		if config.LogFolder != nil {
 			err := d.Set("log_folder", *config.LogFolder)
 			if err != nil {
 				return err
 			}
 		}
-		if config.BucketName != nil && d.Get("bucket_name") != "" {
+		if config.BucketName != nil {
 			err := d.Set("bucket_name", *config.BucketName)
 			if err != nil {
 				return err
 			}
 		}
-		if config.AwsAuthType != nil && d.Get("auth_type") != "" {
+		if config.AwsAuthType != nil {
 			err := d.Set("auth_type", adjustLogForwardingAwsS3AuthType(*config.AwsAuthType))
 			if err != nil {
 				return err
 			}
 		}
-		if config.AwsAccessId != nil && d.Get("access_id") != "" {
+		if config.AwsAccessId != nil {
 			err := d.Set("access_id", *config.AwsAccessId)
 			if err != nil {
 				return err
 			}
 		}
-		if config.AwsAccessKey != nil && d.Get("access_key") != "" {
+		if config.AwsAccessKey != nil {
 			err := d.Set("access_key", *config.AwsAccessKey)
 			if err != nil {
 				return err
 			}
 		}
-		if config.AwsRegion != nil && d.Get("region") != "" {
+		if config.AwsRegion != nil {
 			err := d.Set("region", *config.AwsRegion)
 			if err != nil {
 				return err
 			}
 		}
-		if config.AwsRoleArn != nil && d.Get("role_arn") != "" {
-			err = d.Set("role_arn", *config.AwsRoleArn)
+		if config.AwsRoleArn != nil {
+			err := d.Set("role_arn", *config.AwsRoleArn)
 			if err != nil {
 				return err
 			}

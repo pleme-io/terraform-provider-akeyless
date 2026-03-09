@@ -97,13 +97,13 @@ func resourceGatewayUpdateLogForwardingLogstashRead(d *schema.ResourceData, m in
 
 	config := rOut.LogstashConfig
 	if config != nil {
-		if config.LogstashDns != nil && d.Get("dns").(string) != "" {
+		if config.LogstashDns != nil {
 			err := d.Set("dns", *config.LogstashDns)
 			if err != nil {
 				return err
 			}
 		}
-		if config.LogstashProtocol != nil && d.Get("protocol").(string) != "" {
+		if config.LogstashProtocol != nil {
 			err := d.Set("protocol", *config.LogstashProtocol)
 			if err != nil {
 				return err
@@ -115,7 +115,7 @@ func resourceGatewayUpdateLogForwardingLogstashRead(d *schema.ResourceData, m in
 				return err
 			}
 		}
-		if config.LogstashTlsCertificate != nil && d.Get("tls_certificate").(string) != common.UseExisting {
+		if config.LogstashTlsCertificate != nil {
 			err := d.Set("tls_certificate", common.Base64Encode(*config.LogstashTlsCertificate))
 			if err != nil {
 				return err

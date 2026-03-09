@@ -96,25 +96,25 @@ func resourceGatewayUpdateLogForwardingGoogleChronicleRead(d *schema.ResourceDat
 
 	config := rOut.GoogleChronicleConfig
 	if config != nil {
-		if config.ServiceAccountKey != nil && d.Get("gcp_key").(string) != "" {
+		if config.ServiceAccountKey != nil {
 			err := d.Set("gcp_key", *config.ServiceAccountKey)
 			if err != nil {
 				return err
 			}
 		}
-		if config.CustomerId != nil && d.Get("customer_id").(string) != "" {
+		if config.CustomerId != nil {
 			err := d.Set("customer_id", *config.CustomerId)
 			if err != nil {
 				return err
 			}
 		}
-		if config.Region != nil && d.Get("region").(string) != "" {
+		if config.Region != nil {
 			err := d.Set("region", *config.Region)
 			if err != nil {
 				return err
 			}
 		}
-		if config.LogType != nil && d.Get("log_type").(string) != "" {
+		if config.LogType != nil {
 			err := d.Set("log_type", *config.LogType)
 			if err != nil {
 				return err
