@@ -686,17 +686,17 @@ func HandleError(msg string, resp *http.Response, err error) error {
 		return fmt.Errorf("%s: %s", msg, string(apiErr.Body()))
 	}
 
-	// resp is informative
-	if resp.Body != nil {
-		if errorMsg, errRead := io.ReadAll(resp.Body); errRead == nil {
-			return fmt.Errorf("%s: %s", msg, string(errorMsg))
+	if resp != nil {
+		if resp.Body != nil {
+			if errorMsg, errRead := io.ReadAll(resp.Body); errRead == nil {
+				return fmt.Errorf("%s: %s", msg, string(errorMsg))
+			}
+		}
+		if resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("%s: not found: %w", msg, err)
 		}
 	}
 
-	// nothing informative
-	if resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("%s: not found: %w", msg, err)
-	}
 	return fmt.Errorf("%s: %w", msg, err)
 }
 

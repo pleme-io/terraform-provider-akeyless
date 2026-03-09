@@ -16,3 +16,4 @@ build.log
 terraform-provider-akeyless
 .github/scripts/update_ai.sh
 sdk_diff.log
+.env.test

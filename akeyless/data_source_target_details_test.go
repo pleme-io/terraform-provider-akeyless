@@ -356,8 +356,6 @@ func TestTargetDataSourceLdap(t *testing.T) {
 
 func TestTargetDataSourceLinkedTarget(t *testing.T) {
 
-	t.Skip("fail due to unmarshal error with Target.target.attributes")
-
 	parentTargetName := "target-db-for-linked-target"
 	parentTargetPath := testPath(parentTargetName)
 	createTarget(t, parentTargetPath)

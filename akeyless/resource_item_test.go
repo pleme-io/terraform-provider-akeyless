@@ -156,8 +156,7 @@ func TestRsaPublicResource(t *testing.T) {
 }
 
 func TestClassicKey(t *testing.T) {
-
-	t.Skip("not authorized to create classic key on public gateway")
+	skipIfNoGateway(t)
 	t.Parallel()
 
 	name := "test_classic_key"
@@ -231,8 +230,7 @@ func TestClassicKey(t *testing.T) {
 }
 
 func TestClassicGpgKey(t *testing.T) {
-
-	t.Skip("not authorized to create classic key on public gateway")
+	skipIfNoGateway(t)
 	t.Parallel()
 
 	name := "test_classic_gpg_key"
@@ -259,8 +257,7 @@ func TestClassicGpgKey(t *testing.T) {
 }
 
 func TestClassicAESKey(t *testing.T) {
-
-	t.Skip("not authorized to create classic key on public gateway")
+	skipIfNoGateway(t)
 	t.Parallel()
 
 	name := "test_classic_aes_key"
@@ -370,7 +367,7 @@ func TestPkiResource(t *testing.T) {
 }
 
 func TestPkiResourceWithLocalGw(t *testing.T) {
-	t.Skip("not supported on public gateway")
+	skipIfNoGateway(t)
 	t.Parallel()
 
 	keyPath := testPath("test-dfc-for-pki-with-gw")

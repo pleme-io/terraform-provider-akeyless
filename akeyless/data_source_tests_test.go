@@ -135,15 +135,3 @@ func TestTargetDataSource(t *testing.T) {
 		},
 	})
 }
-
-func TestAuthDataSource(t *testing.T) {
-	t.Skip("Auth data source test requires specific credential setup")
-}
-
-func TestTokenizeDataSource(t *testing.T) {
-	t.Skip("Tokenize data source test requires tokenizer setup with encryption keys")
-}
-
-func TestDetokenizeDataSource(t *testing.T) {
-	t.Skip("Detokenize data source test requires tokenizer setup with encryption keys")
-}

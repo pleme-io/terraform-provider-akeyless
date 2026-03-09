@@ -140,7 +140,7 @@ func resourceDynamicSecretRedisCreate(d *schema.ResourceData, m interface{}) err
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
-	body := akeyless_api.GatewayCreateProducerRedis{
+	body := akeyless_api.DynamicSecretCreateRedis{
 		Name:  name,
 		Token: &token,
 	}
@@ -166,7 +166,7 @@ func resourceDynamicSecretRedisCreate(d *schema.ResourceData, m interface{}) err
 		body.ItemCustomFields = &fields
 	}
 
-	_, _, err := client.GatewayCreateProducerRedis(ctx).Body(body).Execute()
+	_, _, err := client.DynamicSecretCreateRedis(ctx).Body(body).Execute()
 	if err != nil {
 		if errors.As(err, &apiErr) {
 			return fmt.Errorf("can't create Secret: %v", string(apiErr.Body()))
@@ -288,7 +288,7 @@ func resourceDynamicSecretRedisUpdate(d *schema.ResourceData, m interface{}) err
 	producerEncryptionKeyName := d.Get("producer_encryption_key_name").(string)
 	itemCustomFields := d.Get("item_custom_fields").(map[string]interface{})
 
-	body := akeyless_api.GatewayUpdateProducerRedis{
+	body := akeyless_api.DynamicSecretUpdateRedis{
 		Name:  name,
 		Token: &token,
 	}
@@ -314,7 +314,7 @@ func resourceDynamicSecretRedisUpdate(d *schema.ResourceData, m interface{}) err
 		body.ItemCustomFields = &fields
 	}
 
-	_, _, err := client.GatewayUpdateProducerRedis(ctx).Body(body).Execute()
+	_, _, err := client.DynamicSecretUpdateRedis(ctx).Body(body).Execute()
 	if err != nil {
 		if errors.As(err, &apiErr) {
 			return fmt.Errorf("can't update : %v", string(apiErr.Body()))

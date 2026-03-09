@@ -11,9 +11,12 @@ When working with SDK files, **exclude** the following fields:
 2. **`uid_token`,`token`** - Not relevant to Terraform implementation
 3. **`json`** - Fields with description "Set output format to JSON" are internal and should be excluded
 
-## Test Cases to Exclude
-Do **not** create or update **test** cases for:
-- **Any commands that require a gateway like dynamic secret/rotated secret/log forwarding/automatic migration etc**
+## Test Infrastructure
+Gateway-dependent resources (dynamic secrets, rotated secrets, log forwarding, migrations, etc.) are tested using a local Docker gateway via `docker-compose.test.yml`. Tests use `skipIfNoGateway(t)` to skip when no local gateway is available.
+- **Log forwarding tests** that target external services (AWS S3, Azure Analytics, Elasticsearch, etc.) should use `enable = "false"` so the gateway stores config without connecting
+- **Migration tests** use dummy values since migrations store config without connecting to the source
+- **Event forwarder tests** are skipped because the gateway rejects unregistered cluster URLs
+- **Read functions** must always set fields from the API response — do **not** guard `d.Set()` with `d.Get()` checks (causes plan-not-empty bugs)
 
 ## Dynamic Secret Field Locations
 For all dynamic secret resources:
