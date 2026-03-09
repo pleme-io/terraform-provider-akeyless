@@ -322,11 +322,9 @@ func resourceRotatedSecretHanaDbRead(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if itemOut.DeleteProtection != nil {
-		if *itemOut.DeleteProtection || d.Get("delete_protection").(string) != "" {
-			err = d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
-			if err != nil {
-				return err
-			}
+		err = d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
+		if err != nil {
+			return err
 		}
 	}
 

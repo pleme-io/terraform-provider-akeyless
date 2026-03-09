@@ -643,8 +643,6 @@ func TestRoleResourceAndAssocAuthMethod(t *testing.T) {
 }
 
 func TestRoleResourceWithSraRule(t *testing.T) {
-	//todo need to fix this test
-	t.Skip()
 	rolePath := testPath("test_role_resource_sra_rule")
 	deleteRole(rolePath)
 
