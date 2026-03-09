@@ -405,6 +405,14 @@ func createMysqlRotatedSecret(t *testing.T, secret *testMysqlRotatedSecret) {
 	require.NoError(t, handleError(res, err), fmt.Sprintf("failed to create mysql rotated secret for test: %v", handleError(res, err)))
 }
 
+func skipIfNoGateway(t *testing.T) {
+	t.Helper()
+	gw := os.Getenv("AKEYLESS_GATEWAY")
+	if gw == "" || gw == "https://api.akeyless.io" {
+		t.Skip("skipping: requires local gateway (set AKEYLESS_GATEWAY)")
+	}
+}
+
 func getProviderMeta() (*providerMeta, error) {
 
 	apiGwAddress := os.Getenv("AKEYLESS_GATEWAY")

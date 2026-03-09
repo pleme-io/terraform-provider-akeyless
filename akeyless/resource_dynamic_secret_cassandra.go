@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
 	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
@@ -285,6 +286,14 @@ func resourceDynamicSecretCassandraRead(d *schema.ResourceData, m interface{}) e
 		err = d.Set("custom_username_template", *rOut.UsernameTemplate)
 		if err != nil {
 			return err
+		}
+	}
+	if rOut.DeleteProtection != nil {
+		if *rOut.DeleteProtection || d.Get("delete_protection").(string) != "" {
+			err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
+			if err != nil {
+				return err
+			}
 		}
 	}
 

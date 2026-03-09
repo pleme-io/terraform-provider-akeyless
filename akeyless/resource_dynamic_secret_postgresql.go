@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
 	"github.com/akeylesslabs/terraform-provider-akeyless/akeyless/common"
@@ -367,9 +368,11 @@ func resourceDynamicSecretPostgresqlRead(d *schema.ResourceData, m interface{}) 
 	}
 
 	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", fmt.Sprintf("%t", *rOut.DeleteProtection))
-		if err != nil {
-			return err
+		if *rOut.DeleteProtection || d.Get("delete_protection").(string) != "" {
+			err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if rOut.Metadata != nil {

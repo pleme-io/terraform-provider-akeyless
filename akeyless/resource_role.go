@@ -364,9 +364,11 @@ func resourceRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	}
 
 	if role.DeleteProtection != nil {
-		err = d.Set("delete_protection", strconv.FormatBool(*role.DeleteProtection))
-		if err != nil {
-			return diag.FromErr(err)
+		if *role.DeleteProtection || d.Get("delete_protection").(string) != "" {
+			err = d.Set("delete_protection", strconv.FormatBool(*role.DeleteProtection))
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 

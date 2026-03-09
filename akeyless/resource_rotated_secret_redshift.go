@@ -358,6 +358,15 @@ func resourceRotatedSecretRedshiftRead(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
+	if itemOut.DeleteProtection != nil {
+		if *itemOut.DeleteProtection || d.Get("delete_protection").(string) != "" {
+			err = d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	d.SetId(path)
 
 	return nil

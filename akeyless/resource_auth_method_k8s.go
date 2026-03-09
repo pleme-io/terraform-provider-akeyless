@@ -392,9 +392,11 @@ func resourceAuthMethodK8sRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if rOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
-		if err != nil {
-			return err
+		if *rOut.DeleteProtection || d.Get("delete_protection").(string) != "" {
+			err = d.Set("delete_protection", strconv.FormatBool(*rOut.DeleteProtection))
+			if err != nil {
+				return err
+			}
 		}
 	}
 

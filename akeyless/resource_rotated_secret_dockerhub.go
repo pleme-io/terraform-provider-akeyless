@@ -237,9 +237,11 @@ func resourceRotatedSecretDockerHubRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	if itemOut.DeleteProtection != nil {
-		err = d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
-		if err != nil {
-			return err
+		if *itemOut.DeleteProtection || d.Get("delete_protection").(string) != "" {
+			err = d.Set("delete_protection", strconv.FormatBool(*itemOut.DeleteProtection))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if itemOut.ItemCustomFieldsDetails != nil && len(itemOut.ItemCustomFieldsDetails) > 0 {
