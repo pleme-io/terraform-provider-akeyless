@@ -14,6 +14,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func normalizePermissionAssignmentJSON(jsonStr string) string {
+	var data []map[string]interface{}
+	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+		return jsonStr
+	}
+	for _, entry := range data {
+		if sc, ok := entry["sub_claims"]; ok {
+			if m, ok := sc.(map[string]interface{}); ok && len(m) == 0 {
+				delete(entry, "sub_claims")
+			}
+		}
+	}
+	normalized, err := json.Marshal(data)
+	if err != nil {
+		return jsonStr
+	}
+	return string(normalized)
+}
+
 func resourceOidcApp() *schema.Resource {
 	return &schema.Resource{
 		Description: "OIDC App resource",
@@ -74,31 +93,12 @@ func resourceOidcApp() *schema.Resource {
 				Required:    true,
 				Description: "A json array string defining the access permission assignment for this OIDC app. Supports two formats: 1) Auth method: [{\"assignment_type\":\"AUTH_METHOD\",\"access_id\":\"p-abc123\",\"sub_claims\":{\"email\":[\"user@example.com\"]}}] 2) Group: [{\"assignment_type\":\"GROUP\",\"group_id\":\"grp-xyz789\"}]",
 				StateFunc: func(v interface{}) string {
-					// Normalize JSON by parsing and re-marshaling
 					jsonStr := v.(string)
-					var data interface{}
-					if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
-						return jsonStr
-					}
-					normalized, err := json.Marshal(data)
-					if err != nil {
-						return jsonStr
-					}
-					return string(normalized)
+					normalized := normalizePermissionAssignmentJSON(jsonStr)
+					return normalized
 				},
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// Normalize and compare JSON
-					var oldJSON, newJSON interface{}
-					if err := json.Unmarshal([]byte(old), &oldJSON); err != nil {
-						return false
-					}
-					if err := json.Unmarshal([]byte(new), &newJSON); err != nil {
-						return false
-					}
-					// Marshal back to get normalized JSON
-					oldNormalized, _ := json.Marshal(oldJSON)
-					newNormalized, _ := json.Marshal(newJSON)
-					return string(oldNormalized) == string(newNormalized)
+					return normalizePermissionAssignmentJSON(old) == normalizePermissionAssignmentJSON(new)
 				},
 			},
 			"public": {
@@ -321,7 +321,7 @@ func resourceOidcAppRead(d *schema.ResourceData, m interface{}) error {
 					assignment["access_id"] = *pa.AccessId
 				}
 				if pa.AssignmentType != nil && *pa.AssignmentType == "AUTH_METHOD" {
-					if pa.SubClaims != nil {
+					if pa.SubClaims != nil && len(*pa.SubClaims) > 0 {
 						subClaims := make(map[string]interface{})
 						for k, v := range *pa.SubClaims {
 							subClaims[k] = v
