@@ -28,6 +28,11 @@ func TestOidcAppResource(t *testing.T) {
 			description 		= "Test OIDC app"
 			redirect_uris 		= ["https://localhost/callback"]
 			delete_protection 	= "true"
+			tags 				= ["t1", "t2"]
+			audience 			= "https://test-audience.example.com"
+			accessibility 		= "regular"
+			scopes 				= ["openid", "profile"]
+			public 				= false
 			permission_assignment = "[{\"assignment_type\":\"AUTH_METHOD\",\"access_id\":\"${akeyless_auth_method_api_key.%v.access_id}\",\"sub_claims\":{}}]"
 		}
 	`, authMethodName, authMethodPath, appName, appPath, authMethodName)
@@ -42,6 +47,11 @@ func TestOidcAppResource(t *testing.T) {
 			description 		= "Updated OIDC app"
 			redirect_uris 		= ["https://localhost/callback", "https://localhost/callback2"]
 			delete_protection 	= "false"
+			tags 				= ["t1", "t3"]
+			audience 			= "https://updated-audience.example.com"
+			accessibility 		= "regular"
+			scopes 				= ["openid", "email"]
+			public 				= true
 			permission_assignment = "[{\"assignment_type\":\"AUTH_METHOD\",\"access_id\":\"${akeyless_auth_method_api_key.%v.access_id}\",\"sub_claims\":{}}]"
 		}
 	`, authMethodName, authMethodPath, appName, appPath, authMethodName)
@@ -89,13 +99,30 @@ func TestOidcAppResource(t *testing.T) {
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					checkOidcAppExistsRemotely(appPath),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "description", "Test OIDC app"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "delete_protection", "true"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "audience", "https://test-audience.example.com"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "accessibility", "regular"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "scopes.#", "2"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "public", "false"),
 				),
 			},
 			{
 				Config: configUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					checkOidcAppExistsRemotely(appPath),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "description", "Updated OIDC app"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "delete_protection", "false"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "audience", "https://updated-audience.example.com"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "scopes.#", "2"),
+					resource.TestCheckResourceAttr("akeyless_oidc_app.test_oidc_app", "public", "true"),
 				),
+			},
+			{
+				ResourceName:            "akeyless_oidc_app.test_oidc_app",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"permission_assignment", "accessibility"},
 			},
 		},
 	})

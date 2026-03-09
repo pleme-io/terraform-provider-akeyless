@@ -3,6 +3,7 @@ package akeyless
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	akeyless_api "github.com/akeylesslabs/akeyless-go/v5"
@@ -10,6 +11,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 )
+
+var checkTargetDestroyed = func(s *terraform.State) error {
+	client := *testAccProvider.Meta().(*providerMeta).client
+	token := *testAccProvider.Meta().(*providerMeta).token
+
+	for _, rs := range s.RootModule().Resources {
+		if strings.HasPrefix(rs.Type, "akeyless_target") {
+			body := akeyless_api.TargetGet{
+				Name:  rs.Primary.ID,
+				Token: &token,
+			}
+			_, res, err := client.TargetGet(context.Background()).Body(body).Execute()
+			if err == nil {
+				return fmt.Errorf("target %s still exists", rs.Primary.ID)
+			}
+			if res != nil && res.StatusCode != 404 {
+				return fmt.Errorf("target %s: unexpected status %d", rs.Primary.ID, res.StatusCode)
+			}
+		}
+	}
+	return nil
+}
 
 func TestGithubTargetResource(t *testing.T) {
 	secretName := "github_test"
@@ -20,6 +43,7 @@ func TestGithubTargetResource(t *testing.T) {
 			github_app_id 			= "1234"
 			github_app_private_key 	= "abcd"
 			description 			= "aaaa"
+			github_base_url 		= "https://api.github.com"
 		}
 	`, secretName, secretPath)
 
@@ -29,10 +53,38 @@ func TestGithubTargetResource(t *testing.T) {
 			github_app_id 			= "5678"
 			github_app_private_key 	= "efgh"
 			description				= "bbbb"
+			github_base_url 		= "https://github.example.com/api/v3"
 		}
 	`, secretName, secretPath)
 
-	tesTargetResource(t, config, configUpdate, secretPath)
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: providerFactories,
+		CheckDestroy:      checkTargetDestroyed,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					checkTargetExistsRemotelyprod(secretPath),
+					resource.TestCheckResourceAttr("akeyless_target_github.github_test", "description", "aaaa"),
+					resource.TestCheckResourceAttr("akeyless_target_github.github_test", "github_base_url", "https://api.github.com"),
+				),
+			},
+			{
+				Config: configUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					checkTargetExistsRemotelyprod(secretPath),
+					resource.TestCheckResourceAttr("akeyless_target_github.github_test", "description", "bbbb"),
+					resource.TestCheckResourceAttr("akeyless_target_github.github_test", "github_base_url", "https://github.example.com/api/v3"),
+				),
+			},
+			{
+				ResourceName:            "akeyless_target_github.github_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"github_app_private_key"},
+			},
+		},
+	})
 }
 
 func TestGitlabTargetResource(t *testing.T) {
@@ -65,21 +117,54 @@ func TestAwsTargetResource(t *testing.T) {
 	secretPath := testPath("aws_target1")
 	config := fmt.Sprintf(`
 		resource "akeyless_target_aws" "%v" {
-			name = "%v"
-			access_key_id     = "XXXXXXX"
-  			access_key = "rgergetghergerg"
+			name 			= "%v"
+			access_key_id 	= "XXXXXXX"
+  			access_key 		= "rgergetghergerg"
+			description 	= "test aws target"
+			region 			= "us-west-2"
+			session_token 	= "test-session-token"
 		}
 	`, secretName, secretPath)
 
 	configUpdate := fmt.Sprintf(`
 		resource "akeyless_target_aws" "%v" {
-			name = "%v"
-			access_key_id     = "YYYYYYY"
-  			access_key = "0I/sdgfvfsgs/sdfrgrfv"
+			name 			= "%v"
+			access_key_id 	= "YYYYYYY"
+  			access_key 		= "0I/sdgfvfsgs/sdfrgrfv"
+			description 	= "updated aws target"
+			region 			= "eu-west-1"
+			session_token 	= "test-session-token-updated"
 		}
 	`, secretName, secretPath)
 
-	tesTargetResource(t, config, configUpdate, secretPath)
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: providerFactories,
+		CheckDestroy:      checkTargetDestroyed,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					checkTargetExistsRemotelyprod(secretPath),
+					resource.TestCheckResourceAttr("akeyless_target_aws.aws123", "description", "test aws target"),
+					resource.TestCheckResourceAttr("akeyless_target_aws.aws123", "region", "us-west-2"),
+				),
+			},
+			{
+				Config: configUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					checkTargetExistsRemotelyprod(secretPath),
+					resource.TestCheckResourceAttr("akeyless_target_aws.aws123", "description", "updated aws target"),
+					resource.TestCheckResourceAttr("akeyless_target_aws.aws123", "region", "eu-west-1"),
+				),
+			},
+			{
+				ResourceName:            "akeyless_target_aws.aws123",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"access_key", "session_token"},
+			},
+		},
+	})
 }
 
 func TestAzureTargetResource(t *testing.T) {
@@ -525,6 +610,7 @@ func testTargetResource(t *testing.T, secretPath string, configs ...string) {
 
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: providerFactories,
+		CheckDestroy:      checkTargetDestroyed,
 		Steps:             steps,
 	})
 }
@@ -532,6 +618,7 @@ func testTargetResource(t *testing.T, secretPath string, configs ...string) {
 func tesTargetResource(t *testing.T, config, configUpdate, secretPath string) {
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: providerFactories,
+		CheckDestroy:      checkTargetDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: config,

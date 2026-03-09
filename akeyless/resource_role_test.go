@@ -28,6 +28,8 @@ func TestRoleResourceBasic(t *testing.T) {
 			name 				= "%v"
 			description 		= "aaaa"
 			delete_protection 	= "true"
+			audit_access 		= "all"
+			analytics_access 	= "own"
 		}
 	`, rolePath)
 
@@ -36,19 +38,50 @@ func TestRoleResourceBasic(t *testing.T) {
 			name 				= "%v"
 			description 		= "bbbb"
 			delete_protection 	= "false"
+			audit_access 		= "own"
+			analytics_access 	= "all"
 		}
 	`, rolePath)
 
+	var checkRoleDestroyed = func(s *terraform.State) error {
+		client := *testAccProvider.Meta().(*providerMeta).client
+		token := *testAccProvider.Meta().(*providerMeta).token
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type == "akeyless_role" {
+				body := akeyless_api.GetRole{
+					Name:  rs.Primary.ID,
+					Token: &token,
+				}
+				_, res, err := client.GetRole(context.Background()).Body(body).Execute()
+				if err == nil {
+					return fmt.Errorf("role %s still exists", rs.Primary.ID)
+				}
+				if res != nil && res.StatusCode != 404 {
+					return fmt.Errorf("role %s: unexpected status %d", rs.Primary.ID, res.StatusCode)
+				}
+			}
+		}
+		return nil
+	}
+
 	resource.Test(t, resource.TestCase{
 		ProviderFactories: providerFactories,
+		CheckDestroy:      checkRoleDestroyed,
 		Steps: []resource.TestStep{
 			{
 				Config: config,
-				Check:  resource.ComposeTestCheckFunc(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("akeyless_role.test_role", "description", "aaaa"),
+					resource.TestCheckResourceAttr("akeyless_role.test_role", "delete_protection", "true"),
+				),
 			},
 			{
 				Config: configUpdate,
-				Check:  resource.ComposeTestCheckFunc(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("akeyless_role.test_role", "description", "bbbb"),
+					resource.TestCheckResourceAttr("akeyless_role.test_role", "delete_protection", "false"),
+				),
 			},
 		},
 	})
