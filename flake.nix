@@ -23,6 +23,7 @@
         vendorHash = "sha256-ItO75dB0d4zH09IxNyoG1gJ0NmLge7ml/hFRT0hXsJE=";
         description = "Akeyless Terraform Provider - manage Akeyless resources via Terraform";
         homepage = "https://github.com/pleme-io/terraform-provider-akeyless";
+        license = pkgs.lib.licenses.mpl20;
       };
 
       devShells.default = pkgs.mkShellNoCC {
